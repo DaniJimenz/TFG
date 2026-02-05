@@ -5,7 +5,40 @@
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
-            <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+        <script>
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "primary": "#0d59f2",
+                            "accent-purple": "#8b5cf6",
+                            "background-dark": "#0a0c12",
+                        },
+                        fontFamily: { "display": ["Space Grotesk", "sans-serif"] }
+                    },
+                },
+            }
+        </script>
+            <style type="text/tailwindcss">
+                body { font-family: 'Space Grotesk', sans-serif; }
+                html, body {
+                    margin: 0;
+                    padding: 0;
+                    overflow: hidden; /* Esto mata cualquier scroll global */
+                    height: 100%;
+                }
+                .bg-mesh {
+                    background-color: #0a0c12;
+                    background-image:
+                        radial-gradient(at 0% 0%, rgba(13, 89, 242, 0.12) 0px, transparent 40%),
+                        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 40%);
+                }
+                .text-neon-blue { color: #0d59f2; text-shadow: 0 0 10px rgba(13, 89, 242, 0.5); }
+            </style>
         {% endblock %}
 
         {% block javascripts %}

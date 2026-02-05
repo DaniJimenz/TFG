@@ -3,17 +3,103 @@
 {% block title %}Register{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+    <div class="flex h-screen w-full">
+        {# Lado Izquierdo: Formulario #}
+        <div class="w-full lg:w-[40%] flex flex-col px-8 md:px-16 lg:px-20 py-10 overflow-y-auto bg-background-dark">
+            <div class="flex items-center gap-2 mb-12">
+                <h2 class="text-2xl font-black tracking-tighter">
+                    <span class="text-white">META</span><span class="text-primary">FIT</span>
+                </h2>
+            </div>
 
-    {{ form_errors(registrationForm) }}
+            <div class="mb-10">
+                <h1 class="text-white text-4xl font-black leading-tight tracking-tight mb-3">
+                    Crea tu cuenta y empieza hoy
+                </h1>
+                <p class="text-gray-400 text-sm tracking-wide uppercase">
+                    Entrenamiento y Nutrición con IA
+                </p>
+            </div>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+            {# Inicio del Formulario de Symfony #}
+            {{ form_start(registrationForm, {'attr': {'class': 'flex flex-col gap-5 w-full max-w-sm'}}) }}
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+            {# Fila de Nombre y Apellidos #}
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-bold uppercase tracking-widest text-gray-500">Nombre</label>
+                    {{ form_widget(registrationForm.name, {
+                        'attr': {'class': 'w-full bg-[#1a1c23] border border-slate-800 rounded-lg h-12 px-4 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-gray-700 text-sm', 'placeholder': 'John'}
+                    }) }}
+                    {{ form_errors(registrationForm.name) }}
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[11px] font-bold uppercase tracking-widest text-gray-500">Apellidos</label>
+                    {{ form_widget(registrationForm.lastname, {
+                        'attr': {'class': 'w-full bg-[#1a1c23] border border-slate-800 rounded-lg h-12 px-4 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-gray-700 text-sm', 'placeholder': 'Doe'}
+                    }) }}
+                    {{ form_errors(registrationForm.lastname) }}
+                </div>
+            </div>
+
+            {# Campo Email #}
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-bold uppercase tracking-widest text-gray-500">Email</label>
+                {{ form_widget(registrationForm.email, {
+                    'attr': {'class': 'w-full bg-[#1a1c23] border border-slate-800 rounded-lg h-12 px-4 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-gray-700 text-sm', 'placeholder': 'tu@email.com'}
+                }) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            {# Campo Contraseña #}
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] font-bold uppercase tracking-widest text-gray-500">Contraseña</label>
+                {{ form_widget(registrationForm.plainPassword, {
+                    'attr': {'class': 'w-full bg-[#1a1c23] border border-slate-800 rounded-lg h-12 px-4 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-gray-700 text-sm', 'placeholder': '••••••••'}
+                }) }}
+                {{ form_errors(registrationForm.plainPassword) }}
+            </div>
+
+            {# Checkbox de Términos #}
+            <div class="flex items-center gap-3 py-2">
+                {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'size-4 rounded border-slate-800 bg-slate-900 text-primary focus:ring-primary'}}) }}
+                <label class="text-[10px] uppercase tracking-widest text-gray-500">Acepto los términos de MetaFit AI</label>
+                {{ form_errors(registrationForm.agreeTerms) }}
+            </div>
+
+            <div class="pt-4">
+                <button class="w-full bg-primary hover:bg-primary/90 text-white font-extrabold h-12 rounded-lg text-sm transition-all flex items-center justify-center gap-2 group shadow-xl shadow-primary/10 uppercase tracking-widest" type="submit">
+                    Registrarse
+                </button>
+            </div>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-500">¿Ya tienes una cuenta? <a class="text-primary font-bold hover:text-white transition-colors" href="{{ path('app_login') }}">Inicia Sesión</a></p>
+            </div>
+            {{ form_end(registrationForm) }}
+
+            <div class="mt-auto pt-10 text-[10px] text-gray-600 flex justify-between uppercase tracking-widest">
+                <span>© 2026 MetaFit AI</span>
+                <div class="flex gap-4">
+                    <a class="hover:text-primary transition-colors" href="#">Soporte</a>
+                    <a class="hover:text-primary transition-colors" href="#">Legal</a>
+                </div>
+            </div>
+        </div>
+
+        {# Lado Derecho: Imagen Cinematográfica #}
+        <div class="hidden lg:block w-[60%] relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-background-dark via-transparent to-transparent z-10 w-64"></div>
+            <div class="h-full w-full bg-cover bg-center grayscale-[0.2] brightness-75 contrast-125" style="background-image: url('https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?q=80&w=2069&auto=format&fit=crop');"></div>
+            <div class="absolute bottom-16 left-16 z-20 max-w-md">
+                <div class="h-1 w-12 bg-primary mb-6"></div>
+                <h3 class="text-4xl font-black italic leading-none text-white drop-shadow-2xl uppercase tracking-tighter mb-4">
+                    PRECISIÓN <br/><span class="text-primary">ABSOLUTA.</span>
+                </h3>
+                <p class="text-gray-300 text-sm font-medium tracking-wide max-w-xs leading-relaxed opacity-80">
+                    Algoritmos de IA diseñados para optimizar cada repetición en un entorno visualmente inspirador.
+                </p>
+            </div>
+        </div>
+    </div>
 {% endblock %}
