@@ -32,9 +32,10 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // do anything else you need here, like send an email
+            // Iniciamos sesión y forzamos que tras el éxito vaya a onboarding //
+            $security->login($user, AppCustomAuthenticator::class, 'main');
 
-            return $security->login($user, AppCustomAuthenticator::class, 'main');
+            return $this->redirectToRoute('app_onboarding');
         }
 
         return $this->render('registration/register.html.twig', [

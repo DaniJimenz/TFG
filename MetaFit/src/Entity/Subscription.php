@@ -36,7 +36,7 @@ class Subscription
 
     #[ORM\OneToOne(inversedBy: 'subscription', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $appUser = null;
+    private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'subscriptions')]
     #[ORM\JoinColumn(nullable: false)]

@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard MetaFit AI{% endblock %}
+
+{% block body %}
+    <div class="min-h-screen bg-background-dark text-white p-8">
+        <div class="max-w-4xl mx-auto pt-20">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="h-1 w-12 bg-primary"></div>
+                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Panel de Control</span>
+            </div>
+
+            <h1 class="text-6xl font-black italic uppercase tracking-tighter mb-4">
+                Bienvenido, <span class="text-primary">{{ user.name }}</span>!
+            </h1>
+
+            <p class="text-gray-400 text-xl font-light max-w-2xl leading-relaxed">
+                Tu ecosistema de alto rendimiento está listo. Es hora de redefinir tus límites con la ayuda de la IA.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                {# Botón provisional para cerrar sesión #}
+                <a href="{{ path('app_logout') }}" class="border border-slate-800 hover:bg-red-500/10 hover:border-red-500 text-slate-500 hover:text-red-500 px-6 py-4 rounded-xl transition-all text-center font-bold">
+                    Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -45,9 +45,20 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
-        {% block body %}
+    <body class="bg-background-dark bg-mesh min-h-screen">
+    {% if app.user %}
+        {# 1. La Navbar solo para usuarios logueados #}
+        {% include 'navbar.html.twig' %}
 
-        {% endblock %}
+        {# 2. El contenido con margen superior para la Nav #}
+        <main class="{{ app.user ? 'pt-24' : '' }} min-h-screen">
+            {% block body %}{% endblock %}
+        </main>
+    {% else %}
+    {# Si no hay usuario ocupa todoo #}
+        <main class="min-h-screen">
+            {% block body %}{% endblock %}
+        </main>
+    {% endif %}
     </body>
 </html>

@@ -34,16 +34,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $lastname = null;
 
     #[ORM\Column]
-    private ?int $points_xp = null;
+    private ?int $points_xp = 0;
 
     #[ORM\Column]
-    private ?int $continuity = null;
+    private ?int $continuity = 0;
 
     #[ORM\Column]
-    private ?int $level = null;
+    private ?int $level = 0;
 
-    #[ORM\Column(length: 100)]
-    private ?string $rol = null;
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $rol = 'ROLE_USER';
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
@@ -54,22 +54,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deleted_at = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $age = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $height = null;
 
-    #[ORM\Column(length: 1)]
+    #[ORM\Column(length: 1, nullable: true)]
     private ?string $gender = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $actual_weight = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $purpose = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50, nullable: true)]
     private ?string $activity_level = null;
 
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: Subscription::class)]
@@ -112,6 +112,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->trainings = new ArrayCollection();
         $this->achievement = new ArrayCollection();
         $this->meals = new ArrayCollection();
+
+        $this->points_xp = 0; // Así cada usuario nuevo empieza con 0 puntos //
+        $this->continuity = 0;
+        $this->level = 0;
+        $this->created_at = new \DateTimeImmutable(); //Fecha de registro automática //
+        $this->rol = 'ROLE_USER'; // Rol por defecto //
     }
 
     public function getId(): ?int
