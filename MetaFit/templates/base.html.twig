@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}MetaFit AI{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+
+    {% block stylesheets %}
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -23,42 +24,38 @@
                 },
             }
         </script>
-            <style type="text/tailwindcss">
-                body { font-family: 'Space Grotesk', sans-serif; }
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    overflow: hidden; /* Esto mata cualquier scroll global */
-                    height: 100%;
-                }
-                .bg-mesh {
-                    background-color: #0a0c12;
-                    background-image:
-                        radial-gradient(at 0% 0%, rgba(13, 89, 242, 0.12) 0px, transparent 40%),
-                        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 40%);
-                }
-                .text-neon-blue { color: #0d59f2; text-shadow: 0 0 10px rgba(13, 89, 242, 0.5); }
-            </style>
-        {% endblock %}
+        <style type="text/tailwindcss">
+            body { font-family: 'Space Grotesk', sans-serif; }
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+            }
+            .bg-mesh {
+                background-color: #0a0c12;
+                background-image:
+                    radial-gradient(at 0% 0%, rgba(13, 89, 242, 0.12) 0px, transparent 40%),
+                    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 40%);
+            }
+        </style>
+    {% endblock %}
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body class="bg-background-dark bg-mesh min-h-screen">
-    {% if app.user %}
-        {# 1. La Navbar solo para usuarios logueados #}
-        {% include 'navbar.html.twig' %}
+    {% block javascripts %}
+        {% block importmap %}{{ importmap('app') }}{% endblock %}
+    {% endblock %}
+</head>
+<body class="bg-background-dark bg-mesh min-h-screen">
 
-        {# 2. El contenido con margen superior para la Nav #}
-        <main class="{{ app.user ? 'pt-24' : '' }} min-h-screen">
-            {% block body %}{% endblock %}
-        </main>
-    {% else %}
-    {# Si no hay usuario ocupa todoo #}
-        <main class="min-h-screen">
-            {% block body %}{% endblock %}
-        </main>
-    {% endif %}
-    </body>
+{# 1. La Navbar SOLO si el usuario está logueado #}
+{% if app.user %}
+    {% include 'navbar.html.twig' %}
+{% endif %}
+
+{# 2. UN SOLO bloque body para toda la aplicación #}
+{# Si hay usuario, añadimos pt-24 para que la Nav no tape el contenido #}
+<main class="min-h-screen {{ app.user ? 'pt-24' : '' }}">
+    {% block body %}{% endblock %}
+</main>
+
+</body>
 </html>
