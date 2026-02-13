@@ -6,9 +6,15 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
 
     {% block stylesheets %}
+
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+        <link rel="stylesheet" href="{{  asset('styles/app.js') }}">
+
+        {% block javascripts %}
+            {{ importmap('app') }}
+        {% endblock %}
         <script>
             tailwind.config = {
                 darkMode: "class",
@@ -39,21 +45,25 @@
             }
         </style>
     {% endblock %}
-
-    {% block javascripts %}
-        {% block importmap %}{{ importmap('app') }}{% endblock %}
-    {% endblock %}
 </head>
-<body class="bg-background-dark bg-mesh min-h-screen">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {# ... tus metas y estilos aquí ... #}
+</head>
+<body class="bg-background-dark text-slate-200 font-display min-h-screen">
 
-{# 1. La Navbar SOLO si el usuario está logueado #}
-{% if app.user %}
+{# Lógica de visualización de la Nav #}
+{% set show_nav = app.user and app.request.attributes.get('_route') != 'app_onboarding' %}
+
+{% if show_nav %}
     {% include 'navbar.html.twig' %}
 {% endif %}
 
-{# 2. UN SOLO bloque body para toda la aplicación #}
-{# Si hay usuario, añadimos pt-24 para que la Nav no tape el contenido #}
-<main class="min-h-screen {{ app.user ? 'pt-24' : '' }}">
+{# Un solo contenedor principal para toda la app #}
+<main class="{{ show_nav ? 'pt-24 px-8' : '' }}">
     {% block body %}{% endblock %}
 </main>
 
