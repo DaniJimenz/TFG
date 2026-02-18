@@ -49,7 +49,7 @@ class ImportExercisesCommand extends Command
 
             $exercise->setCompound(false);
             // Valores por defecto para campos que no estén en el JSON
-            $exercise->setDifficulty('Media');
+            $exercise->setDifficulty($item['difficulty'] ?? 'Media');
 
             $this->entityManager->persist($exercise);
         }
