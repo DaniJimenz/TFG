@@ -4,7 +4,7 @@
 
 {% block body %}
     <div class="max-w-7xl mx-auto">
-        {# Título y subtítulo #}
+        {# Título y subtítulo con estilo MetaFit #}
         <div class="mb-10">
             <h1 class="text-4xl font-black italic uppercase text-white tracking-tighter">
                 Biblioteca de <span class="text-primary">Ejercicios</span>
@@ -12,7 +12,7 @@
             <p class="text-slate-500 mt-2 font-medium">Domina cada movimiento con guías de técnica impulsadas por IA.</p>
         </div>
 
-        {# Buscador #}
+        {# Buscador estilizado #}
         <div class="relative mb-8">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary">search</span>
             <input type="text" id="exerciseSearch"
@@ -25,24 +25,31 @@
             {% set categories = ['Todos', 'Pecho', 'Espalda', 'Piernas', 'Hombros', 'Brazos', 'Core'] %}
             {% for cat in categories %}
                 <button class="category-btn px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all
-                {{ loop.first ? 'bg-primary text-white active-cat' : 'bg-slate-900/40 text-slate-500 border border-slate-800/50 hover:border-primary/30' }}"
+                {{ loop.first ? 'bg-primary text-white active-cat shadow-[0_0_20px_rgba(13,89,242,0.3)]' : 'bg-slate-900/40 text-slate-500 border border-slate-800/50 hover:border-primary/30 hover:text-white' }}"
                         data-category="{{ cat }}">
                     {{ cat }}
                 </button>
             {% endfor %}
         </div>
 
-        {# Grid de Tarjetas #}
+        {# Grid de Tarjetas Dinámicas #}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="exerciseGrid">
             {% for exercise in exercises %}
-                <div class="exercise-card bg-[#0d1117]/40 border border-slate-800/50 rounded-3xl overflow-hidden group hover:border-primary/40 transition-all duration-500"
+                <div class="exercise-card cursor-pointer bg-[#0d1117]/40 border border-slate-800/50 rounded-3xl overflow-hidden group hover:border-primary/40 transition-all duration-500"
                      data-name="{{ exercise.name|lower }}"
-                     data-group="{{ exercise.muscularGroup }}">
+                     data-group="{{ exercise.muscularGroup }}"
+                     data-desc="{{ exercise.description }}"
+                     data-tech="{{ exercise.technique }}"
+                     data-video="{{ exercise.urlVideo }}">
 
                     <div class="relative aspect-video overflow-hidden">
                         <img src="{{ exercise.urlImage }}" alt="{{ exercise.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                         <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-white tracking-tighter">
                             {{ exercise.difficulty|default('MEDIA')|upper }}
+                        </div>
+                        {# Icono de play overlay al hacer hover #}
+                        <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="material-symbols-outlined text-white text-5xl">play_circle</span>
                         </div>
                     </div>
 
@@ -59,9 +66,51 @@
                 </div>
             {% else %}
                 <div class="col-span-full text-center py-20">
+                    <span class="material-symbols-outlined text-6xl text-slate-700 mb-4">fitness_center</span>
                     <p class="text-slate-500">No hay ejercicios en la base de datos.</p>
                 </div>
             {% endfor %}
+        </div>
+    </div>
+
+    {# Modal de Modo Enfoque #}
+    <div id="exerciseModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm transition-all">
+        <div class="bg-[#0d1117] border border-slate-800 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative">
+            <button id="closeModal" class="absolute top-5 right-5 z-10 text-slate-400 hover:text-white bg-slate-800/50 p-2 rounded-full transition-all">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+
+            <div class="flex flex-col md:flex-row h-full max-h-[90vh]">
+                <div class="md:w-3/5 bg-black flex items-center justify-center relative aspect-video md:aspect-auto">
+                    <video id="modalVideo" controls class="w-full h-full object-cover">
+                        <source src="" type="video/mp4">
+                    </video>
+                    <div id="videoPlaceholder" class="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-500 italic text-sm text-center p-8">
+                        <div>
+                            <span class="material-symbols-outlined text-4xl mb-2">videocam_off</span>
+                            <p>Vídeo de técnica no disponible para este ejercicio</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:w-2/5 p-8 overflow-y-auto bg-[#0d1117]">
+                    <span id="modalGroup" class="text-primary text-[10px] font-black uppercase tracking-[0.2em] border border-primary/20 px-3 py-1 rounded-full bg-primary/5"></span>
+                    <h2 id="modalName" class="text-3xl font-black italic uppercase text-white mt-4 mb-2 tracking-tighter leading-none"></h2>
+                    <p id="modalTechnique" class="text-primary/80 font-bold text-xs uppercase mb-6"></p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-white font-bold text-sm uppercase mb-2 tracking-widest">Instrucciones</h4>
+                            <p id="modalDesc" class="text-slate-400 text-sm leading-relaxed font-medium"></p>
+                        </div>
+                        <div class="pt-6 border-t border-slate-800/50">
+                            <button class="w-full py-4 bg-primary text-white font-black italic uppercase tracking-widest rounded-xl hover:shadow-[0_0_30px_rgba(13,89,242,0.4)] transition-all">
+                                Añadir a mi rutina
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -70,10 +119,16 @@
             const searchInput = document.getElementById('exerciseSearch');
             const categoryBtns = document.querySelectorAll('.category-btn');
             const cards = document.querySelectorAll('.exercise-card');
+            const modal = document.getElementById('exerciseModal');
+            const closeModal = document.getElementById('closeModal');
+            const videoElement = document.getElementById('modalVideo');
+            const placeholder = document.getElementById('videoPlaceholder');
 
+            // --- LÓGICA DE FILTRADO ---
             function filterExercises() {
                 const searchTerm = searchInput.value.toLowerCase();
-                const activeCategory = document.querySelector('.active-cat').dataset.category;
+                const activeBtn = document.querySelector('.active-cat');
+                const activeCategory = activeBtn ? activeBtn.dataset.category : 'Todos';
 
                 cards.forEach(card => {
                     const name = card.dataset.name;
@@ -82,28 +137,65 @@
                     const matchesSearch = name.includes(searchTerm);
                     const matchesCategory = activeCategory === 'Todos' || group === activeCategory;
 
-                    if (matchesSearch && matchesCategory) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                    card.style.display = (matchesSearch && matchesCategory) ? 'block' : 'none';
                 });
             }
 
-            // Evento Buscador
             searchInput.addEventListener('input', filterExercises);
 
-            // Evento Categorías
             categoryBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     categoryBtns.forEach(b => {
-                        b.classList.remove('bg-primary', 'text-white', 'active-cat');
+                        b.classList.remove('bg-primary', 'text-white', 'active-cat', 'shadow-[0_0_20px_rgba(13,89,242,0.3)]');
                         b.classList.add('bg-slate-900/40', 'text-slate-500');
                     });
-                    btn.classList.add('bg-primary', 'text-white', 'active-cat');
+                    btn.classList.add('bg-primary', 'text-white', 'active-cat', 'shadow-[0_0_20px_rgba(13,89,242,0.3)]');
                     btn.classList.remove('bg-slate-900/40', 'text-slate-500');
                     filterExercises();
                 });
+            });
+
+            // --- LÓGICA DEL MODAL (MODO ENFOQUE) ---
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Mapeo de datos desde los atributos data- de la tarjeta
+                    document.getElementById('modalName').innerText = card.querySelector('h3').innerText;
+                    document.getElementById('modalGroup').innerText = card.dataset.group;
+                    document.getElementById('modalDesc').innerText = card.dataset.desc;
+                    document.getElementById('modalTechnique').innerText = "Técnica: " + card.dataset.tech;
+
+                    const videoUrl = card.dataset.video;
+
+                    if (videoUrl && videoUrl !== "" && videoUrl !== "null") {
+                        videoElement.src = videoUrl;
+                        videoElement.classList.remove('hidden');
+                        placeholder.classList.add('hidden');
+                    } else {
+                        videoElement.src = "";
+                        videoElement.classList.add('hidden');
+                        placeholder.classList.remove('hidden');
+                    }
+
+                    // Mostrar modal con animación sencilla
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+
+            const hideModal = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                videoElement.pause();
+                videoElement.src = "";
+                document.body.style.overflow = 'auto';
+            };
+
+            closeModal.addEventListener('click', hideModal);
+
+            // Cerrar al hacer clic fuera del contenido del modal
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) hideModal();
             });
         });
     </script>
