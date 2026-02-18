@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Biblioteca de Ejercicios - MetaFit AI{% endblock %}
+
+{% block body %}
+    <div class="max-w-7xl mx-auto">
+        {# Título y subtítulo #}
+        <div class="mb-10">
+            <h1 class="text-4xl font-black italic uppercase text-white tracking-tighter">
+                Biblioteca de <span class="text-primary">Ejercicios</span>
+            </h1>
+            <p class="text-slate-500 mt-2 font-medium">Domina cada movimiento con guías de técnica impulsadas por IA.</p>
+        </div>
+
+        {# Buscador #}
+        <div class="relative mb-8">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary">search</span>
+            <input type="text" id="exerciseSearch"
+                   placeholder="Buscar ejercicios (ej. Press de Banca, Sentadilla)..."
+                   class="w-full bg-[#0d1117] border border-slate-800/50 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary/50 transition-all shadow-inner">
+        </div>
+
+        {# Filtros de Categoría #}
+        <div class="flex flex-wrap gap-3 mb-12">
+            {% set categories = ['Todos', 'Pecho', 'Espalda', 'Piernas', 'Hombros', 'Brazos', 'Core'] %}
+            {% for cat in categories %}
+                <button class="category-btn px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all
+                {{ loop.first ? 'bg-primary text-white active-cat' : 'bg-slate-900/40 text-slate-500 border border-slate-800/50 hover:border-primary/30' }}"
+                        data-category="{{ cat }}">
+                    {{ cat }}
+                </button>
+            {% endfor %}
+        </div>
+
+        {# Grid de Tarjetas #}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="exerciseGrid">
+            {% for exercise in exercises %}
+                <div class="exercise-card bg-[#0d1117]/40 border border-slate-800/50 rounded-3xl overflow-hidden group hover:border-primary/40 transition-all duration-500"
+                     data-name="{{ exercise.name|lower }}"
+                     data-group="{{ exercise.muscularGroup }}">
+
+                    <div class="relative aspect-video overflow-hidden">
+                        <img src="{{ exercise.urlImage }}" alt="{{ exercise.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-white tracking-tighter">
+                            {{ exercise.difficulty|default('MEDIA')|upper }}
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-white uppercase italic tracking-tighter">{{ exercise.name }}</h3>
+                            <span class="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-black rounded uppercase border border-primary/20">
+                                {{ exercise.muscularGroup }}
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-primary/80 font-bold uppercase tracking-widest mb-3">Técnica: {{ exercise.technique }}</p>
+                        <p class="text-sm text-slate-500 leading-relaxed font-medium line-clamp-2">{{ exercise.description }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-span-full text-center py-20">
+                    <p class="text-slate-500">No hay ejercicios en la base de datos.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('exerciseSearch');
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const cards = document.querySelectorAll('.exercise-card');
+
+            function filterExercises() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const activeCategory = document.querySelector('.active-cat').dataset.category;
+
+                cards.forEach(card => {
+                    const name = card.dataset.name;
+                    const group = card.dataset.group;
+
+                    const matchesSearch = name.includes(searchTerm);
+                    const matchesCategory = activeCategory === 'Todos' || group === activeCategory;
+
+                    if (matchesSearch && matchesCategory) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            // Evento Buscador
+            searchInput.addEventListener('input', filterExercises);
+
+            // Evento Categorías
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    categoryBtns.forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white', 'active-cat');
+                        b.classList.add('bg-slate-900/40', 'text-slate-500');
+                    });
+                    btn.classList.add('bg-primary', 'text-white', 'active-cat');
+                    btn.classList.remove('bg-slate-900/40', 'text-slate-500');
+                    filterExercises();
+                });
+            });
+        });
+    </script>
+{% endblock %}
+

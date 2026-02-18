@@ -9,3 +9,8 @@
 
 controllers:
     resource: routing.controllers
+    # config/routes.yaml
+
+app_library_index:
+    path: /library
+    controller: App\Controller\LibraryController::index
