@@ -3,26 +3,83 @@
 {% block title %}Dashboard MetaFit AI{% endblock %}
 
 {% block body %}
-    <div class="min-h-screen bg-background-dark text-white p-8">
-        <div class="max-w-4xl mx-auto pt-20">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="h-1 w-12 bg-primary"></div>
-                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Panel de Control</span>
-            </div>
+    <div class="min-h-screen bg-background-dark text-white p-4 md:p-8">
+        <div class="max-w-6xl mx-auto pt-20">
 
-            <h1 class="text-6xl font-black italic uppercase tracking-tighter mb-4">
-                Bienvenido, <span class="text-primary">{{ app.user.name }}</span>!
-            </h1>
-
-            <p class="text-gray-400 text-xl font-light max-w-2xl leading-relaxed">
-                Tu ecosistema de alto rendimiento está listo. Es hora de redefinir tus límites con la ayuda de la IA.
-            </p>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-                {# Botón provisional para cerrar sesión #}
-                <a href="{{ path('app_logout') }}" class="border border-slate-800 hover:bg-red-500/10 hover:border-red-500 text-slate-500 hover:text-red-500 px-6 py-4 rounded-xl transition-all text-center font-bold">
+            {# HEADER #}
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                <div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="h-1 w-12 bg-primary"></div>
+                        <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Panel de Control</span>
+                    </div>
+                    <h1 class="text-6xl font-black italic uppercase tracking-tighter mb-2">
+                        Hola, <span class="text-primary">{{ user.name }}</span>!
+                    </h1>
+                    <p class="text-gray-400 text-xl font-light max-w-2xl leading-relaxed">
+                        Tu ecosistema está listo. <span class="text-white font-medium italic">Nivel {{ user.activityLevel|default('Bajo') }}</span> detectado.
+                    </p>
+                </div>
+                <a href="{{ path('app_logout') }}" class="border border-slate-800 hover:bg-red-500/10 hover:border-red-500 text-slate-500 hover:text-red-500 px-6 py-3 rounded-xl transition-all font-bold text-xs uppercase">
                     Cerrar Sesión
                 </a>
+            </div>
+
+            {# STATS #}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Peso</p>
+                    <p class="text-3xl font-black italic">{{ user.actualWeight|default('--') }}<span class="text-primary text-sm ml-1">KG</span></p>
+                </div>
+                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Altura</p>
+                    <p class="text-3xl font-black italic">{{ user.height|default('--') }}<span class="text-primary text-sm ml-1">CM</span></p>
+                </div>
+                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Edad</p>
+                    <p class="text-3xl font-black italic">{{ user.age|default('--') }}<span class="text-primary text-sm ml-1">AÑOS</span></p>
+                </div>
+
+                {% set imc = 0 %}
+                {% if user.height and user.actualWeight and user.height > 0 %}
+                    {% set imc = user.actualWeight / ((user.height / 100) * (user.height / 100)) %}
+                {% endif %}
+
+                <div class="bg-primary p-6 rounded-2xl">
+                    <p class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Tu IMC</p>
+                    <p class="text-3xl font-black italic text-white">{{ imc > 0 ? imc|number_format(1) : '--' }}</p>
+                </div>
+            </div>
+
+            {# RUTINA #}
+            <div class="mb-8">
+                <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-8">Tu Rutina <span class="text-primary">Personalizada</span></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for ejercicio in rutina %}
+                        <div class="group bg-[#0d1117] border border-slate-800 rounded-3xl overflow-hidden hover:border-primary/50 transition-all">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="{{ ejercicio.getUrlImage()|default('https://images.unsplash.com/photo-1534438327276-14e5300c3a48') }}" class="w-full h-full object-cover">
+                                <div class="absolute top-4 left-4">
+                                    <span class="bg-black/80 text-white text-[10px] font-black px-3 py-1 rounded-lg uppercase">
+                                        {{ ejercicio.getMuscularGroup() }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-black italic uppercase text-white mb-2">{{ ejercicio.getName() }}</h3>
+                                <p class="text-slate-500 text-sm line-clamp-2">{{ ejercicio.getDescription() }}</p>
+                                <div class="mt-6 pt-4 border-t border-slate-800/50 flex justify-between items-center text-[10px] font-black uppercase tracking-tighter">
+                                    <span class="text-slate-400">Esfuerzo</span>
+                                    <span class="text-primary">{{ ejercicio.getDifficulty() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-span-full py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl">
+                            <p class="text-slate-500 italic">No hay ejercicios para nivel "{{ user.activityLevel|default('Bajo') }}".</p>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

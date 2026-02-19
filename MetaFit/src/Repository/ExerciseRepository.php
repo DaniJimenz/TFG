@@ -16,28 +16,20 @@ class ExerciseRepository extends ServiceEntityRepository
         parent::__construct($registry, Exercise::class);
     }
 
-    //    /**
-    //     * @return Exercise[] Returns an array of Exercise objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('e.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Exercise
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Busca ejercicios aleatorios filtrados por grupo muscular y dificultad
+     */
+    public function findRandomByGroupAndDifficulty(string $group, string $difficulty, int $limit): array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.muscular_group = :group')
+            ->andWhere('e.difficulty = :difficulty')
+            ->setParameter('group', $group)
+            ->setParameter('difficulty', $difficulty)
+            ->addSelect('RAND() as HIDDEN rand')
+            ->orderBy('rand')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }
