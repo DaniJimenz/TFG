@@ -19,5 +19,15 @@ services:
     App\:
         resource: '../src/'
 
+    # Image Upload Service para ejercicios
+    App\Service\ImageUploadService:
+        arguments:
+            $uploadsDirectory: '%kernel.project_dir%/public/uploads/exercises'
+
+    # Pexels Service para búsqueda de imágenes y videos
+    App\Service\PexelsService:
+        arguments:
+            $pexelsApiKey: '%env(PEXELS_API_KEY)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

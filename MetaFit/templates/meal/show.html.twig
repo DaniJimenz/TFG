@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Detalle de Comida - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-2xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="flex items-center justify-between gap-4 mb-12">
+            <div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Detalle</span>
+                </div>
+                <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                    Mi <span class="text-primary">Comida</span>
+                </h1>
+            </div>
+            <a href="{{ path('meal_index') }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-4 py-3 rounded-xl transition-all font-bold text-sm uppercase">
+                Volver
+            </a>
+        </div>
+
+        {# IMAGEN #}
+        {% if meal.urlImage %}
+            <div class="mb-8">
+                <img src="{{ meal.urlImage }}" alt="Foto de comida" class="w-full h-64 object-cover rounded-2xl">
+            </div>
+        {% endif %}
+
+        {# INFORMACIÓN #}
+        <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl space-y-6">
+
+            {# Tipo y fecha #}
+            <div class="flex flex-col md:flex-row md:items-center gap-6 pb-6 border-b border-slate-800">
+                <div>
+                    <p class="text-slate-500 text-xs uppercase tracking-wider">Tipo de Comida</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="material-symbols-outlined text-primary text-2xl">
+                            {% if meal.foodType == 'desayuno' %}breakfast_dining
+                            {% elseif meal.foodType == 'comida' %}lunch_dining
+                            {% elseif meal.foodType == 'merienda' %}local_cafe
+                            {% else %}dinner_dining{% endif %}
+                        </span>
+                        <p class="text-xl font-bold uppercase">{{ meal.foodType }}</p>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-slate-500 text-xs uppercase tracking-wider">Registrada</p>
+                    <p class="text-xl font-bold">{{ meal.registerDate|date('d/m/Y H:i') }}</p>
+                </div>
+                <div>
+                    <p class="text-slate-500 text-xs uppercase tracking-wider">Método</p>
+                    <p class="text-xl font-bold capitalize">
+                        {% if meal.registerMethod == 'photo_ai' %}
+                            <span class="text-primary">📷 Foto IA</span>
+                        {% else %}
+                            Manual
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {# Macros #}
+            <div>
+                <p class="text-slate-500 text-xs uppercase tracking-wider mb-4">Macronutrientes</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-[#1a1d26] border border-slate-700 p-4 rounded-lg">
+                        <p class="text-slate-500 text-xs uppercase tracking-wider mb-2">Calorías</p>
+                        <p class="text-2xl font-black text-primary">{{ meal.caloriesTotal|default('-') }}</p>
+                        <p class="text-xs text-slate-500 mt-1">kcal</p>
+                    </div>
+                    <div class="bg-[#1a1d26] border border-slate-700 p-4 rounded-lg">
+                        <p class="text-slate-500 text-xs uppercase tracking-wider mb-2">Proteínas</p>
+                        <p class="text-2xl font-black text-accent-purple">{{ meal.proteinesG|default('-') }}</p>
+                        <p class="text-xs text-slate-500 mt-1">gramos</p>
+                    </div>
+                    <div class="bg-[#1a1d26] border border-slate-700 p-4 rounded-lg">
+                        <p class="text-slate-500 text-xs uppercase tracking-wider mb-2">Carbohidratos</p>
+                        <p class="text-2xl font-black">{{ meal.carbohidratsG|default('-') }}</p>
+                        <p class="text-xs text-slate-500 mt-1">gramos</p>
+                    </div>
+                    <div class="bg-[#1a1d26] border border-slate-700 p-4 rounded-lg">
+                        <p class="text-slate-500 text-xs uppercase tracking-wider mb-2">Grasas</p>
+                        <p class="text-2xl font-black">{{ meal.fatsG|default('-') }}</p>
+                        <p class="text-xs text-slate-500 mt-1">gramos</p>
+                    </div>
+                </div>
+            </div>
+
+            {# Notas #}
+            {% if meal.notes %}
+                <div>
+                    <p class="text-slate-500 text-xs uppercase tracking-wider mb-3">Notas</p>
+                    <div class="bg-[#1a1d26] border border-slate-700 p-4 rounded-lg text-slate-300">
+                        {{ meal.notes }}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Botones de acción #}
+            <div class="flex gap-3 pt-6 border-t border-slate-800">
+                <a href="{{ path('meal_edit', {'id': meal.id}) }}" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">edit</span>
+                    Editar
+                </a>
+                <form method="POST" action="{{ path('meal_delete', {'id': meal.id}) }}" style="flex: 1; display: flex;" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta comida?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_meal_' ~ meal.id) }}">
+                    <button type="submit" class="flex-1 border border-red-700/50 hover:bg-red-500/10 text-red-500 px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">delete</span>
+                        Eliminar
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

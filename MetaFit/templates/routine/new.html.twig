@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nueva Rutina - MetaFit AI{% endblock %}
+
+{% block body %}
+    <div class="bg-background-dark text-white">
+        <div class="max-w-2xl mx-auto pt-14 md:pt-16">
+
+            {# HEADER #}
+            <a href="{{ path('routine_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
+                <span class="material-symbols-outlined text-xl">arrow_back</span>
+                Volver a Rutinas
+            </a>
+
+            <div class="mb-12">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Nueva Rutina</span>
+                </div>
+                <h1 class="text-6xl font-black italic uppercase tracking-tighter mb-2">
+                    Crear <span class="text-primary">Rutina</span>
+                </h1>
+            </div>
+
+            {# FORM #}
+            <form method="POST" class="space-y-6 bg-[#0d1117] border border-slate-800 p-8 rounded-2xl">
+                <div>
+                    <label for="name" class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-3">
+                        Nombre de la Rutina
+                    </label>
+                    <input type="text" id="name" name="name" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-primary transition-all"
+                        placeholder="Ej: Push Day, Pecho y Tríceps...">
+                </div>
+
+                <div>
+                    <label for="objective" class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-3">
+                        Objetivo
+                    </label>
+                    <select id="objective" name="objective" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                        <option value="">-- Selecciona un objetivo --</option>
+                        <option value="Ganar Masa">Ganar Masa Muscular</option>
+                        <option value="Perder Peso">Perder Peso</option>
+                        <option value="Resistencia">Resistencia</option>
+                        <option value="Fuerza">Fuerza</option>
+                        <option value="Tonificacion">Tonificación</option>
+                        <option value="General">Fitness General</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="days_week" class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-3">
+                            Días por Semana
+                        </label>
+                        <select id="days_week" name="days_week" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                            <option value="">-- Selecciona --</option>
+                            <option value="3">3 días</option>
+                            <option value="4">4 días</option>
+                            <option value="5">5 días</option>
+                            <option value="6">6 días</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="dispo_material" class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-3">
+                            Material Disponible
+                        </label>
+                        <select id="dispo_material" name="dispo_material" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                            <option value="">-- Selecciona --</option>
+                            <option value="Gym Completo">Gym Completo</option>
+                            <option value="Mancuernas">Mancuernas</option>
+                            <option value="Pesas Libres">Pesas Libres</option>
+                            <option value="Máquinas">Máquinas</option>
+                            <option value="Peso Corporal">Peso Corporal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-6">
+                    <a href="{{ path('routine_index') }}" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase text-center">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase">
+                        Crear Rutina
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

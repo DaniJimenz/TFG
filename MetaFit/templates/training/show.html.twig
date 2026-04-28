@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ training.exercise.name }} - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-4xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
+            <div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Detalle de Entrenamiento</span>
+                </div>
+                <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                    <span class="text-primary">{{ training.exercise.name }}</span>
+                </h1>
+                <p class="text-slate-400 text-lg font-light">
+                    Registrado el {{ training.date|date('d \\d\\e M \\d\\e Y \\a \\l\\a\\s H:i') }}
+                </p>
+            </div>
+            <div class="flex gap-2 flex-wrap">
+                {% if training.completed %}
+                    <span class="bg-green-500/20 text-green-400 px-4 py-2 rounded-lg font-bold text-sm uppercase">✓ Completado</span>
+                {% else %}
+                    <span class="bg-yellow-500/20 text-yellow-400 px-4 py-2 rounded-lg font-bold text-sm uppercase">Pendiente</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            {# MAIN CONTENT #}
+            <div class="lg:col-span-2 space-y-6">
+
+                {# PERFORMANCE STATS #}
+                <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl">
+                    <h2 class="text-xl font-black italic uppercase tracking-tighter mb-8">Rendimiento</h2>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-slate-900 p-6 rounded-xl text-center">
+                            <p class="text-slate-500 text-xs uppercase tracking-widest mb-3">Series</p>
+                            <p class="text-4xl font-black text-primary">{{ training.completedSeries }}</p>
+                        </div>
+                        <div class="bg-slate-900 p-6 rounded-xl text-center">
+                            <p class="text-slate-500 text-xs uppercase tracking-widest mb-3">Repeticiones</p>
+                            <p class="text-4xl font-black text-accent-purple">{{ training.repetitions }}</p>
+                        </div>
+                        <div class="bg-slate-900 p-6 rounded-xl text-center">
+                            <p class="text-slate-500 text-xs uppercase tracking-widest mb-3">Peso</p>
+                            <p class="text-3xl font-black">{{ training.weight }}<span class="text-lg ml-1">kg</span></p>
+                        </div>
+                        <div class="bg-slate-900 p-6 rounded-xl text-center">
+                            <p class="text-slate-500 text-xs uppercase tracking-widest mb-3">Duración</p>
+                            <p class="text-3xl font-black">{{ training.durationMinutes }}<span class="text-lg ml-1">min</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                {# 1RM ESTIMATION #}
+                <div class="bg-gradient-to-r from-primary/20 to-accent-purple/20 border border-primary/50 p-8 rounded-2xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-400 text-sm uppercase tracking-widest font-bold mb-2">Máximo Estimado (1RM)</p>
+                            <p class="text-4xl font-black italic text-primary">{{ training.oneRmEstimated|number_format(1) }} kg</p>
+                            <p class="text-xs text-slate-500 mt-2">Calculado con la fórmula de Epley</p>
+                        </div>
+                        <div class="hidden md:block">
+                            <span class="material-symbols-outlined text-5xl text-primary opacity-50">trending_up</span>
+                        </div>
+                    </div>
+                </div>
+
+                {# EXERCISE INFO #}
+                <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl">
+                    <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6">Información del Ejercicio</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-slate-500 font-bold uppercase text-sm">Grupo Muscular</span>
+                            <span class="text-white font-bold">{{ training.exercise.muscularGroup }}</span>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <span class="text-slate-500 font-bold uppercase text-sm">Dificultad</span>
+                            <span class="text-white font-bold">{{ training.exercise.difficulty }}</span>
+                        </div>
+                        {% if training.exercise.compound %}
+                            <div class="flex justify-between items-start">
+                                <span class="text-slate-500 font-bold uppercase text-sm">Tipo</span>
+                                <span class="bg-accent-purple/20 text-accent-purple px-3 py-1 rounded-lg text-sm font-bold">Ejercicio Compuesto</span>
+                            </div>
+                        {% endif %}
+                        {% if training.routine %}
+                            <div class="flex justify-between items-start">
+                                <span class="text-slate-500 font-bold uppercase text-sm">Rutina</span>
+                                <a href="{{ path('routine_show', {'id': training.routine.id}) }}" class="text-primary hover:text-primary/80 font-bold transition">
+                                    {{ training.routine.name }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if training.exercise.description %}
+                        <div class="mt-6 pt-6 border-t border-slate-700">
+                            <p class="text-slate-400 text-sm">{{ training.exercise.description }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# NOTES #}
+                {% if training.notes %}
+                    <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl">
+                        <h2 class="text-xl font-black italic uppercase tracking-tighter mb-4">Notas</h2>
+                        <p class="text-slate-300 leading-relaxed">{{ training.notes }}</p>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            {# SIDEBAR #}
+            <div class="space-y-4">
+
+                {# ACTIONS #}
+                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                    <h3 class="font-bold uppercase text-sm tracking-wider text-slate-400 mb-4">Acciones</h3>
+                    <div class="space-y-3">
+                        <a href="{{ path('training_edit', {'id': training.id}) }}" class="block w-full bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-xl transition-all font-bold text-sm uppercase text-center">
+                            Editar
+                        </a>
+                        <form method="POST" action="{{ path('training_delete', {'id': training.id}) }}" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este entrenamiento?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_training_' ~ training.id) }}">
+                            <button type="submit" class="w-full border border-red-700/50 hover:bg-red-500/10 text-red-500 px-4 py-3 rounded-xl transition-all font-bold text-sm uppercase">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {# BACK LINK #}
+                <a href="{{ path('training_index') }}" class="block w-full border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-4 py-3 rounded-xl transition-all font-bold text-sm uppercase text-center">
+                    Volver al Historial
+                </a>
+
+                {# QUICK STATS #}
+                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                    <h3 class="font-bold uppercase text-sm tracking-wider text-slate-400 mb-4">Métricas</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-slate-600 text-xs uppercase">Total Reps</p>
+                            <p class="text-2xl font-black text-primary">{{ training.completedSeries * training.repetitions }}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-600 text-xs uppercase">Volumen (kg)</p>
+                            <p class="text-2xl font-black text-accent-purple">{{ training.completedSeries * training.repetitions * training.weight }}</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

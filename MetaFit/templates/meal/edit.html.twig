@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar Comida - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-2xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="mb-6 md:mb-8">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="h-1 w-12 bg-primary"></div>
+                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Editar Comida</span>
+            </div>
+            <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                Actualizar <span class="text-primary">Nutrición</span>
+            </h1>
+            <p class="text-gray-400 text-lg font-light">
+                Modifica los detalles de tu comida
+            </p>
+        </div>
+
+        {# FORMULARIO #}
+        <form method="POST" class="space-y-4 sm:space-y-5 md:space-y-6 bg-[#0d1117] border border-slate-800 p-4 sm:p-5 md:p-6 rounded-lg md:rounded-2xl">
+            <input type="hidden" name="_token" value="{{ csrf_token('meal_edit_' ~ meal.id) }}">
+
+            {# Tipo de Comida #}
+            <div>
+                <label for="food_type" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Tipo de Comida
+                </label>
+                <select name="food_type" id="food_type" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold uppercase focus:border-primary focus:outline-none transition-all" required>
+                    <option value="desayuno" {% if meal.foodType == 'desayuno' %}selected{% endif %}>Desayuno</option>
+                    <option value="comida" {% if meal.foodType == 'comida' %}selected{% endif %}>Comida</option>
+                    <option value="merienda" {% if meal.foodType == 'merienda' %}selected{% endif %}>Merienda</option>
+                    <option value="cena" {% if meal.foodType == 'cena' %}selected{% endif %}>Cena</option>
+                </select>
+            </div>
+
+            {# Calorías #}
+            <div>
+                <label for="calories_total" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Calorías (kcal)
+                </label>
+                <input type="number" name="calories_total" id="calories_total" step="0.1" min="0" value="{{ meal.caloriesTotal }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+            </div>
+
+            {# Grid 3 columnas: Proteínas, Carbos, Grasas #}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="proteines_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Proteínas (g)
+                    </label>
+                    <input type="number" name="proteines_g" id="proteines_g" step="0.1" min="0" value="{{ meal.proteinesG }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+                </div>
+                <div>
+                    <label for="carbohidrats_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Carbohidratos (g)
+                    </label>
+                    <input type="number" name="carbohidrats_g" id="carbohidrats_g" step="0.1" min="0" value="{{ meal.carbohidratsG }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+                </div>
+                <div>
+                    <label for="fats_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Grasas (g)
+                    </label>
+                    <input type="number" name="fats_g" id="fats_g" step="0.1" min="0" value="{{ meal.fatsG }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+                </div>
+            </div>
+
+            {# Notas #}
+            <div>
+                <label for="notes" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Notas (Opcional)
+                </label>
+                <textarea name="notes" id="notes" rows="4" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all resize-none">{{ meal.notes ?? '' }}</textarea>
+            </div>
+
+            {# Información #}
+            <div class="bg-slate-900 border border-slate-700 p-4 rounded-lg text-sm text-slate-400">
+                <p><strong>Registrado:</strong> {{ meal.registerDate|date('d/m/Y H:i') }}</p>
+                <p><strong>Método:</strong> {{ meal.registerMethod }}</p>
+            </div>
+
+            {# Botones #}
+            <div class="flex gap-4">
+                <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">save</span>
+                    Guardar Cambios
+                </button>
+                <a href="{{ path('meal_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">close</span>
+                    Cancelar
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}

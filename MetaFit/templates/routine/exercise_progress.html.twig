@@ -1,0 +1,217 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Progreso - {{ exercise.getName() }} - MetaFit AI{% endblock %}
+
+{% block body %}
+    <div class="bg-background-dark text-white">
+        <div class="max-w-6xl mx-auto pt-14 md:pt-16">
+
+            {# HEADER #}
+            <a href="javascript:history.back()" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
+                <span class="material-symbols-outlined text-xl">arrow_back</span>
+                Volver
+            </a>
+
+            <div class="mb-12">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Análisis de Progreso</span>
+                </div>
+                <h1 class="text-6xl font-black italic uppercase tracking-tighter mb-4">
+                    {{ exercise.getName() }}
+                </h1>
+                <div class="flex gap-4 flex-wrap">
+                    <span class="bg-primary/30 text-primary text-xs font-black px-3 py-1 rounded-lg">{{ exercise.getMuscularGroup() }}</span>
+                    <span class="bg-slate-700 text-slate-300 text-xs font-black px-3 py-1 rounded-lg">{{ exercise.getEquipment() }}</span>
+                </div>
+            </div>
+
+            {# ESTADÍSTICAS RÁPIDAS #}
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-6 text-center">
+                    <p class="text-slate-400 text-sm mb-2 uppercase font-bold">Entrenamientos</p>
+                    <p class="text-4xl font-black text-primary">{{ totalTrainings }}</p>
+                </div>
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-6 text-center">
+                    <p class="text-slate-400 text-sm mb-2 uppercase font-bold">Peso Máx.</p>
+                    <p class="text-4xl font-black text-emerald-400">{{ maxWeight|round(1) }} kg</p>
+                </div>
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-6 text-center">
+                    <p class="text-slate-400 text-sm mb-2 uppercase font-bold">Peso Prom.</p>
+                    <p class="text-4xl font-black text-blue-400">{{ avgWeight|round(1) }} kg</p>
+                </div>
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-6 text-center">
+                    <p class="text-slate-400 text-sm mb-2 uppercase font-bold">1RM Estimado</p>
+                    <p class="text-4xl font-black text-purple-400">{{ maxOneRM|round(1) }} kg</p>
+                </div>
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-6 text-center">
+                    <p class="text-slate-400 text-sm mb-2 uppercase font-bold">Volumen Total</p>
+                    <p class="text-4xl font-black text-pink-400">{{ totalVolume|round(0) }} kg</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8 mb-12">
+                {# GRÁFICO #}
+                <div class="lg:col-span-2 bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
+                    <h3 class="text-2xl font-black uppercase mb-6">Progresión de Peso - Últimos 30 Días</h3>
+                    <canvas id="progressChart" width="400" height="300"></canvas>
+                </div>
+
+                {# RECOMENDACIÓN #}
+                <div class="bg-gradient-to-b from-primary/20 to-transparent border border-primary/50 rounded-2xl p-8">
+                    <div class="flex items-start gap-3 mb-6">
+                        <span class="material-symbols-outlined text-4xl text-primary">trending_up</span>
+                        <div>
+                            <p class="text-slate-400 uppercase text-xs font-bold">Próxima Meta</p>
+                            <p class="text-4xl font-black text-primary">{{ nextLoadRecommendation|round(1) }} kg</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-300 text-sm mb-4">
+                        Se recomienda aumentar a <strong>{{ nextLoadRecommendation|round(1) }} kg</strong> en tu próximo entrenamiento. Esto representa:
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Aumento:</span>
+                            <span class="font-bold text-primary">+{{ (nextLoadRecommendation - maxWeight)|round(1) }} kg</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">% de aumento:</span>
+                            <span class="font-bold text-primary">{{ ((nextLoadRecommendation / maxWeight - 1) * 100)|round(1) }}%</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-slate-700">
+                        <p class="text-xs text-slate-400 uppercase font-bold mb-3">Consejos de Técnica</p>
+                        <ul class="space-y-2 text-sm text-slate-300">
+                            <li class="flex gap-2">
+                                <span class="material-symbols-outlined text-primary text-lg flex-shrink-0">check_circle</span>
+                                <span>Mantén el peso bajo control</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="material-symbols-outlined text-primary text-lg flex-shrink-0">check_circle</span>
+                                <span>Aumenta gradualmente sin saltos</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="material-symbols-outlined text-primary text-lg flex-shrink-0">check_circle</span>
+                                <span>Respeta la forma correcta</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            {# TABLA DE ENTRENAMIENTOS #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden">
+                <div class="p-8 border-b border-slate-700">
+                    <h3 class="text-2xl font-black uppercase">Historial de Entrenamientos</h3>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-slate-900/50 border-b border-slate-700">
+                                <th class="px-6 py-4 text-left text-xs font-black uppercase text-slate-400">Fecha</th>
+                                <th class="px-6 py-4 text-right text-xs font-black uppercase text-slate-400">Peso</th>
+                                <th class="px-6 py-4 text-right text-xs font-black uppercase text-slate-400">Series</th>
+                                <th class="px-6 py-4 text-right text-xs font-black uppercase text-slate-400">Reps</th>
+                                <th class="px-6 py-4 text-right text-xs font-black uppercase text-slate-400">Volumen</th>
+                                <th class="px-6 py-4 text-right text-xs font-black uppercase text-slate-400">1RM</th>
+                                <th class="px-6 py-4 text-right text-xs font-black uppercase text-slate-400">Duración</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for training in trainings %}
+                                <tr class="border-b border-slate-800 hover:bg-slate-900/30 transition-all">
+                                    <td class="px-6 py-4 text-sm text-slate-300">{{ training.date|date('d/m/Y') }}</td>
+                                    <td class="px-6 py-4 text-right text-sm">
+                                        <span class="font-bold text-primary">{{ training.weight|round(1) }} kg</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm text-slate-300">{{ training.completed_series }}</td>
+                                    <td class="px-6 py-4 text-right text-sm text-slate-300">{{ training.repetitions }}</td>
+                                    <td class="px-6 py-4 text-right text-sm">
+                                        <span class="text-pink-400 font-bold">{{ (training.completed_series * training.repetitions * training.weight)|round(0) }} kg</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm">
+                                        <span class="text-purple-400 font-bold">{{ training.oneRM|round(1) }} kg</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm text-slate-300">{{ training.duration_minutes }} min</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="px-6 py-8 text-center text-slate-400">
+                                        No hay entrenamientos registrados para este ejercicio
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Datos para el gráfico
+        const chartData = {{ chartData|json_encode() }};
+        
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: 'Peso (kg)',
+                        data: chartData.weights,
+                        borderColor: '#fbbf24',
+                        backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#fbbf24',
+                        pointBorderColor: '#000',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 7,
+                    },
+                    {
+                        label: '1RM Estimado (kg)',
+                        data: chartData.oneRMs,
+                        borderColor: '#a855f7',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#a855f7',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#94a3b8',
+                            font: { weight: 'bold', size: 12 }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

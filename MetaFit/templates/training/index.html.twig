@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mis Entrenamientos - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-6xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 mb-6 md:mb-8">
+            <div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Registro de Entrenamientos</span>
+                </div>
+                <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                    Mis <span class="text-primary">Entrenamientos</span>
+                </h1>
+                <p class="text-gray-400 text-lg font-light">
+                    Sigue tu progreso en el gym
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ path('training_progress') }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    Progreso
+                </a>
+                <a href="{{ path('training_new') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                    <span class="material-symbols-outlined">add</span>
+                    Nuevo
+                </a>
+            </div>
+        </div>
+
+        {# ESTADÍSTICAS RÁPIDAS #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total Entrenamientos</p>
+                <p class="text-3xl font-black italic text-primary">{{ trainings|length }}</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Completados</p>
+                <p class="text-3xl font-black italic text-accent-purple">{{ trainings|filter(t => t.completed)|length }}</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Últimas 7 Días</p>
+                <p class="text-3xl font-black italic">{{ trainings|filter(t => t.date >= date('-7 days'))|length }}</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Esta Semana</p>
+                <a href="{{ path('training_weekly_summary') }}" class="text-primary hover:text-primary/80 transition">
+                    <span class="material-symbols-outlined text-2xl">trending_up</span>
+                </a>
+            </div>
+        </div>
+
+        {# LISTA DE ENTRENAMIENTOS #}
+        {% if trainings is not empty %}
+            <div class="space-y-4">
+                {% for training in trainings %}
+                    <div class="bg-[#0d1117] border border-slate-800 hover:border-primary/50 p-6 rounded-2xl transition-all">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="material-symbols-outlined text-primary">fitness_center</span>
+                                    <h3 class="text-lg font-bold">{{ training.exercise.name }}</h3>
+                                    {% if training.completed %}
+                                        <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-lg text-xs font-bold">✓ Completado</span>
+                                    {% else %}
+                                        <span class="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-lg text-xs font-bold">Pendiente</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="text-slate-500 text-sm mb-4">
+                                    <strong>Grupo:</strong> {{ training.exercise.muscularGroup }} | 
+                                    <strong>Fecha:</strong> {{ training.date|date('d/m/Y H:i') }}
+                                </p>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                    <div class="bg-slate-900 p-3 rounded-lg">
+                                        <p class="text-slate-500 text-xs uppercase tracking-wider">Series</p>
+                                        <p class="text-xl font-bold">{{ training.completedSeries }}</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-3 rounded-lg">
+                                        <p class="text-slate-500 text-xs uppercase tracking-wider">Reps</p>
+                                        <p class="text-xl font-bold">{{ training.repetitions }}</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-3 rounded-lg">
+                                        <p class="text-slate-500 text-xs uppercase tracking-wider">Peso (kg)</p>
+                                        <p class="text-xl font-bold text-accent-purple">{{ training.weight }}</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-3 rounded-lg">
+                                        <p class="text-slate-500 text-xs uppercase tracking-wider">Duración</p>
+                                        <p class="text-xl font-bold">{{ training.durationMinutes }}m</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-3 rounded-lg">
+                                        <p class="text-slate-500 text-xs uppercase tracking-wider">1RM Est.</p>
+                                        <p class="text-xl font-bold text-primary">{{ training.oneRmEstimated|number_format(1) }}</p>
+                                    </div>
+                                </div>
+
+                                {% if training.notes %}
+                                    <p class="text-slate-400 text-sm mt-3 italic">{{ training.notes }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="flex gap-2 flex-wrap md:flex-col">
+                                <a href="{{ path('training_edit', {'id': training.id}) }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase">
+                                    Editar
+                                </a>
+                                <form method="POST" action="{{ path('training_delete', {'id': training.id}) }}" style="display: inline;" onsubmit="return confirm('¿Estás seguro?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_training_' ~ training.id) }}">
+                                    <button type="submit" class="w-full border border-red-700/50 hover:bg-red-500/10 text-red-500 px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-[#0d1117] border border-slate-800 p-12 rounded-2xl text-center">
+                <span class="material-symbols-outlined text-slate-600 text-5xl mb-4 block">fitness_center</span>
+                <h3 class="text-xl font-bold mb-2">No hay entrenamientos registrados</h3>
+                <p class="text-slate-400 mb-6">Comienza a registrar tus sesiones de entrenamiento</p>
+                <a href="{{ path('training_new') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase inline-flex items-center gap-2">
+                    <span class="material-symbols-outlined">add</span>
+                    Registrar Primer Entrenamiento
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

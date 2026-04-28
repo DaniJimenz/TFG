@@ -1,0 +1,146 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ exercise.name }} - Historial - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-5xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
+            <div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Progreso del Ejercicio</span>
+                </div>
+                <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                    <span class="text-primary">{{ exercise.name }}</span>
+                </h1>
+                <p class="text-slate-400 text-lg font-light">
+                    Grupo: {{ exercise.muscularGroup }}
+                </p>
+            </div>
+            <a href="{{ path('training_progress') }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase">
+                Volver al Progreso
+            </a>
+        </div>
+
+        {# STATS CARDS #}
+        {% set total_trainings = trainings|length %}
+        {% set total_weight = 0 %}
+        {% set avg_weight = 0 %}
+        {% set max_weight = 0 %}
+        {% set total_volume = 0 %}
+        
+        {% for training in trainings %}
+            {% set total_weight = total_weight + training.weight %}
+            {% set volume = training.completedSeries * training.repetitions * training.weight %}
+            {% set total_volume = total_volume + volume %}
+            {% if training.weight > max_weight %}
+                {% set max_weight = training.weight %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if total_trainings > 0 %}
+            {% set avg_weight = total_weight / total_trainings %}
+        {% endif %}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total Veces</p>
+                <p class="text-3xl font-black italic text-primary">{{ total_trainings }}</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Peso Máximo (PR)</p>
+                <p class="text-3xl font-black italic text-accent-purple">{{ max_weight }}<span class="text-sm ml-1">kg</span></p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Peso Promedio</p>
+                <p class="text-3xl font-black italic">{{ avg_weight|number_format(1) }}<span class="text-sm ml-1">kg</span></p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Volumen Total</p>
+                <p class="text-3xl font-black italic text-green-500">{{ total_volume|number_format(0) }}<span class="text-sm ml-1">kg</span></p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Dificultad</p>
+                <p class="text-2xl font-bold">{{ exercise.difficulty }}</p>
+            </div>
+        </div>
+
+        {# EXERCISE INFO #}
+        {% if exercise.description or exercise.technique %}
+            <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl mb-12">
+                {% if exercise.description %}
+                    <h3 class="text-lg font-bold uppercase tracking-wider mb-3">Descripción</h3>
+                    <p class="text-slate-300 mb-6">{{ exercise.description }}</p>
+                {% endif %}
+                
+                {% if exercise.technique %}
+                    <h3 class="text-lg font-bold uppercase tracking-wider mb-3">Técnica</h3>
+                    <p class="text-slate-300">{{ exercise.technique }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {# TRAININGS HISTORY #}
+        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="p-8 border-b border-slate-800">
+                <h2 class="text-xl font-black italic uppercase tracking-tighter flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">history</span>
+                    Historial de Entrenamientos
+                </h2>
+            </div>
+
+            {% if trainings is not empty %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-900 border-b border-slate-800">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Fecha</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Series</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Reps</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Peso (kg)</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">1RM</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Duración</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Volumen</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-400">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            {% for training in trainings|sort((a, b) => b.date <=> a.date) %}
+                                <tr class="hover:bg-slate-900/50 transition">
+                                    <td class="px-6 py-4 text-sm">
+                                        <a href="{{ path('training_show', {'id': training.id}) }}" class="text-primary hover:text-primary/80 transition font-bold">
+                                            {{ training.date|date('d/m/Y H:i') }}
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-bold">{{ training.completedSeries }}</td>
+                                    <td class="px-6 py-4 text-sm font-bold">{{ training.repetitions }}</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-accent-purple">{{ training.weight }} kg</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-primary">{{ training.oneRmEstimated|number_format(1) }} kg</td>
+                                    <td class="px-6 py-4 text-sm font-bold">{{ training.durationMinutes }} min</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-green-500">
+                                        {{ training.completedSeries * training.repetitions * training.weight|number_format(0) }} kg
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <a href="{{ path('training_edit', {'id': training.id}) }}" class="text-slate-400 hover:text-primary transition text-sm font-bold" title="Editar">
+                                            <span class="material-symbols-outlined text-lg">edit</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="p-8 text-center">
+                    <span class="material-symbols-outlined text-slate-600 text-5xl mb-4 block">fitness_center</span>
+                    <p class="text-slate-400">No hay entrenamientos registrados para este ejercicio</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

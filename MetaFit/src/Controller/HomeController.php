@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\ExerciseRepository;
+use App\Service\DashboardStatsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,7 +13,7 @@ class HomeController extends AbstractController
 {
     #[Route('/home', name: 'app_home')]
     #[IsGranted('ROLE_USER')]
-    public function index(ExerciseRepository $exerciseRepository): Response
+    public function index(ExerciseRepository $exerciseRepository, DashboardStatsService $dashboardStatsService): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -42,9 +43,15 @@ class HomeController extends AbstractController
             $rutina = [];
         }
 
+        // Obtener estadísticas del dashboard
+        $stats = $dashboardStatsService->getUserDashboardStats($user);
+        $recentTrainings = $dashboardStatsService->getRecentTrainings($user, 5);
+
         return $this->render('home/index.html.twig', [
             'user' => $user,
             'rutina' => $rutina,
+            'stats' => $stats,
+            'recentTrainings' => $recentTrainings,
         ]);
     }
 }

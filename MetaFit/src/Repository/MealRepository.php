@@ -31,13 +31,22 @@ class MealRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Meal
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Find meals by user and date range
+     * @return Meal[]
+     */
+    public function findMealsByDateRange($user, \DateTimeImmutable $startDate, \DateTimeImmutable $endDate): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.appUser = :user')
+            ->andWhere('m.register_date >= :startDate')
+            ->andWhere('m.register_date <= :endDate')
+            ->setParameter('user', $user)
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->orderBy('m.register_date', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

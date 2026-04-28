@@ -105,6 +105,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Meal::class, mappedBy: 'appUser')]
     private Collection $meals;
 
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: TrainingPreference::class, cascade: ['persist', 'remove'])]
+    private ?TrainingPreference $trainingPreference = null;
+
+    /**
+     * @var Collection<int, SocialConnection>
+     */
+    #[ORM\OneToMany(targetEntity: SocialConnection::class, mappedBy: 'user', cascade: ['remove'])]
+    private Collection $socialConnections;
+
+    /**
+     * @var Collection<int, DataBackup>
+     */
+    #[ORM\OneToMany(targetEntity: DataBackup::class, mappedBy: 'user', cascade: ['remove'])]
+    private Collection $backups;
+
     public function __construct()
     {
         $this->allergens = new ArrayCollection();
@@ -112,6 +127,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->trainings = new ArrayCollection();
         $this->achievement = new ArrayCollection();
         $this->meals = new ArrayCollection();
+        $this->socialConnections = new ArrayCollection();
+        $this->backups = new ArrayCollection();
 
         $this->points_xp = 0; // Así cada usuario nuevo empieza con 0 puntos //
         $this->continuity = 0;
@@ -519,5 +536,70 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         /*Borrar aquí datos temporales sensibles de User*/
+    }
+
+    public function getTrainingPreference(): ?TrainingPreference
+    {
+        return $this->trainingPreference;
+    }
+
+    public function setTrainingPreference(?TrainingPreference $trainingPreference): static
+    {
+        $this->trainingPreference = $trainingPreference;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SocialConnection>
+     */
+    public function getSocialConnections(): Collection
+    {
+        return $this->socialConnections;
+    }
+
+    public function addSocialConnection(SocialConnection $socialConnection): static
+    {
+        if (!$this->socialConnections->contains($socialConnection)) {
+            $this->socialConnections->add($socialConnection);
+            $socialConnection->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeSocialConnection(SocialConnection $socialConnection): static
+    {
+        if ($this->socialConnections->removeElement($socialConnection)) {
+            if ($socialConnection->getUser() === $this) {
+                $socialConnection->setUser(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DataBackup>
+     */
+    public function getBackups(): Collection
+    {
+        return $this->backups;
+    }
+
+    public function addBackup(DataBackup $backup): static
+    {
+        if (!$this->backups->contains($backup)) {
+            $this->backups->add($backup);
+            $backup->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeBackup(DataBackup $backup): static
+    {
+        if ($this->backups->removeElement($backup)) {
+            if ($backup->getUser() === $this) {
+                $backup->setUser(null);
+            }
+        }
+        return $this;
     }
 }

@@ -1,0 +1,172 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mi Progreso - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-6xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+            <div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Análisis Detallado</span>
+                </div>
+                <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                    Mi <span class="text-primary">Progreso</span>
+                </h1>
+                <p class="text-gray-400 text-lg font-light">
+                    Últimos 30 días
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ path('training_weekly_summary') }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    Semanal
+                </a>
+                <a href="{{ path('training_index') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                    <span class="material-symbols-outlined">history</span>
+                    Historial
+                </a>
+            </div>
+        </div>
+
+        {# MAIN STATS #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total Entrenamientos</p>
+                <p class="text-3xl font-black italic text-primary">{{ stats.total_trainings }}</p>
+                <p class="text-xs text-slate-600 mt-2">en 30 días</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Completados</p>
+                <p class="text-3xl font-black italic text-green-500">{{ stats.completed_trainings }}</p>
+                <p class="text-xs text-slate-600 mt-2">
+                    {% set completion_rate = stats.total_trainings > 0 ? (stats.completed_trainings / stats.total_trainings * 100)|number_format(0) : 0 %}
+                    {{ completion_rate }}% completado
+                </p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total Levantado</p>
+                <p class="text-3xl font-black italic text-accent-purple">{{ stats.total_weight_lifted|number_format(0) }}<span class="text-sm ml-1">kg</span></p>
+                <p class="text-xs text-slate-600 mt-2">volumen total</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Tiempo Total</p>
+                <p class="text-3xl font-black italic">{{ stats.total_duration }}<span class="text-sm ml-1">min</span></p>
+                <p class="text-xs text-slate-600 mt-2">
+                    {% set avg_session = stats.total_trainings > 0 ? (stats.total_duration / stats.total_trainings)|number_format(0) : 0 %}
+                    {{ avg_session }} min/sesión
+                </p>
+            </div>
+        </div>
+
+        {# PERFORMANCE ANALYSIS #}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+
+            {# PESO PROMEDIO POR SESIÓN #}
+            <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl">
+                <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">equalizer</span>
+                    Peso Promedio
+                </h2>
+                <div class="text-center py-8">
+                    <p class="text-slate-500 uppercase text-xs tracking-wider mb-2">Promedio por Sesión</p>
+                    <p class="text-5xl font-black text-primary">
+                        {{ stats.avg_weight|number_format(1) }}
+                        <span class="text-xl ml-2">kg</span>
+                    </p>
+                </div>
+                <p class="text-slate-400 text-sm text-center">
+                    Basado en {{ stats.total_trainings }} entrenamientos
+                </p>
+            </div>
+
+            {# CONSISTENCIA #}
+            <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl">
+                <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-accent-purple">check_circle</span>
+                    Consistencia
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-slate-400 font-bold">Tasa de Finalización</span>
+                            <span class="text-primary font-bold">{{ completion_rate }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full" style="width: {{ completion_rate }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-slate-400 font-bold">Entrenamientos/Semana</span>
+                            <span class="text-accent-purple font-bold">
+                                {% set avg_weekly = (stats.total_trainings / 4.28)|number_format(1) %}
+                                {{ avg_weekly }}
+                            </span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2">
+                            <div class="bg-accent-purple h-2 rounded-full" style="width: {{ (avg_weekly / 7 * 100)|number_format(0) }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {# TOP EXERCISES #}
+        <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl mb-12">
+            <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">star</span>
+                Ejercicios Más Trabajados
+            </h2>
+
+            {% if exercises is not empty %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for exercise in exercises[:6] %}
+                        <a href="{{ path('training_exercise_history', {'exerciseId': exercise.exercise.id}) }}" class="bg-slate-900 border border-slate-700 hover:border-primary/50 p-6 rounded-xl transition-all group">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold group-hover:text-primary transition">{{ exercise.exercise.name }}</h3>
+                                <span class="material-symbols-outlined text-slate-600 group-hover:text-primary transition">arrow_forward</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div>
+                                    <p class="text-slate-600 text-xs uppercase">Veces</p>
+                                    <p class="font-bold">{{ exercise.count }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-slate-600 text-xs uppercase">PR</p>
+                                    <p class="font-bold text-accent-purple">{{ exercise.pr|number_format(1) }}kg</p>
+                                </div>
+                                <div>
+                                    <p class="text-slate-600 text-xs uppercase">Promedio</p>
+                                    <p class="font-bold text-primary">{{ exercise.avg|number_format(1) }}kg</p>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <p class="text-slate-400">No hay suficientes datos para mostrar los ejercicios más trabajados</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {# CALL TO ACTION #}
+        <div class="bg-gradient-to-r from-primary/20 to-accent-purple/20 border border-primary/50 p-8 rounded-2xl text-center">
+            <h3 class="text-2xl font-black italic uppercase mb-4">Mantén tu Consistencia</h3>
+            <p class="text-slate-300 mb-6">
+                Registra tus entrenamientos regularmente para seguir tu progreso y alcanzar tus objetivos
+            </p>
+            <a href="{{ path('training_new') }}" class="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-xl transition-all font-bold uppercase inline-flex items-center gap-2">
+                <span class="material-symbols-outlined">add</span>
+                Registrar Nuevo Entrenamiento
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

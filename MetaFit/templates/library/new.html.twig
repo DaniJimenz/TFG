@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Crear Ejercicio - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-2xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="mb-12">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="h-1 w-12 bg-primary"></div>
+                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Crear Ejercicio</span>
+            </div>
+            <h1 class="text-4xl font-black italic uppercase tracking-tighter">
+                Nuevo <span class="text-primary">Ejercicio</span>
+            </h1>
+        </div>
+
+        {# FORM #}
+        {{ form_start(form, {'attr': {'class': 'space-y-8', 'novalidate': 'novalidate'}}) }}
+
+            {# NAME #}
+            <div>
+                {{ form_label(form.name, 'Nombre del Ejercicio', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
+                {{ form_widget(form.name, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
+                {{ form_errors(form.name) }}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {# MUSCULAR GROUP #}
+                <div>
+                    {{ form_label(form.muscular_group, 'Grupo Muscular', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
+                    {{ form_widget(form.muscular_group, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
+                </div>
+
+                {# DIFFICULTY #}
+                <div>
+                    {{ form_label(form.difficulty, 'Dificultad', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
+                    {{ form_widget(form.difficulty, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
+                </div>
+            </div>
+
+            {# DESCRIPTION #}
+            <div>
+                {{ form_label(form.description, 'Descripción', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition', 'rows': '3'}}) }}
+            </div>
+
+            {# TECHNIQUE #}
+            <div>
+                {{ form_label(form.technique, 'Técnica de Ejecución', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
+                {{ form_widget(form.technique, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition', 'rows': '4'}}) }}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {# IMAGE UPLOAD #}
+                <div>
+                    {{ form_label(form.url_image, 'Imagen del Ejercicio', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
+                    {{ form_widget(form.url_image, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition', 'accept': 'image/*'}}) }}
+                    <p class="text-xs text-slate-500 mt-2">Máx 5MB (JPEG, PNG, WebP o GIF)</p>
+                    {{ form_errors(form.url_image) }}
+                </div>
+
+                {# VIDEO URL #}
+                <div>
+                    {{ form_label(form.url_video, 'URL de Video', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
+                    {{ form_widget(form.url_video, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition', 'placeholder': 'https://youtube.com/watch?v=...'}}) }}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {# MATERIAL #}
+                <div>
+                    {{ form_label(form.necessary_material, 'Material Necesario', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
+                    {{ form_widget(form.necessary_material, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition', 'placeholder': 'Ej: Barra, Mancuernas'}}) }}
+                </div>
+
+                {# COMPOUND #}
+                <div class="flex items-end">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        {{ form_widget(form.compound, {'attr': {'class': 'w-5 h-5 rounded'}}) }}
+                        <span class="text-sm font-bold uppercase tracking-wider text-slate-400">¿Ejercicio Compuesto?</span>
+                    </label>
+                </div>
+            </div>
+
+            {# BUTTONS #}
+            <div class="flex gap-4 pt-6">
+                <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase">
+                    Crear Ejercicio
+                </button>
+                <a href="{{ path('app_library_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase text-center">
+                    Cancelar
+                </a>
+            </div>
+
+        {{ form_end(form) }}
+
+    </div>
+</div>
+{% endblock %}

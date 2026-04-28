@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mis Rutinas - MetaFit AI{% endblock %}
+
+{% block body %}
+    <div class="bg-background-dark text-white">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-6 md:py-8">
+
+            {# HEADER #}
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                <div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="h-1 w-12 bg-primary"></div>
+                        <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Entrenamientos</span>
+                    </div>
+                    <h1 class="text-6xl font-black italic uppercase tracking-tighter mb-2">
+                        Mis <span class="text-primary">Rutinas</span>
+                    </h1>
+                    <p class="text-gray-400 text-xl font-light max-w-2xl leading-relaxed">
+                        Crea y personaliza tus rutinas de entrenamiento
+                    </p>
+                </div>
+                <a href="{{ path('routine_new') }}" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-xl transition-all font-bold text-xs uppercase">
+                    + Nueva Rutina
+                </a>
+            </div>
+
+            {# RUTINAS #}
+            {% if routines|length > 0 %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for routine in routines %}
+                        <div class="group bg-[#0d1117] border border-slate-800 rounded-2xl p-6 hover:border-primary/50 transition-all">
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <h3 class="text-2xl font-black italic uppercase text-white mb-1">{{ routine.getName() }}</h3>
+                                    <p class="text-slate-400 text-sm">{{ routine.getObjective() }}</p>
+                                </div>
+                                {% if routine.getActive() %}
+                                    <span class="bg-green-500/20 border border-green-500/50 text-green-400 text-[10px] font-black px-3 py-1 rounded-lg">
+                                        ACTIVA
+                                    </span>
+                                {% else %}
+                                    <span class="bg-slate-700/20 border border-slate-700/50 text-slate-400 text-[10px] font-black px-3 py-1 rounded-lg">
+                                        INACTIVA
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="space-y-3 py-4 border-y border-slate-800/50">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Ejercicios:</span>
+                                    <span class="font-bold text-primary">{{ routine.getExercises()|length }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Días/Semana:</span>
+                                    <span class="font-bold">{{ routine.getDaysWeek() }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">Material:</span>
+                                    <span class="font-bold text-xs">{{ routine.getDispoMaterial()|truncate(20, '...') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex gap-3">
+                                <a href="{{ path('routine_start', {id: routine.id}) }}" class="flex-1 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase text-center">
+                                    Entrenar Ahora
+                                </a>
+                                <a href="{{ path('routine_edit', {id: routine.id}) }}" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase text-center">
+                                    Editar
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl">
+                    <p class="text-slate-500 text-xl italic mb-6">No tienes rutinas creadas aún</p>
+                    <a href="{{ path('routine_new') }}" class="inline-block bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-xl font-bold uppercase">
+                        Crear Primera Rutina
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

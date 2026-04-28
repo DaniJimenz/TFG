@@ -31,13 +31,55 @@ class TrainingRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Training
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Find trainings after a specific date for a user
+     * @return Training[]
+     */
+    public function findTrainingsAfterDate($user, \DateTimeImmutable $date): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.appUser = :user')
+            ->andWhere('t.date >= :date')
+            ->setParameter('user', $user)
+            ->setParameter('date', $date)
+            ->orderBy('t.date', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+     * Find trainings by user and exercise
+     * @return Training[]
+     */
+    public function findByUserAndExercise($user, $exercise): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.appUser = :user')
+            ->andWhere('t.exercise = :exercise')
+            ->setParameter('user', $user)
+            ->setParameter('exercise', $exercise)
+            ->orderBy('t.date', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+     * Get PR (Personal Record) for a user and exercise
+     */
+    public function getPRByUserAndExercise($user, $exercise): ?float
+    {
+        $result = $this->createQueryBuilder('t')
+            ->select('MAX(t.weight) as max_weight')
+            ->andWhere('t.appUser = :user')
+            ->andWhere('t.exercise = :exercise')
+            ->setParameter('user', $user)
+            ->setParameter('exercise', $exercise)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+
+        return $result['max_weight'] ?? null;
+    }
 }

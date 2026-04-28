@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Resumen Semanal - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-5xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+            <div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Resumen Semanal</span>
+                </div>
+                <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                    Esta <span class="text-primary">Semana</span>
+                </h1>
+                <p class="text-gray-400 text-lg font-light">
+                    Últimos 7 días
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ path('training_progress') }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    Progreso
+                </a>
+                <a href="{{ path('training_index') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                    <span class="material-symbols-outlined">history</span>
+                    Historial
+                </a>
+            </div>
+        </div>
+
+        {# WEEKLY STATS #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Entrenamientos</p>
+                <p class="text-3xl font-black italic text-primary">{{ weekly_summary|length }}</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Completados</p>
+                <p class="text-3xl font-black italic text-green-500">
+                    {{ weekly_summary|filter(t => t.completed)|length }}
+                </p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total Levantado</p>
+                <p class="text-3xl font-black italic text-accent-purple">
+                    {% set total = 0 %}
+                    {% for training in weekly_summary %}
+                        {% set total = total + training.weight %}
+                    {% endfor %}
+                    {{ total|number_format(0) }}<span class="text-sm ml-1">kg</span>
+                </p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Tiempo Total</p>
+                <p class="text-3xl font-black italic">
+                    {% set total_time = 0 %}
+                    {% for training in weekly_summary %}
+                        {% set total_time = total_time + training.durationMinutes %}
+                    {% endfor %}
+                    {{ total_time }}<span class="text-sm ml-1">min</span>
+                </p>
+            </div>
+        </div>
+
+        {# CALENDAR VIEW #}
+        <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 mb-12">
+            {% for day_offset in range(6, 0, -1) %}
+                {% set target_date = date('-' ~ day_offset ~ ' days') %}
+                {% set day_name = target_date|date('l') %}
+                {% set day_date = target_date|date('d/m') %}
+                
+                {% set day_trainings = weekly_summary|filter(t => 
+                    t.date|date('Y-m-d') == target_date|date('Y-m-d')
+                ) %}
+                
+                <div class="bg-[#0d1117] border {% if day_trainings|length > 0 %}border-primary/50{% else %}border-slate-800{% endif %} p-6 rounded-xl">
+                    <h3 class="font-bold uppercase text-sm tracking-wider mb-4">
+                        {{ day_name|upper }}
+                        <span class="text-slate-600">{{ day_date }}</span>
+                    </h3>
+
+                    {% if day_trainings|length > 0 %}
+                        <div class="space-y-3">
+                            {% for training in day_trainings %}
+                                <a href="{{ path('training_show', {'id': training.id}) }}" class="block bg-slate-900 border border-slate-700 hover:border-primary/50 p-4 rounded-lg transition-all">
+                                    <p class="font-bold text-sm text-primary mb-2">{{ training.exercise.name }}</p>
+                                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                                        <div>
+                                            <p class="uppercase text-[10px]">Series</p>
+                                            <p class="font-bold text-white">{{ training.completedSeries }}x{{ training.repetitions }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="uppercase text-[10px]">Peso</p>
+                                            <p class="font-bold text-accent-purple">{{ training.weight }}kg</p>
+                                        </div>
+                                    </div>
+                                    {% if training.completed %}
+                                        <span class="text-xs font-bold text-green-500 mt-2 block">✓ Completado</span>
+                                    {% endif %}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <span class="material-symbols-outlined text-slate-700 text-3xl block mb-2">fitness_center</span>
+                            <p class="text-slate-600 text-xs">Sin entrenamientos</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            {# TODAY #}
+            {% set today_trainings = weekly_summary|filter(t => 
+                t.date|date('Y-m-d') == 'now'|date('Y-m-d')
+            ) %}
+            
+            <div class="bg-gradient-to-r from-primary/20 to-accent-purple/20 border border-primary/50 p-6 rounded-xl">
+                <h3 class="font-bold uppercase text-sm tracking-wider mb-4">
+                    HOY
+                    <span class="text-slate-600">{{ 'now'|date('d/m') }}</span>
+                </h3>
+
+                {% if today_trainings|length > 0 %}
+                    <div class="space-y-3">
+                        {% for training in today_trainings %}
+                            <a href="{{ path('training_show', {'id': training.id}) }}" class="block bg-slate-900/50 border border-primary p-4 rounded-lg transition-all hover:bg-slate-800/50">
+                                <p class="font-bold text-sm text-primary mb-2">{{ training.exercise.name }}</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                                    <div>
+                                        <p class="uppercase text-[10px]">Series</p>
+                                        <p class="font-bold text-white">{{ training.completedSeries }}x{{ training.repetitions }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="uppercase text-[10px]">Peso</p>
+                                        <p class="font-bold text-accent-purple">{{ training.weight }}kg</p>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <span class="material-symbols-outlined text-accent-purple text-3xl block mb-2">add</span>
+                        <p class="text-slate-400 text-xs mb-4">Sin entrenamientos aún</p>
+                        <a href="{{ path('training_new') }}" class="text-primary hover:text-primary/80 font-bold text-xs uppercase transition">
+                            Registrar ahora
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ACTIVITY SUMMARY #}
+        <div class="bg-[#0d1117] border border-slate-800 p-8 rounded-2xl">
+            <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">assessment</span>
+                Resumen de Actividad
+            </h2>
+
+            {% set unique_exercises = [] %}
+            {% for training in weekly_summary %}
+                {% if training.exercise.id not in unique_exercises %}
+                    {% set unique_exercises = unique_exercises|merge([training.exercise.id]) %}
+                {% endif %}
+            {% endfor %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-slate-500 uppercase text-xs tracking-wider font-bold mb-3">Ejercicios Diferentes</p>
+                    <p class="text-4xl font-black text-primary">{{ unique_exercises|length }}</p>
+                </div>
+                <div>
+                    <p class="text-slate-500 uppercase text-xs tracking-wider font-bold mb-3">Promedio de Peso</p>
+                    {% set avg = weekly_summary|length > 0 ? (weekly_summary|map(t => t.weight)|reduce((carry, weight) => carry + weight, 0) / weekly_summary|length) : 0 %}
+                    <p class="text-4xl font-black text-accent-purple">{{ avg|number_format(1) }} kg</p>
+                </div>
+            </div>
+
+            {% if unique_exercises|length > 0 %}
+                <div class="mt-8 pt-8 border-t border-slate-700">
+                    <p class="text-slate-500 uppercase text-xs tracking-wider font-bold mb-4">Ejercicios de Esta Semana</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for training in weekly_summary %}
+                            <a href="{{ path('training_exercise_history', {'exerciseId': training.exercise.id}) }}" class="bg-slate-900 border border-slate-700 hover:border-primary/50 text-slate-300 hover:text-primary px-4 py-2 rounded-lg text-sm font-bold transition">
+                                {{ training.exercise.name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

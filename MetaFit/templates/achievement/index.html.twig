@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Logros - MetaFit AI{% endblock %}
+
+{% block body %}
+    <div class="bg-background-dark text-white">
+        <div class="max-w-7xl mx-auto pt-14 md:pt-16">
+
+            {# HEADER #}
+            <div class="mb-12">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Sistema de Logros</span>
+                </div>
+                <h1 class="text-6xl font-black italic uppercase tracking-tighter mb-2">
+                    Tus <span class="text-primary">Logros</span>
+                </h1>
+                <p class="text-gray-400 text-xl font-light">
+                    Desbloquea logros completando entrenamientos y alcanzando metas
+                </p>
+            </div>
+
+            {# ESTADÍSTICAS #}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total Desbloqueados</p>
+                    <p class="text-4xl font-black italic text-primary">{{ stats.unlocked }}<span class="text-slate-400 text-lg ml-2">/ {{ stats.total }}</span></p>
+                </div>
+                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Progreso</p>
+                    <div class="flex items-baseline gap-2">
+                        <p class="text-4xl font-black italic">{{ stats.percentage|number_format(0) }}%</p>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-primary h-full transition-all" style="width: {{ stats.percentage }}%"></div>
+                    </div>
+                </div>
+                <div class="bg-primary p-6 rounded-2xl">
+                    <p class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-2">XP Total Ganado</p>
+                    <p class="text-4xl font-black italic text-white">{{ stats.totalXp }}</p>
+                </div>
+                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Por Desbloquear</p>
+                    <p class="text-4xl font-black italic text-slate-400">{{ stats.locked }}</p>
+                </div>
+            </div>
+
+            {# LOGROS DESBLOQUEADOS #}
+            {% if unlockedAchievements|length > 0 %}
+                <div class="mb-12">
+                    <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-8">
+                        <span class="text-primary">✓</span> Logros Desbloqueados
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for userAchievement in unlockedAchievements %}
+                            {% set achievement = userAchievement.getAchievement() %}
+                            <a href="{{ path('achievement_show', {id: achievement.id}) }}" class="group bg-gradient-to-br from-primary/20 to-transparent border border-primary/50 rounded-2xl p-6 hover:border-primary hover:from-primary/30 transition-all">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-primary/30 rounded-xl flex items-center justify-center text-2xl group-hover:bg-primary/50 transition-all">
+                                        {% if achievement.getType() == 'workout' %}
+                                            💪
+                                        {% elseif achievement.getType() == 'milestone' %}
+                                            🏆
+                                        {% elseif achievement.getType() == 'streak' %}
+                                            🔥
+                                        {% elseif achievement.getType() == 'nutrition' %}
+                                            🥗
+                                        {% else %}
+                                            ⭐
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-primary font-black text-lg">+{{ achievement.getOtorgatedXp() }} XP</p>
+                                        <p class="text-slate-500 text-xs">{{ userAchievement.getDateObtained()|date('d/m/Y') }}</p>
+                                    </div>
+                                </div>
+                                <h3 class="text-xl font-black italic uppercase text-white mb-2 group-hover:text-primary transition-all">
+                                    {{ achievement.getName() }}
+                                </h3>
+                                <p class="text-slate-400 text-sm line-clamp-2">
+                                    {{ achievement.getDescription() }}
+                                </p>
+                                <div class="mt-4 pt-4 border-t border-primary/20 flex justify-between items-center text-[10px] font-black uppercase tracking-tighter text-slate-500">
+                                    <span>{{ achievement.getType()|upper }}</span>
+                                    <span class="text-primary">DESBLOQUEADO ✓</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# LOGROS POR DESBLOQUEAR #}
+            {% if lockedAchievements|length > 0 %}
+                <div>
+                    <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-8">
+                        <span class="text-slate-600">⚪</span> Logros por Desbloquear
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for achievement in lockedAchievements %}
+                            <a href="{{ path('achievement_show', {id: achievement.id}) }}" class="group bg-[#0d1117] border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-all opacity-60 hover:opacity-100">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-slate-800/50 rounded-xl flex items-center justify-center text-2xl group-hover:bg-slate-700/50 transition-all">
+                                        {% if achievement.getType() == 'workout' %}
+                                            💪
+                                        {% elseif achievement.getType() == 'milestone' %}
+                                            🏆
+                                        {% elseif achievement.getType() == 'streak' %}
+                                            🔥
+                                        {% elseif achievement.getType() == 'nutrition' %}
+                                            🥗
+                                        {% else %}
+                                            ⭐
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-slate-500 font-black text-lg">+{{ achievement.getOtorgatedXp() }} XP</p>
+                                        <p class="text-slate-600 text-xs">BLOQUEADO</p>
+                                    </div>
+                                </div>
+                                <h3 class="text-xl font-black italic uppercase text-slate-400 mb-2">
+                                    {{ achievement.getName() }}
+                                </h3>
+                                <p class="text-slate-500 text-sm line-clamp-2">
+                                    {{ achievement.getDescription() }}
+                                </p>
+                                <div class="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-[10px] font-black uppercase tracking-tighter text-slate-600">
+                                    <span>{{ achievement.getType()|upper }}</span>
+                                    <span>POR DESBLOQUEAR</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# SIN LOGROS #}
+            {% if unlockedAchievements|length == 0 and lockedAchievements|length == 0 %}
+                <div class="py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl">
+                    <p class="text-slate-500 text-xl italic mb-4">No hay logros disponibles aún</p>
+                    <a href="{{ path('app_library_index') }}" class="text-primary hover:underline font-bold">
+                        Ir a la Biblioteca de Ejercicios →
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

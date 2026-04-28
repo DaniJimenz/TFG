@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar {{ exercise.name }} - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white">
+    <div class="max-w-4xl mx-auto pt-14 md:pt-16">
+
+        {# HEADER #}
+        <div class="mb-12">
+            <a href="{{ path('admin_exercises_index') }}" class="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-6 transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Volver
+            </a>
+            <h1 class="text-4xl font-black italic uppercase tracking-tighter">
+                Editar: <span class="text-primary">{{ exercise.name }}</span>
+            </h1>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {# PREVISUALIZACIONES #}
+            <div>
+                <h2 class="text-xl font-bold mb-4 uppercase tracking-wider text-slate-400">Previsualización Actual</h2>
+                
+                {% if exercise.urlImage %}
+                    <div class="mb-8">
+                        <p class="text-xs text-slate-500 mb-2 uppercase font-bold">Imagen</p>
+                        <div class="aspect-video rounded-xl overflow-hidden border-2 border-slate-800">
+                            <img src="{{ exercise.urlImage }}" alt="{{ exercise.name }}" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if exercise.urlVideo %}
+                    <div>
+                        <p class="text-xs text-slate-500 mb-2 uppercase font-bold">Video</p>
+                        <div class="aspect-video rounded-xl overflow-hidden border-2 border-slate-800 bg-black flex items-center justify-center">
+                            {% if exercise.urlVideo|lower contains 'youtube.com' or exercise.urlVideo|lower contains 'youtu.be' %}
+                                {# Convertir URL de YouTube a embed #}
+                                {% set video_id = exercise.urlVideo|regex_replace('/^.*(?:youtu.be\\/|v=)([a-zA-Z0-9_-]{11}).*/','$1') %}
+                                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/{{ video_id }}" frameborder="0" allowfullscreen class="w-full h-full"></iframe>
+                            {% elseif exercise.urlVideo|lower contains 'pexels.com' %}
+                                <video controls class="w-full h-full object-cover">
+                                    <source src="{{ exercise.urlVideo }}" type="video/mp4">
+                                </video>
+                            {% else %}
+                                <video controls class="w-full h-full object-cover">
+                                    <source src="{{ exercise.urlVideo }}" type="video/mp4">
+                                </video>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# FORMULARIO #}
+            <div>
+                <h2 class="text-xl font-bold mb-6 uppercase tracking-wider text-slate-400">Editar Datos</h2>
+
+                {{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
+
+                    {# NOMBRE (deshabilitado) #}
+                    <div>
+                        {{ form_label(form.name, 'Nombre del Ejercicio', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-2'}}) }}
+                        {{ form_widget(form.name, {'attr': {'class': 'w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-400 cursor-not-allowed', 'disabled': true}}) }}
+                    </div>
+
+                    {# IMAGEN #}
+                    <div>
+                        {{ form_label(form.url_image, 'URL de Imagen', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-2'}}) }}
+                        {{ form_widget(form.url_image, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition', 'placeholder': 'https://images.pexels.com/...'}}) }}
+                        <p class="text-xs text-slate-500 mt-2">
+                            💡 Busca en: 
+                            <a href="https://www.pexels.com" target="_blank" class="text-primary hover:underline">Pexels</a> • 
+                            <a href="https://unsplash.com" target="_blank" class="text-primary hover:underline">Unsplash</a> • 
+                            <a href="https://pixabay.com" target="_blank" class="text-primary hover:underline">Pixabay</a>
+                        </p>
+                        {{ form_errors(form.url_image) }}
+                    </div>
+
+                    {# VIDEO #}
+                    <div>
+                        {{ form_label(form.url_video, 'URL de Video', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-2'}}) }}
+                        {{ form_widget(form.url_video, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition', 'placeholder': 'https://www.youtube.com/watch?v=... o https://videos.pexels.com/...'}}) }}
+                        <p class="text-xs text-slate-500 mt-2">
+                            💡 Busca en: 
+                            <a href="https://www.youtube.com" target="_blank" class="text-primary hover:underline">YouTube</a> • 
+                            <a href="https://pexels.com/videos" target="_blank" class="text-primary hover:underline">Pexels Videos</a>
+                        </p>
+                        {{ form_errors(form.url_video) }}
+                    </div>
+
+                    {# BOTONES #}
+                    <div class="flex gap-4 pt-6 border-t border-slate-800">
+                        <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase">
+                            Guardar Cambios
+                        </button>
+                        <a href="{{ path('admin_exercises_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase text-center">
+                            Cancelar
+                        </a>
+                    </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
