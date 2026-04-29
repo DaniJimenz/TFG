@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[UniqueEntity(fields: ['email'], message: 'Ya existe una cuenta con este Correo Electrónico')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -134,7 +134,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->continuity = 0;
         $this->level = 0;
         $this->created_at = new \DateTimeImmutable(); //Fecha de registro automática //
-        $this->rol = 'ROLE_USER'; // Rol por defecto //
+        $this->rol = 'ROLE_USER'; // Rol por defecto // 
     }
 
     public function getId(): ?int
