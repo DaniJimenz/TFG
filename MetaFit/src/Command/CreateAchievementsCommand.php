@@ -25,109 +25,109 @@ class CreateAchievementsCommand extends Command
         $achievements = [
             [
                 'name' => 'Primer Entrenamiento',
-                'description' => 'Completa tu primer entrenamiento en MetaFit AI',
+                'description' => 'Completa tu primer entrenamiento en MetaFit',
                 'type' => 'workout',
                 'xp' => 50,
-                'icon' => '💪',
+                'icon' => 'fitness_center',
                 'judgment' => 'first_workout',
                 'sort_order' => 1,
             ],
             [
-                'name' => 'Guerrero de 7 Días',
+                'name' => 'Consistencia 7 Días',
                 'description' => 'Entrena 7 días consecutivos sin faltar',
                 'type' => 'streak',
                 'xp' => 150,
-                'icon' => '🔥',
+                'icon' => 'local_fire_department',
                 'judgment' => 'streak_7_days',
                 'sort_order' => 2,
             ],
             [
-                'name' => 'Monstruo de 30 Días',
+                'name' => 'Hito de 30 Entrenamientos',
                 'description' => 'Completa 30 entrenamientos en un mes',
                 'type' => 'milestone',
                 'xp' => 300,
-                'icon' => '🏆',
+                'icon' => 'emoji_events',
                 'judgment' => 'milestone_30_workouts',
                 'sort_order' => 3,
             ],
             [
-                'name' => 'Nutricionista Amateur',
+                'name' => 'Nutrición Consistente',
                 'description' => 'Registra tus comidas durante una semana completa',
                 'type' => 'nutrition',
                 'xp' => 75,
-                'icon' => '🥗',
+                'icon' => 'restaurant',
                 'judgment' => 'nutrition_week',
                 'sort_order' => 4,
             ],
             [
-                'name' => 'Explorador de Ejercicios',
+                'name' => 'Especialista en Ejercicios',
                 'description' => 'Completa ejercicios de todas las categorías de músculos',
                 'type' => 'workout',
                 'xp' => 200,
-                'icon' => '🧭',
+                'icon' => 'explore',
                 'judgment' => 'all_muscle_groups',
                 'sort_order' => 5,
             ],
             [
-                'name' => 'Miltonario',
-                'description' => 'Acumula 1.000 puntos XP',
+                'name' => 'Maestro XP',
+                'description' => 'Acumula 1.000 puntos de experiencia',
                 'type' => 'milestone',
                 'xp' => 250,
-                'icon' => '🏅',
+                'icon' => 'military_tech',
                 'judgment' => 'xp_1000',
                 'sort_order' => 6,
             ],
             [
                 'name' => 'Nivel 5',
-                'description' => 'Alcanza el nivel 5 en la app',
+                'description' => 'Alcanza el nivel 5 en la plataforma',
                 'type' => 'milestone',
                 'xp' => 100,
-                'icon' => '📈',
+                'icon' => 'trending_up',
                 'judgment' => 'level_5',
                 'sort_order' => 7,
             ],
             [
-                'name' => 'Maestro de Pecho',
+                'name' => 'Experto en Pecho',
                 'description' => 'Completa 10 ejercicios de pecho diferentes',
                 'type' => 'workout',
                 'xp' => 120,
-                'icon' => '💯',
+                'icon' => 'favorite',
                 'judgment' => 'chest_expert',
                 'sort_order' => 8,
             ],
             [
-                'name' => 'Espaldas Fuertes',
+                'name' => 'Espalda Fortalecida',
                 'description' => 'Completa 10 ejercicios de espalda diferentes',
                 'type' => 'workout',
                 'xp' => 120,
-                'icon' => '🔙',
+                'icon' => 'back_hand',
                 'judgment' => 'back_expert',
                 'sort_order' => 9,
             ],
             [
-                'name' => 'Piernas de Acero',
+                'name' => 'Piernas Potentes',
                 'description' => 'Completa 10 ejercicios de piernas diferentes',
                 'type' => 'workout',
                 'xp' => 120,
-                'icon' => '🦵',
+                'icon' => 'directions_run',
                 'judgment' => 'legs_expert',
                 'sort_order' => 10,
             ],
             [
-                'name' => 'Núcleo Fortalecido',
+                'name' => 'Core Resistente',
                 'description' => 'Completa 5 ejercicios de core',
                 'type' => 'workout',
                 'xp' => 100,
-                'icon' => '🎯',
+                'icon' => 'center_focus_strong',
                 'judgment' => 'core_expert',
                 'sort_order' => 11,
             ],
             [
-                'name' => 'Sociólogo del Fitness',
-                'description' => 'Invita a un amigo a usar MetaFit AI',
+                'name' => 'Red de Atletas',
+                'description' => 'Invita a un amigo a usar MetaFit',
                 'type' => 'milestone',
                 'xp' => 50,
-                'icon' => '👥',
+                'icon' => 'group_add',
                 'judgment' => 'invite_friend',
                 'sort_order' => 12,
             ],
@@ -141,7 +141,7 @@ class CreateAchievementsCommand extends Command
             ]);
 
             if ($existing) {
-                $io->writeln("⏭️  {$data['name']} ya existe, omitiendo...");
+                $io->writeln("   {$data['name']} ya existe, omitiendo...");
                 continue;
             }
 
@@ -160,7 +160,7 @@ class CreateAchievementsCommand extends Command
 
         $this->entityManager->flush();
 
-        $io->success("✓ Se crearon {$count} logros nuevos exitosamente!");
+        $io->success("Se crearon {$count} logros nuevos exitosamente");
 
         return Command::SUCCESS;
     }

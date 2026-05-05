@@ -3,7 +3,7 @@
 {% block title %}Administrador de Ejercicios - MetaFit AI{% endblock %}
 
 {% block body %}
-<div class="bg-background-dark text-white">
+<div class="bg-primary text-text-main">
     <div class="max-w-7xl mx-auto pt-14 md:pt-16">
 
         {# HEADER #}
@@ -11,58 +11,58 @@
             <div class="flex items-center justify-between">
                 <div>
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="h-1 w-12 bg-primary"></div>
-                        <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Administración</span>
+                        <div class="h-1 w-12 bg-accent"></div>
+                        <span class="text-accent font-bold tracking-[0.3em] uppercase text-sm">Administración</span>
                     </div>
                     <h1 class="text-4xl font-black italic uppercase tracking-tighter">
-                        Editar <span class="text-primary">Ejercicios</span>
+                        Editar <span class="text-accent">Ejercicios</span>
                     </h1>
                 </div>
-                <a href="{{ path('app_library_index') }}" class="text-slate-400 hover:text-white transition-colors">
+                <a href="{{ path('app_library_index') }}" class="text-text-muted hover:text-text-main transition-colors">
                     <span class="material-symbols-outlined text-3xl">arrow_back</span>
                 </a>
             </div>
         </div>
 
         {# TABLA DE EJERCICIOS #}
-        <div class="overflow-x-auto rounded-2xl border border-slate-800">
+        <div class="overflow-x-auto rounded-2xl border border-card bg-card/50">
             <table class="w-full">
                 <thead>
-                    <tr class="bg-slate-900/50 border-b border-slate-800">
-                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase">Ejercicio</th>
-                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase">Grupo</th>
-                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase">Imagen</th>
-                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase">Video</th>
-                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase">Acciones</th>
+                    <tr class="bg-card border-b border-card/50">
+                        <th class="px-6 py-4 text-left text-sm font-bold text-text-muted uppercase">Ejercicio</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold text-text-muted uppercase">Grupo</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold text-text-muted uppercase">Imagen</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold text-text-muted uppercase">Video</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold text-text-muted uppercase">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for exercise in exercises %}
-                    <tr class="border-b border-slate-800/50 hover:bg-slate-900/30 transition-colors">
+                    <tr class="border-b border-card/30 hover:bg-card transition-colors">
                         <td class="px-6 py-4">
-                            <span class="font-bold text-white">{{ exercise.name }}</span>
+                            <span class="font-bold text-text-main">{{ exercise.name }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full">{{ exercise.muscularGroup }}</span>
+                            <span class="text-xs bg-accent/10 text-accent px-3 py-1 rounded-full font-bold">{{ exercise.muscularGroup }}</span>
                         </td>
                         <td class="px-6 py-4">
                             {% if exercise.urlImage %}
-                                <div class="w-12 h-12 rounded-lg overflow-hidden border border-slate-700">
+                                <div class="w-12 h-12 rounded-lg overflow-hidden border border-card bg-card/50">
                                     <img src="{{ exercise.urlImage }}" alt="{{ exercise.name }}" class="w-full h-full object-cover">
                                 </div>
                             {% else %}
-                                <span class="text-slate-500 text-xs">Sin imagen</span>
+                                <span class="text-text-muted text-xs">Sin imagen</span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
                             {% if exercise.urlVideo %}
-                                <span class="text-xs text-green-400">✓ Sí</span>
+                                <span class="text-xs text-green-400 font-bold">✓ Sí</span>
                             {% else %}
-                                <span class="text-xs text-red-400">✗ No</span>
+                                <span class="text-xs text-error font-bold">✗ No</span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ path('admin_exercises_quick_edit', {'id': exercise.id}) }}" class="inline-block bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all">
+                            <a href="{{ path('admin_exercises_quick_edit', {'id': exercise.id}) }}" class="inline-block bg-accent hover:bg-accent/90 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all">
                                 Editar
                             </a>
                         </td>
@@ -72,9 +72,9 @@
             </table>
         </div>
 
-        <div class="mt-8 p-6 bg-slate-900/50 border border-slate-800 rounded-xl">
-            <p class="text-slate-400 text-sm">
-                <strong>Total:</strong> {{ exercises|length }} ejercicios
+        <div class="mt-8 p-6 bg-card border border-card/50 rounded-xl">
+            <p class="text-text-muted text-sm">
+                <strong class="text-text-main">Total:</strong> {{ exercises|length }} ejercicios
             </p>
         </div>
 

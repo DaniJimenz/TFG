@@ -3,11 +3,11 @@
 {% block title %}{{ achievement.name }} - Logros{% endblock %}
 
 {% block body %}
-    <div class="bg-background-dark text-white">
+    <div class="bg-primary text-text-main">
         <div class="max-w-4xl mx-auto pt-14 md:pt-16">
 
             {# BACK BUTTON #}
-            <a href="{{ path('achievement_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
+            <a href="{{ path('achievement_index') }}" class="inline-flex items-center gap-2 text-text-muted hover:text-text-main mb-8 transition-all font-bold">
                 <span class="material-symbols-outlined text-xl">arrow_back</span>
                 Volver a Logros
             </a>
@@ -16,32 +16,25 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {# IMAGEN/ICON #}
                 <div class="md:col-span-1">
-                    <div class="bg-gradient-to-br {{ userAchievement ? 'from-primary/30 to-primary/10 border border-primary/50' : 'from-slate-800/50 to-slate-900/50 border border-slate-700' }} rounded-2xl p-12 flex flex-col items-center justify-center min-h-96">
-                        <div class="text-8xl mb-6">
-                            {% if achievement.getType() == 'workout' %}
-                                💪
-                            {% elseif achievement.getType() == 'milestone' %}
-                                🏆
-                            {% elseif achievement.getType() == 'streak' %}
-                                🔥
-                            {% elseif achievement.getType() == 'nutrition' %}
-                                🥗
-                            {% else %}
-                                ⭐
-                            {% endif %}
+                    <div class="bg-gradient-to-br {{ userAchievement ? 'from-accent/30 to-accent/10 border border-accent/50' : 'from-card/50 to-card border border-card' }} rounded-2xl p-12 flex flex-col items-center justify-center min-h-96">
+                        <div class="w-20 h-20 bg-accent/30 rounded-2xl flex items-center justify-center text-5xl mb-6">
+                            <span class="material-symbols-outlined text-accent">{{ achievement.getUrlIcon() }}</span>
                         </div>
                         <div class="text-center">
-                            <p class="text-4xl font-black italic text-primary mb-2">+{{ achievement.getOtorgatedXp() }}</p>
-                            <p class="text-slate-400 font-bold uppercase tracking-widest">PUNTOS XP</p>
+                            <p class="text-4xl font-black italic text-accent mb-2">+{{ achievement.getOtorgatedXp() }}</p>
+                            <p class="text-text-muted font-bold uppercase tracking-widest text-sm">Puntos XP</p>
                         </div>
                         {% if userAchievement %}
-                            <div class="mt-8 pt-8 border-t border-slate-700/50 text-center w-full">
-                                <p class="text-slate-400 text-sm mb-2">Desbloqueado el</p>
-                                <p class="text-2xl font-black italic">{{ userAchievement.getDateObtained()|date('d/m/Y') }}</p>
+                            <div class="mt-8 pt-8 border-t border-card w-full text-center">
+                                <p class="text-text-muted text-sm mb-2">Desbloqueado el</p>
+                                <p class="text-2xl font-black italic text-accent">{{ userAchievement.getDateObtained()|date('d/m/Y') }}</p>
                             </div>
                         {% else %}
-                            <div class="mt-8 pt-8 border-t border-slate-700/50 text-center w-full">
-                                <p class="text-slate-500 text-sm font-bold uppercase">🔒 BLOQUEADO</p>
+                            <div class="mt-8 pt-8 border-t border-card w-full text-center">
+                                <p class="text-text-muted text-sm font-bold uppercase">
+                                    <span class="material-symbols-outlined inline-block mr-1 align-middle text-lg">lock</span>
+                                    Bloqueado
+                                </p>
                             </div>
                         {% endif %}
                     </div>
@@ -51,30 +44,31 @@
                 <div class="md:col-span-2">
                     <div>
                         <div class="flex items-center gap-3 mb-4">
-                            <span class="inline-block bg-primary/30 border border-primary/50 rounded-lg px-3 py-1 text-primary text-xs font-black uppercase tracking-widest">
+                            <span class="inline-block bg-accent/30 border border-accent/50 rounded-lg px-3 py-1 text-accent text-xs font-black uppercase tracking-widest">
                                 {{ achievement.getType()|upper }}
                             </span>
                             {% if userAchievement %}
-                                <span class="inline-block bg-green-500/30 border border-green-500/50 rounded-lg px-3 py-1 text-green-400 text-xs font-black uppercase tracking-widest">
-                                    ✓ DESBLOQUEADO
+                                <span class="inline-block bg-accent/20 border border-accent/50 rounded-lg px-3 py-1 text-accent text-xs font-black uppercase tracking-widest">
+                                    <span class="material-symbols-outlined inline-block align-middle text-sm mr-1">check</span>
+                                    Desbloqueado
                                 </span>
                             {% endif %}
                         </div>
-                        <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-6">
+                        <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-6 text-text-main">
                             {{ achievement.getName() }}
                         </h1>
-                        <p class="text-xl text-slate-300 leading-relaxed mb-12">
+                        <p class="text-xl text-text-muted leading-relaxed mb-12">
                             {{ achievement.getDescription() }}
                         </p>
                     </div>
 
                     {# DESCRIPCIÓN Y REQUISITOS #}
                     <div class="space-y-6">
-                        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
-                            <h3 class="text-lg font-black italic uppercase mb-4">Criterios de Desbloqueo</h3>
-                            <p class="text-slate-400 leading-relaxed">
+                        <div class="bg-card border border-card rounded-2xl p-6">
+                            <h3 class="text-lg font-black italic uppercase mb-4 text-text-main">Criterios de Desbloqueo</h3>
+                            <p class="text-text-muted leading-relaxed">
                                 {% if achievement.getType() == 'workout' %}
-                                    Completa tu primer entrenamiento en la app. Comienza tu viaje fitness desbloqueando este logro.
+                                    Completa tu primer entrenamiento en la plataforma. Comienza tu viaje fitness desbloqueando este logro.
                                 {% elseif achievement.getType() == 'milestone' %}
                                     Alcanza un hito importante en tu entrenamiento. Continúa siendo consistente y lograrás grandes cosas.
                                 {% elseif achievement.getType() == 'streak' %}
@@ -82,34 +76,34 @@
                                 {% elseif achievement.getType() == 'nutrition' %}
                                     Registra tus comidas durante una semana completa. Una buena nutrición es fundamental.
                                 {% else %}
-                                    Completa este desafío para desbloquear el logro y ganar XP.
+                                    Completa este desafío para desbloquear el logro y ganar experiencia.
                                 {% endif %}
                             </p>
                         </div>
 
                         {# RECOMPENSA #}
-                        <div class="bg-gradient-to-br from-primary/20 to-transparent border border-primary/50 rounded-2xl p-6">
-                            <h3 class="text-lg font-black italic uppercase mb-4">Recompensa</h3>
+                        <div class="bg-gradient-to-br from-accent/20 to-transparent border border-accent/50 rounded-2xl p-6">
+                            <h3 class="text-lg font-black italic uppercase mb-4 text-text-main">Recompensa</h3>
                             <div class="flex items-center justify-between">
-                                <span class="text-slate-300">Puntos de Experiencia (XP)</span>
-                                <span class="text-3xl font-black italic text-primary">+{{ achievement.getOtorgatedXp() }}</span>
+                                <span class="text-text-muted">Experiencia (XP)</span>
+                                <span class="text-3xl font-black italic text-accent">+{{ achievement.getOtorgatedXp() }}</span>
                             </div>
                         </div>
 
                         {# ESTADO #}
-                        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
-                            <h3 class="text-lg font-black italic uppercase mb-4">Estado</h3>
+                        <div class="bg-card border border-card rounded-2xl p-6">
+                            <h3 class="text-lg font-black italic uppercase mb-4 text-text-main">Estado</h3>
                             {% if userAchievement %}
                                 <div class="flex items-center gap-3">
-                                    <div class="w-4 h-4 bg-green-500 rounded-full"></div>
-                                    <span class="text-slate-300">
-                                        Desbloqueado el <strong>{{ userAchievement.getDateObtained()|date('d/m/Y H:i') }}</strong>
+                                    <div class="w-4 h-4 bg-accent rounded-full"></div>
+                                    <span class="text-text-muted">
+                                        Desbloqueado el <strong class="text-accent">{{ userAchievement.getDateObtained()|date('d/m/Y H:i') }}</strong>
                                     </span>
                                 </div>
                             {% else %}
                                 <div class="flex items-center gap-3">
-                                    <div class="w-4 h-4 bg-slate-600 rounded-full"></div>
-                                    <span class="text-slate-400">Este logro aún no ha sido desbloqueado</span>
+                                    <div class="w-4 h-4 bg-text-muted/40 rounded-full"></div>
+                                    <span class="text-text-muted">Este logro aún no ha sido desbloqueado</span>
                                 </div>
                             {% endif %}
                         </div>
@@ -119,10 +113,10 @@
 
             {# BOTONES #}
             <div class="mt-12 flex gap-4">
-                <a href="{{ path('achievement_index') }}" class="flex-1 bg-[#0d1117] border border-slate-800 hover:bg-slate-900 hover:border-slate-700 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase tracking-widest text-center">
+                <a href="{{ path('achievement_index') }}" class="flex-1 bg-card border border-card hover:border-text-muted text-text-muted hover:text-text-main px-6 py-3 rounded-xl transition-all font-bold uppercase tracking-widest text-center">
                     Volver a Logros
                 </a>
-                <a href="{{ path('app_library_index') }}" class="flex-1 bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase tracking-widest text-center">
+                <a href="{{ path('app_library_index') }}" class="flex-1 bg-accent hover:bg-accent/90 text-primary px-6 py-3 rounded-xl transition-all font-bold uppercase tracking-widest text-center">
                     Ir a Entrenar
                 </a>
             </div>
