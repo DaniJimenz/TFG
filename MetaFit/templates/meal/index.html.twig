@@ -30,19 +30,19 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-6 md:mb-8">
             <div class="bg-[#0d1117] border border-slate-800 p-3 sm:p-4 md:p-5 rounded-lg md:rounded-2xl">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Calorías</p>
-                <p class="text-3xl font-black italic text-primary">0 <span class="text-sm">kcal</span></p>
+                <p class="text-3xl font-black italic text-primary">{{ todayMacros.calories|round(1) }} <span class="text-sm">kcal</span></p>
             </div>
-            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+            <div class="bg-[#0d1117] border border-slate-800 p-3 sm:p-4 md:p-5 rounded-lg md:rounded-2xl">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Proteínas</p>
-                <p class="text-3xl font-black italic text-accent-purple">0 <span class="text-sm">g</span></p>
+                <p class="text-3xl font-black italic text-accent-purple">{{ todayMacros.proteins|round(1) }} <span class="text-sm">g</span></p>
             </div>
-            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+            <div class="bg-[#0d1117] border border-slate-800 p-3 sm:p-4 md:p-5 rounded-lg md:rounded-2xl">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Carbohidratos</p>
-                <p class="text-3xl font-black italic">0 <span class="text-sm">g</span></p>
+                <p class="text-3xl font-black italic">{{ todayMacros.carbs|round(1) }} <span class="text-sm">g</span></p>
             </div>
-            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+            <div class="bg-[#0d1117] border border-slate-800 p-3 sm:p-4 md:p-5 rounded-lg md:rounded-2xl">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Grasas</p>
-                <p class="text-3xl font-black italic">0 <span class="text-sm">g</span></p>
+                <p class="text-3xl font-black italic">{{ todayMacros.fats|round(1) }} <span class="text-sm">g</span></p>
             </div>
         </div>
 

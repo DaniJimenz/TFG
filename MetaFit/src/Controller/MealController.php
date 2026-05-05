@@ -35,8 +35,42 @@ class MealController extends AbstractController
             ['register_date' => 'DESC']
         );
 
+        // Calcular macros de hoy
+        $today = new \DateTime();
+        $today->setTime(0, 0, 0);
+        $tomorrow = (new \DateTime())->setTime(23, 59, 59);
+
+        $todayMacros = [
+            'calories' => 0,
+            'proteins' => 0,
+            'carbs' => 0,
+            'fats' => 0
+        ];
+
+        // Agrupar comidas por día
+        $mealsByDay = [];
+        foreach ($meals as $meal) {
+            $mealDate = $meal->getRegisterDate();
+            $dateKey = $mealDate->format('Y-m-d');
+            
+            if (!isset($mealsByDay[$dateKey])) {
+                $mealsByDay[$dateKey] = [];
+            }
+            $mealsByDay[$dateKey][] = $meal;
+
+            // Sumar macros de hoy
+            if ($mealDate >= $today && $mealDate <= $tomorrow) {
+                $todayMacros['calories'] += $meal->getCaloriesTotal() ?? 0;
+                $todayMacros['proteins'] += $meal->getProteinesG() ?? 0;
+                $todayMacros['carbs'] += $meal->getCarbohidratesG() ?? 0;
+                $todayMacros['fats'] += $meal->getFatsG() ?? 0;
+            }
+        }
+
         return $this->render('meal/index.html.twig', [
             'meals' => $meals,
+            'mealsByDay' => $mealsByDay,
+            'todayMacros' => $todayMacros,
         ]);
     }
 

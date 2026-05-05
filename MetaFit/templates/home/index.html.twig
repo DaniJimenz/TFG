@@ -210,6 +210,172 @@
             </div>
             {% endif %}
 
+            {# CALENDARIO + ESTADÍSTICAS #}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {# CALENDARIO #}
+                <div class="lg:col-span-2">
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter mb-4">📅 Tu Calendario</h2>
+                    <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
+                        <div id="calendar" class="space-y-4">
+                            {# Generamos 30 días #}
+                            {% set currentDate = 'now'|date('Y-m-d') %}
+                            <div class="grid grid-cols-7 gap-2 mb-4">
+                                <div class="text-center font-bold text-slate-500 text-xs">L</div>
+                                <div class="text-center font-bold text-slate-500 text-xs">M</div>
+                                <div class="text-center font-bold text-slate-500 text-xs">X</div>
+                                <div class="text-center font-bold text-slate-500 text-xs">J</div>
+                                <div class="text-center font-bold text-slate-500 text-xs">V</div>
+                                <div class="text-center font-bold text-slate-500 text-xs">S</div>
+                                <div class="text-center font-bold text-slate-500 text-xs">D</div>
+                            </div>
+
+                            <div class="grid grid-cols-7 gap-2" id="calendar-grid">
+                                {% for i in range(0, 29) %}
+                                    {% set dayDate = 'now'|date_modify("-" ~ (29 - i) ~ " days")|date('Y-m-d') %}
+                                    {% set dayOfWeek = dayDate|date('w') %}
+                                    <button type="button" 
+                                        class="p-3 rounded-lg border transition-all text-sm font-bold cursor-pointer hover:border-primary hover:bg-primary/10"
+                                        data-date="{{ dayDate }}"
+                                        onclick="loadDayData('{{ dayDate }}')">
+                                        {{ dayDate|date('d') }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-4 text-center">Haz clic en un día para ver los detalles</p>
+                    </div>
+                </div>
+
+                {# TABLA DE ESTADÍSTICAS MENSUALES #}
+                <div>
+                    <h2 class="text-2xl font-black italic uppercase tracking-tighter mb-4">📊 Estadísticas</h2>
+                    <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-4 space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
+                            <span class="text-sm text-slate-400">Comidas registradas</span>
+                            <span class="text-xl font-black text-primary">{{ meals|length }}</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
+                            <span class="text-sm text-slate-400">Entrenamientos</span>
+                            <span class="text-xl font-black text-primary">{{ stats.totalTrainings }}</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
+                            <span class="text-sm text-slate-400">Total de calorías</span>
+                            <span class="text-xl font-black text-primary">{{ stats.totalCalories|default(0)|number_format(0) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
+                            <span class="text-sm text-slate-400">Proteínas (total)</span>
+                            <span class="text-xl font-black text-primary">{{ stats.totalProteins|default(0)|number_format(0) }}g</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
+                            <span class="text-sm text-slate-400">Peso promedio</span>
+                            <span class="text-xl font-black text-primary">{{ stats.avgWeight|default(user.actualWeight)|number_format(1) }}kg</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# MODAL PARA VER DETALLES DEL DÍA #}
+            <div id="dayModal" class="hidden fixed inset-0 bg-black/80 z-50 justify-center items-center p-4" style="display: none;" onclick="closeDayModal(event)">
+                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl max-w-2xl w-full max-h-96 overflow-y-auto" onclick="event.stopPropagation()">
+                    <div class="sticky top-0 bg-[#0d1117] border-b border-slate-800 p-4 flex justify-between items-center">
+                        <h3 class="text-xl font-black uppercase" id="modalDate">Detalles del día</h3>
+                        <button onclick="closeDayModal()" class="text-slate-400 hover:text-white">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        {# COMIDAS #}
+                        <div>
+                            <h4 class="text-lg font-bold text-primary mb-2">🍽️ Comidas</h4>
+                            <div id="mealsContainer" class="space-y-2">
+                                <p class="text-slate-400 text-sm">Cargando...</p>
+                            </div>
+                        </div>
+
+                        {# ENTRENAMIENTOS #}
+                        <div>
+                            <h4 class="text-lg font-bold text-primary mb-2">💪 Entrenamientos</h4>
+                            <div id="trainingsContainer" class="space-y-2">
+                                <p class="text-slate-400 text-sm">Cargando...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# SCRIPT PARA MANEJAR EL CALENDARIO #}
+            <script>
+                function loadDayData(date) {
+                    const modal = document.getElementById('dayModal');
+                    const modalDate = document.getElementById('modalDate');
+                    const mealsContainer = document.getElementById('mealsContainer');
+                    const trainingsContainer = document.getElementById('trainingsContainer');
+
+                    modalDate.textContent = 'Detalles de ' + new Date(date).toLocaleDateString('es-ES');
+                    mealsContainer.innerHTML = '<p class="text-slate-400 text-sm">Cargando comidas...</p>';
+                    trainingsContainer.innerHTML = '<p class="text-slate-400 text-sm">Cargando entrenamientos...</p>';
+                    modal.classList.remove('hidden');
+                    modal.style.display = 'flex';
+
+                    fetch('/api/calendar/day/' + date)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Mostrar comidas
+                                if (data.meals.length > 0) {
+                                    mealsContainer.innerHTML = data.meals.map(meal => `
+                                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <p class="font-bold text-white">${meal.name}</p>
+                                                    <p class="text-xs text-slate-400">${meal.type} • ${meal.date}</p>
+                                                </div>
+                                                <span class="text-primary font-bold">${meal.calories} kcal</span>
+                                            </div>
+                                            <div class="grid grid-cols-3 gap-2 text-xs">
+                                                <div><span class="text-slate-500">Proteínas:</span> <span class="text-green-400">${meal.proteins}g</span></div>
+                                                <div><span class="text-slate-500">Carbs:</span> <span class="text-blue-400">${meal.carbs}g</span></div>
+                                                <div><span class="text-slate-500">Grasas:</span> <span class="text-orange-400">${meal.fats}g</span></div>
+                                            </div>
+                                        </div>
+                                    `).join('');
+                                } else {
+                                    mealsContainer.innerHTML = '<p class="text-slate-400 text-sm italic">Sin comidas registradas</p>';
+                                }
+
+                                // Mostrar entrenamientos
+                                if (data.trainings.length > 0) {
+                                    trainingsContainer.innerHTML = data.trainings.map(training => `
+                                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <p class="font-bold text-white">${training.name}</p>
+                                                    <p class="text-xs text-slate-400">${training.exercises} ejercicios • ${training.duration}</p>
+                                                </div>
+                                                <span class="text-primary font-bold">✓</span>
+                                            </div>
+                                        </div>
+                                    `).join('');
+                                } else {
+                                    trainingsContainer.innerHTML = '<p class="text-slate-400 text-sm italic">Sin entrenamientos registrados</p>';
+                                }
+                            } else {
+                                mealsContainer.innerHTML = '<p class="text-red-400 text-sm">Error al cargar datos</p>';
+                            }
+                        })
+                        .catch(error => {
+                            mealsContainer.innerHTML = '<p class="text-red-400 text-sm">Error: ' + error + '</p>';
+                        });
+                }
+
+                function closeDayModal(event) {
+                    const modal = document.getElementById('dayModal');
+                    if (event && event.target !== modal) return;
+                    modal.classList.add('hidden');
+                    modal.style.display = 'none';
+                }
+            </script>
+
             {# RUTINA #}
             <div class="mb-8">
                 <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-8">Tu Rutina <span class="text-primary">Personalizada</span></h2>

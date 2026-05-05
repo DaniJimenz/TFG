@@ -29,5 +29,10 @@ services:
         arguments:
             $pexelsApiKey: '%env(PEXELS_API_KEY)%'
 
+    # Download Exercise Images Command
+    App\Command\DownloadExerciseImagesCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

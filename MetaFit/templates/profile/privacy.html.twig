@@ -3,92 +3,89 @@
 {% block title %}Privacidad - MetaFit AI{% endblock %}
 
 {% block body %}
-    <div class="bg-background-dark text-white">
-        <div class="max-w-3xl mx-auto pt-14 md:pt-16">
+    <div class="bg-background-dark text-white min-h-screen flex flex-col">
+        <div class="max-w-2xl mx-auto pt-8 md:pt-10 px-4 flex-1">
 
             <a href="{{ path('profile_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
                 <span class="material-symbols-outlined text-xl">arrow_back</span>
                 Volver al Perfil
             </a>
 
-            <div class="mb-12">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="h-1 w-12 bg-primary"></div>
-                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Seguridad</span>
+            <div class="mb-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="h-1 w-8 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.2em] uppercase text-xs">Seguridad</span>
                 </div>
-                <h1 class="text-5xl font-black italic uppercase tracking-tighter">
-                    Privacidad y Seguridad
+                <h1 class="text-4xl md:text-5xl font-black italic uppercase tracking-tighter">
+                    Privacidad
                 </h1>
             </div>
 
-            <form method="POST" class="space-y-8">
+            <form method="POST" class="space-y-4">
 
                 {# VISIBILIDAD DEL PERFIL #}
-                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
-                    <h3 class="text-2xl font-black uppercase mb-6">Visibilidad del Perfil</h3>
-                    <div class="space-y-4">
-                        <label class="flex items-start gap-4 p-4 bg-slate-900/50 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all">
-                            <input type="checkbox" name="profile_public" {{ preferences and preferences.isProfilePublic() ? 'checked' : '' }} class="w-5 h-5 mt-1">
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-lg font-black uppercase mb-3">Visibilidad</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-start gap-2 p-2">
+                            <input type="checkbox" name="profile_public" {{ preferences and preferences.isProfilePublic() ? 'checked' : '' }} class="w-4 h-4 mt-0.5">
                             <div>
-                                <p class="font-bold">Perfil Público</p>
-                                <p class="text-sm text-slate-400 mt-1">Otros usuarios pueden ver tu perfil y estadísticas. Si está desactivado, solo tú verás tu información.</p>
+                                <p class="font-bold text-sm">Perfil Público</p>
+                                <p class="text-xs text-slate-400">Otros usuarios pueden ver tu perfil y estadísticas</p>
                             </div>
                         </label>
 
-                        <label class="flex items-start gap-4 p-4 bg-slate-900/50 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all">
-                            <input type="checkbox" name="stats_visible" {{ preferences and preferences.isStatsVisible() ? 'checked' : '' }} class="w-5 h-5 mt-1">
+                        <label class="flex items-start gap-2 p-2">
+                            <input type="checkbox" name="stats_visible" {{ preferences and preferences.isStatsVisible() ? 'checked' : '' }} class="w-4 h-4 mt-0.5">
                             <div>
-                                <p class="font-bold">Mostrar Estadísticas</p>
-                                <p class="text-sm text-slate-400 mt-1">Permite que otros vean tus estadísticas de entrenamiento (entrenamientos, peso levantado, etc.)</p>
+                                <p class="font-bold text-sm">Mostrar Estadísticas</p>
+                                <p class="text-xs text-slate-400">Permite que otros vean tus entrenamientos</p>
                             </div>
                         </label>
 
-                        <label class="flex items-start gap-4 p-4 bg-slate-900/50 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all">
-                            <input type="checkbox" name="achievements_visible" {{ preferences and preferences.isAchievementsVisible() ? 'checked' : '' }} class="w-5 h-5 mt-1">
+                        <label class="flex items-start gap-2 p-2">
+                            <input type="checkbox" name="achievements_visible" {{ preferences and preferences.isAchievementsVisible() ? 'checked' : '' }} class="w-4 h-4 mt-0.5">
                             <div>
-                                <p class="font-bold">Mostrar Logros</p>
-                                <p class="text-sm text-slate-400 mt-1">Permite que otros usuarios vean tus logros y medallas desbloqueadas</p>
+                                <p class="font-bold text-sm">Mostrar Logros</p>
+                                <p class="text-xs text-slate-400">Otros pueden ver tus logros desbloqueados</p>
                             </div>
                         </label>
 
-                        <label class="flex items-start gap-4 p-4 bg-slate-900/50 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all">
-                            <input type="checkbox" name="routines_visible" {{ preferences and preferences.isRoutinesVisible() ? 'checked' : '' }} class="w-5 h-5 mt-1">
+                        <label class="flex items-start gap-2 p-2">
+                            <input type="checkbox" name="routines_visible" {{ preferences and preferences.isRoutinesVisible() ? 'checked' : '' }} class="w-4 h-4 mt-0.5">
                             <div>
-                                <p class="font-bold">Compartir Rutinas</p>
-                                <p class="text-sm text-slate-400 mt-1">Otros usuarios pueden ver y copiar tus rutinas de entrenamiento</p>
+                                <p class="font-bold text-sm">Compartir Rutinas</p>
+                                <p class="text-xs text-slate-400">Otros pueden ver y copiar tus rutinas</p>
                             </div>
                         </label>
                     </div>
                 </div>
 
                 {# INFORMACIÓN DE SEGURIDAD #}
-                <div class="bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/30 rounded-2xl p-8">
-                    <div class="flex gap-4">
-                        <span class="material-symbols-outlined text-3xl text-orange-400 flex-shrink-0">info</span>
+                <div class="bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/30 rounded-xl p-4">
+                    <div class="flex gap-3">
+                        <span class="material-symbols-outlined text-xl text-orange-400 flex-shrink-0">info</span>
                         <div>
-                            <h3 class="font-black uppercase text-lg mb-2">Información de Seguridad</h3>
-                            <ul class="text-sm text-slate-300 space-y-2">
-                                <li>• Tu información personal nunca será vendida a terceros</li>
-                                <li>• Puedes cambiar tus configuraciones de privacidad en cualquier momento</li>
-                                <li>• Tus datos están encriptados y protegidos</li>
-                                <li>• Puedes descargar una copia de tus datos en cualquier momento</li>
-                                <li>• Para borrar tu cuenta y datos, contacta con soporte</li>
+                            <h3 class="font-black uppercase text-sm mb-1">Seguridad</h3>
+                            <ul class="text-xs text-slate-300 space-y-1">
+                                <li>• Tu información nunca será vendida a terceros</li>
+                                <li>• Puedes cambiar configuraciones en cualquier momento</li>
+                                <li>• Tus datos están encriptados</li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
                 {# BOTONES #}
-                <div class="flex gap-4 pt-6">
-                    <a href="{{ path('profile_index') }}" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase text-center">
+                <div class="flex gap-3 pt-4">
+                    <a href="{{ path('profile_index') }}" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded transition-all font-bold uppercase text-sm text-center">
                         Cancelar
                     </a>
-                    <button type="submit" class="flex-1 bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase">
-                        ✓ Guardar Cambios
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded transition-all font-bold uppercase text-sm">
+                        ✓ Guardar
                     </button>
                 </div>
 
             </form>
         </div>
     </div>
-{% endblock %}

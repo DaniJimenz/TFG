@@ -3,157 +3,139 @@
 {% block title %}Preferencias - MetaFit AI{% endblock %}
 
 {% block body %}
-    <div class="bg-background-dark text-white">
-        <div class="max-w-3xl mx-auto pt-14 md:pt-16">
+    <div class="bg-background-dark text-white min-h-screen flex flex-col">
+        <div class="max-w-3xl mx-auto pt-8 md:pt-10 px-4 flex-1">
 
             <a href="{{ path('profile_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
                 <span class="material-symbols-outlined text-xl">arrow_back</span>
                 Volver al Perfil
             </a>
 
-            <div class="mb-12">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="h-1 w-12 bg-primary"></div>
-                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Configuración</span>
+            <div class="mb-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="h-1 w-8 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.2em] uppercase text-xs">Configuración</span>
                 </div>
-                <h1 class="text-5xl font-black italic uppercase tracking-tighter">
-                    Preferencias de Entrenamiento
+                <h1 class="text-4xl md:text-5xl font-black italic uppercase tracking-tighter">
+                    Preferencias
                 </h1>
             </div>
 
-            <form method="POST" class="space-y-8">
+            <form method="POST" class="space-y-4">
 
                 {# HORA PREFERIDA #}
-                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
-                    <h3 class="text-2xl font-black uppercase mb-6">Hora Preferida para Entrenar</h3>
-                    <div class="grid md:grid-cols-3 gap-4">
-                        <label class="flex items-center gap-3 p-4 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getPreferredTime() == 'morning' ? 'border-primary bg-primary/10' : '' }}">
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-lg font-black uppercase mb-3">Hora</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="flex flex-col items-center gap-1 p-2 border border-slate-700 rounded cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getPreferredTime() == 'morning' ? 'border-primary bg-primary/10' : '' }}">
                             <input type="radio" name="preferred_time" value="morning" {{ preferences and preferences.getPreferredTime() == 'morning' ? 'checked' : '' }} required>
-                            <div>
-                                <span class="material-symbols-outlined">wb_sunny</span>
-                                <p class="font-bold">Mañana</p>
-                                <p class="text-xs text-slate-400">6:00 - 12:00</p>
-                            </div>
+                            <span class="material-symbols-outlined text-sm">wb_sunny</span>
+                            <p class="font-bold text-xs">Mañana</p>
                         </label>
-                        <label class="flex items-center gap-3 p-4 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getPreferredTime() == 'afternoon' ? 'border-primary bg-primary/10' : '' }}">
+                        <label class="flex flex-col items-center gap-1 p-2 border border-slate-700 rounded cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getPreferredTime() == 'afternoon' ? 'border-primary bg-primary/10' : '' }}">
                             <input type="radio" name="preferred_time" value="afternoon" {{ preferences and preferences.getPreferredTime() == 'afternoon' ? 'checked' : '' }} required>
-                            <div>
-                                <span class="material-symbols-outlined">brightness_7</span>
-                                <p class="font-bold">Tarde</p>
-                                <p class="text-xs text-slate-400">12:00 - 18:00</p>
-                            </div>
+                            <span class="material-symbols-outlined text-sm">brightness_7</span>
+                            <p class="font-bold text-xs">Tarde</p>
                         </label>
-                        <label class="flex items-center gap-3 p-4 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getPreferredTime() == 'evening' ? 'border-primary bg-primary/10' : '' }}">
+                        <label class="flex flex-col items-center gap-1 p-2 border border-slate-700 rounded cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getPreferredTime() == 'evening' ? 'border-primary bg-primary/10' : '' }}">
                             <input type="radio" name="preferred_time" value="evening" {{ preferences and preferences.getPreferredTime() == 'evening' ? 'checked' : '' }} required>
-                            <div>
-                                <span class="material-symbols-outlined">dark_mode</span>
-                                <p class="font-bold">Noche</p>
-                                <p class="text-xs text-slate-400">18:00 - 23:00</p>
-                            </div>
+                            <span class="material-symbols-outlined text-sm">dark_mode</span>
+                            <p class="font-bold text-xs">Noche</p>
                         </label>
                     </div>
                 </div>
 
                 {# INTENSIDAD #}
-                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
-                    <h3 class="text-2xl font-black uppercase mb-6">Intensidad de Entrenamiento</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 p-4 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getTrainingIntensity() == 'light' ? 'border-primary bg-primary/10' : '' }}">
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-lg font-black uppercase mb-3">Intensidad</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 p-2 border border-slate-700 rounded cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getTrainingIntensity() == 'light' ? 'border-primary bg-primary/10' : '' }}">
                             <input type="radio" name="training_intensity" value="light" {{ preferences and preferences.getTrainingIntensity() == 'light' ? 'checked' : '' }} required>
                             <div>
-                                <p class="font-bold">Ligera</p>
-                                <p class="text-sm text-slate-400">50-60% esfuerzo máximo</p>
+                                <p class="font-bold text-sm">Ligera</p>
+                                <p class="text-xs text-slate-400">50-60%</p>
                             </div>
                         </label>
-                        <label class="flex items-center gap-3 p-4 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getTrainingIntensity() == 'moderate' ? 'border-primary bg-primary/10' : '' }}">
+                        <label class="flex items-center gap-2 p-2 border border-slate-700 rounded cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getTrainingIntensity() == 'moderate' ? 'border-primary bg-primary/10' : '' }}">
                             <input type="radio" name="training_intensity" value="moderate" {{ preferences and preferences.getTrainingIntensity() == 'moderate' ? 'checked' : '' }} required>
                             <div>
-                                <p class="font-bold">Moderada</p>
-                                <p class="text-sm text-slate-400">60-75% esfuerzo máximo</p>
+                                <p class="font-bold text-sm">Moderada</p>
+                                <p class="text-xs text-slate-400">60-75%</p>
                             </div>
                         </label>
-                        <label class="flex items-center gap-3 p-4 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getTrainingIntensity() == 'intense' ? 'border-primary bg-primary/10' : '' }}">
+                        <label class="flex items-center gap-2 p-2 border border-slate-700 rounded cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getTrainingIntensity() == 'intense' ? 'border-primary bg-primary/10' : '' }}">
                             <input type="radio" name="training_intensity" value="intense" {{ preferences and preferences.getTrainingIntensity() == 'intense' ? 'checked' : '' }} required>
                             <div>
-                                <p class="font-bold">Intensa</p>
-                                <p class="text-sm text-slate-400">75-90% esfuerzo máximo</p>
+                                <p class="font-bold text-sm">Intensa</p>
+                                <p class="text-xs text-slate-400">75-90%</p>
                             </div>
                         </label>
                     </div>
                 </div>
 
                 {# DURACIONES Y DESCANSOS #}
-                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
-                    <h3 class="text-2xl font-black uppercase mb-6">Duraciones y Descansos</h3>
-                    <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-lg font-black uppercase mb-3">Duraciones</h3>
+                    <div class="grid md:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Duración típica del entrenamiento (minutos)</label>
-                            <input type="number" name="training_duration_minutes" value="{{ preferences.getTrainingDurationMinutes() ?? 60 }}" min="15" max="240" step="5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                            <label class="block text-xs font-bold uppercase tracking-widest text-slate-300 mb-1">Duración (min)</label>
+                            <input type="number" name="training_duration_minutes" value="{{ preferences.getTrainingDurationMinutes() ?? 60 }}" min="15" max="240" step="5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-primary transition-all">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Descanso entre series (segundos)</label>
-                            <input type="number" name="rest_between_sets_seconds" value="{{ preferences.getRestBetweenSetsSeconds() ?? 60 }}" min="15" max="300" step="5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                            <label class="block text-xs font-bold uppercase tracking-widest text-slate-300 mb-1">Descanso (seg)</label>
+                            <input type="number" name="rest_between_sets_seconds" value="{{ preferences.getRestBetweenSetsSeconds() ?? 60 }}" min="15" max="300" step="5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-sm text-white focus:outline-none focus:border-primary transition-all">
                         </div>
                     </div>
                 </div>
 
                 {# NOTIFICACIONES #}
-                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
-                    <h3 class="text-2xl font-black uppercase mb-6">Notificaciones</h3>
-                    <div class="space-y-4">
-                        <label class="flex items-center gap-3 p-4 bg-slate-900/50 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all">
-                            <input type="checkbox" name="notifications_enabled" {{ preferences and preferences.isNotificationsEnabled() ? 'checked' : '' }} class="w-5 h-5">
-                            <div>
-                                <p class="font-bold">Habilitar notificaciones</p>
-                                <p class="text-sm text-slate-400">Recibe alertas de logros y eventos</p>
-                            </div>
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-lg font-black uppercase mb-3">Notificaciones</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 p-2">
+                            <input type="checkbox" name="notifications_enabled" {{ preferences and preferences.isNotificationsEnabled() ? 'checked' : '' }} class="w-4 h-4">
+                            <span class="text-sm font-bold">Notificaciones activadas</span>
                         </label>
                         
-                        <label class="flex items-center gap-3 p-4 bg-slate-900/50 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all">
-                            <input type="checkbox" name="reminder_before_training" {{ preferences and preferences.isReminderBeforeTraining() ? 'checked' : '' }} class="w-5 h-5">
-                            <div>
-                                <p class="font-bold">Recordatorio de entrenamiento</p>
-                                <p class="text-sm text-slate-400">Alerta antes de tu hora programada</p>
-                            </div>
+                        <label class="flex items-center gap-2 p-2">
+                            <input type="checkbox" name="reminder_before_training" {{ preferences and preferences.isReminderBeforeTraining() ? 'checked' : '' }} class="w-4 h-4">
+                            <span class="text-sm font-bold">Recordatorio antes de entrenar</span>
                         </label>
 
-                        <div class="ml-8">
-                            <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Recordar (minutos antes)</label>
-                            <input type="number" name="reminder_minutes_before" value="{{ preferences.getReminderMinutesBefore() ?? 30 }}" min="5" max="120" step="5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                        <div class="ml-6 flex items-center gap-2">
+                            <label class="text-xs font-bold text-slate-300">Minutos:</label>
+                            <input type="number" name="reminder_minutes_before" value="{{ preferences.getReminderMinutesBefore() ?? 30 }}" min="5" max="120" step="5" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-primary transition-all">
                         </div>
 
-                        <label class="flex items-center gap-3 p-4 bg-slate-900/50 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all">
-                            <input type="checkbox" name="sound_enabled" {{ preferences and preferences.isSoundEnabled() ? 'checked' : '' }} class="w-5 h-5">
-                            <div>
-                                <p class="font-bold">Sonido en notificaciones</p>
-                                <p class="text-sm text-slate-400">Reproducir sonido al recibir alerta</p>
-                            </div>
+                        <label class="flex items-center gap-2 p-2">
+                            <input type="checkbox" name="sound_enabled" {{ preferences and preferences.isSoundEnabled() ? 'checked' : '' }} class="w-4 h-4">
+                            <span class="text-sm font-bold">Sonido en notificaciones</span>
                         </label>
                     </div>
                 </div>
 
                 {# UNIDADES DE MEDIDA #}
-                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
-                    <h3 class="text-2xl font-black uppercase mb-6">Unidades de Medida</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <label class="flex items-center gap-3 p-4 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getMeasurementUnit() == 'kg' ? 'border-primary bg-primary/10' : '' }}">
+                <div class="bg-[#0d1117] border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-lg font-black uppercase mb-3">Unidades</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-2 border border-slate-700 rounded cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getMeasurementUnit() == 'kg' ? 'border-primary bg-primary/10' : '' }}">
                             <input type="radio" name="measurement_unit" value="kg" {{ preferences and preferences.getMeasurementUnit() == 'kg' ? 'checked' : '' }} required>
-                            <p class="font-bold">Kilogramos (kg)</p>
+                            <p class="font-bold text-sm">Kg</p>
                         </label>
-                        <label class="flex items-center gap-3 p-4 border border-slate-700 rounded-lg cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getMeasurementUnit() == 'lbs' ? 'border-primary bg-primary/10' : '' }}">
+                        <label class="flex items-center gap-2 p-2 border border-slate-700 rounded cursor-pointer hover:border-primary transition-all {{ preferences and preferences.getMeasurementUnit() == 'lbs' ? 'border-primary bg-primary/10' : '' }}">
                             <input type="radio" name="measurement_unit" value="lbs" {{ preferences and preferences.getMeasurementUnit() == 'lbs' ? 'checked' : '' }} required>
-                            <p class="font-bold">Libras (lbs)</p>
+                            <p class="font-bold text-sm">Lbs</p>
                         </label>
                     </div>
                 </div>
 
                 {# BOTONES #}
-                <div class="flex gap-4 pt-6">
-                    <a href="{{ path('profile_index') }}" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase text-center">
+                <div class="flex gap-3 pt-4">
+                    <a href="{{ path('profile_index') }}" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded transition-all font-bold uppercase text-sm text-center">
                         Cancelar
                     </a>
-                    <button type="submit" class="flex-1 bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase">
-                        ✓ Guardar Preferencias
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded transition-all font-bold uppercase text-sm">
+                        ✓ Guardar
                     </button>
                 </div>
 

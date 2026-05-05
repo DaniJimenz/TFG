@@ -4,7 +4,7 @@
 
 {% block body %}
 <div class="bg-background-dark text-white">
-    <div class="max-w-2xl mx-auto pt-14 md:pt-16">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-14 md:pt-16">
 
         {# HEADER #}
         <div class="mb-6 md:mb-8">
@@ -16,23 +16,19 @@
                 Registrar <span class="text-primary">Nutrición</span>
             </h1>
             <p class="text-gray-400 text-lg font-light">
-                Agrega los detalles de tu comida manualmente
+                Agrega los detalles de tu comida de dos formas
             </p>
         </div>
 
-        {# TABS: Manual / Foto #}
-        <div class="flex gap-2 mb-8 border-b border-slate-800">
-            <button class="px-6 py-3 border-b-2 border-primary text-primary font-bold uppercase text-sm tracking-widest">
-                Manual
-            </button>
-            <button class="px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-300 font-bold uppercase text-sm tracking-widest transition-all">
-                <span class="material-symbols-outlined inline mr-1 text-lg">camera_alt</span>
-                Foto IA
-            </button>
-        </div>
-
+        {# GRID: Manual / Foto lado a lado #}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-8">
+            
         {# FORMULARIO MANUAL #}
-        <form method="POST" class="space-y-4 sm:space-y-5 md:space-y-6 bg-[#0d1117] border border-slate-800 p-4 sm:p-5 md:p-6 rounded-lg md:rounded-2xl">
+        <form method="POST" id="form-manual" class="space-y-3 md:space-y-4 bg-[#0d1117] border border-slate-800 p-3 sm:p-4 md:p-5 rounded-lg md:rounded-xl">
+            <h3 class="text-xl font-bold uppercase tracking-tighter text-primary mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined">edit</span>
+                Registro Manual
+            </h3>
             <input type="hidden" name="_token" value="{{ csrf_token('meal_new') }}">
 
             {# Tipo de Comida #}
@@ -43,69 +39,473 @@
                 <select name="food_type" id="food_type" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold uppercase focus:border-primary focus:outline-none transition-all" required>
                     <option value="">Selecciona...</option>
                     <option value="desayuno">Desayuno</option>
+                    <option value="snack">Snack</option>
                     <option value="comida">Comida</option>
                     <option value="merienda">Merienda</option>
                     <option value="cena">Cena</option>
                 </select>
             </div>
 
-            {# Calorías #}
-            <div>
-                <label for="calories_total" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
-                    Calorías (kcal)
-                </label>
-                <input type="number" name="calories_total" id="calories_total" step="0.1" min="0" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+            {# Grid 3 columnas: Calorías, Proteínas, Carbos, Grasas - OCULTOS INICIALMENTE #}
+            <div id="macros-section" class="space-y-3 md:space-y-0" style="display: none;">
+                <div class="mb-3">
+                    <label for="calories_total" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Calorías (kcal)
+                    </label>
+                    <input type="number" name="calories_total" id="calories_total" step="0.1" min="0" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" readonly>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                    <div>
+                        <label for="proteines_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                            Proteínas (g)
+                        </label>
+                        <input type="number" name="proteines_g" id="proteines_g" step="0.1" min="0" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" readonly>
+                    </div>
+                    <div>
+                        <label for="carbohidrats_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                            Carbohidratos (g)
+                        </label>
+                        <input type="number" name="carbohidrats_g" id="carbohidrats_g" step="0.1" min="0" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" readonly>
+                    </div>
+                    <div>
+                        <label for="fats_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                            Grasas (g)
+                        </label>
+                        <input type="number" name="fats_g" id="fats_g" step="0.1" min="0" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" readonly>
+                    </div>
+                </div>
             </div>
 
-            {# Grid 3 columnas: Proteínas, Carbos, Grasas #}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                    <label for="proteines_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
-                        Proteínas (g)
-                    </label>
-                    <input type="number" name="proteines_g" id="proteines_g" step="0.1" min="0" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+            {# Agregar Alimentos #}
+            <div class="border-t border-slate-700 pt-4">
+                <h4 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">add_circle</span>
+                    Alimentos
+                </h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+                    <input type="text" id="food_name" placeholder="Ej: Pollo, Arroz..." class="bg-[#1a1d26] border border-slate-700 rounded-lg px-3 py-2 text-white font-bold text-sm focus:border-primary focus:outline-none transition-all" autocomplete="off">
+                    <input type="number" id="food_weight" placeholder="Peso (g)" step="1" min="0" class="bg-[#1a1d26] border border-slate-700 rounded-lg px-3 py-2 text-white font-bold text-sm focus:border-primary focus:outline-none transition-all">
+                    <button type="button" onclick="addFood()" class="bg-primary/20 border border-primary hover:bg-primary/30 text-primary px-3 py-2 rounded-lg transition-all font-bold text-xs uppercase flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-base">add</span>
+                        Agregar
+                    </button>
                 </div>
-                <div>
-                    <label for="carbohidrats_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
-                        Carbohidratos (g)
-                    </label>
-                    <input type="number" name="carbohidrats_g" id="carbohidrats_g" step="0.1" min="0" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+
+                <div id="foods-list" class="space-y-2 mb-3 max-h-40 overflow-y-auto">
                 </div>
-                <div>
-                    <label for="fats_g" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
-                        Grasas (g)
-                    </label>
-                    <input type="number" name="fats_g" id="fats_g" step="0.1" min="0" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+
+                <button type="button" id="btn-calculate" onclick="calculateMacros()" class="hidden w-full bg-green-600/20 border border-green-600 hover:bg-green-600/30 text-green-400 px-4 py-2 rounded-lg transition-all font-bold text-sm uppercase mb-3">
+                    <span class="material-symbols-outlined inline mr-2 text-base">calculate</span>
+                    Calcular Macros
+                </button>
+
+                <div id="loading-ai" class="hidden bg-slate-900/50 border border-slate-700 rounded-lg p-2 text-center">
+                    <div class="inline-block">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    </div>
+                    <p class="text-xs text-slate-300 mt-1">Calculando macros con IA...</p>
+                </div>
+
+                <div id="error-ai" class="hidden bg-red-900/20 border border-red-700/50 rounded-lg p-2">
+                    <p id="error-ai-text" class="text-red-400 text-xs"></p>
                 </div>
             </div>
 
             {# Notas #}
             <div>
-                <label for="notes" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                <label for="notes" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-2">
                     Notas (Opcional)
                 </label>
-                <textarea name="notes" id="notes" rows="4" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all resize-none"></textarea>
+                <textarea name="notes" id="notes" rows="3" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-2 text-white font-bold focus:border-primary focus:outline-none transition-all resize-none text-sm"></textarea>
             </div>
 
             {# Botones #}
-            <div class="flex gap-4">
-                <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">save</span>
-                    Guardar Comida
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase flex items-center justify-center gap-2" onclick="return validateForm()">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    Guardar
                 </button>
-                <a href="{{ path('meal_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">close</span>
+                <a href="{{ path('meal_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">close</span>
                     Cancelar
                 </a>
             </div>
 
         </form>
 
+        {# FORMULARIO FOTO IA #}
+        <div id="form-photo" class="space-y-3 md:space-y-4 bg-[#0d1117] border border-slate-800 p-3 sm:p-4 md:p-5 rounded-lg md:rounded-xl">
+            <h3 class="text-xl font-bold uppercase tracking-tighter text-primary mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined">camera_alt</span>
+                Análisis por Foto IA
+            </h3>
+            <div>
+                <label for="food_type_photo" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Tipo de Comida
+                </label>
+                <select id="food_type_photo" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold uppercase focus:border-primary focus:outline-none transition-all" required>
+                    <option value="">Selecciona...</option>
+                    <option value="desayuno">Desayuno</option>
+                    <option value="snack">Snack</option>
+                    <option value="comida">Comida</option>
+                    <option value="merienda">Merienda</option>
+                    <option value="cena">Cena</option>
+                </select>
+            </div>
+            <div>
+                <label for="photo_input" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Sube una foto de tu comida
+                </label>
+                <input type="file" id="photo_input" accept="image/jpeg,image/png,image/webp" class="hidden" required>
+                <label for="photo_input" class="block w-full bg-[#1a1d26] border-2 border-dashed border-slate-700 rounded-lg px-4 py-8 text-center cursor-pointer hover:border-primary hover:bg-slate-900/30 transition-all">
+                    <div class="text-slate-400">
+                        <span class="material-symbols-outlined text-4xl mb-2 block">image</span>
+                        <p class="font-bold text-white mb-1 text-sm">Haz clic o arrastra</p>
+                        <p class="text-xs">JPG, PNG o WebP • Máx. 10MB</p>
+                    </div>
+                </label>
+                <div id="photo-preview" class="mt-3 hidden">
+                    <img id="preview-img" src="" alt="Preview" class="w-full h-40 object-cover rounded-lg">
+                </div>
+            </div>
+
+            <div>
+                <label for="notes_photo" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-2">
+                    Notas (Opcional)
+                </label>
+                <textarea id="notes_photo" rows="3" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-2 text-white font-bold focus:border-primary focus:outline-none transition-all resize-none text-sm"></textarea>
+            </div>
+
+            <div id="analysis-result" class="hidden bg-slate-900 border border-slate-700 rounded-lg p-3 space-y-2">
+                <h3 class="font-bold text-primary uppercase text-sm">Análisis de IA</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase">Calorías</p>
+                        <p id="result-calories" class="text-lg font-bold text-primary">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase">Proteínas</p>
+                        <p id="result-proteines" class="text-lg font-bold text-primary">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase">Carbohidratos</p>
+                        <p id="result-carbs" class="text-xl font-bold text-primary">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase">Grasas</p>
+                        <p id="result-fats" class="text-lg font-bold text-primary">-</p>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase">Detectados</p>
+                    <p id="result-items" class="text-xs text-slate-300">-</p>
+                </div>
+            </div>
+
+            <div id="loading" class="hidden bg-slate-900 border border-slate-700 rounded-lg p-3 text-center">
+                <div class="inline-block">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+                <p class="mt-2 text-sm text-slate-300">Analizando imagen...</p>
+            </div>
+
+            <div id="error-message" class="hidden bg-red-900/20 border border-red-700/50 rounded-lg p-3">
+                <p id="error-text" class="text-red-400 text-xs"></p>
+            </div>
+
+            {# Botones #}
+            <div class="flex gap-3 pt-2">
+                <button type="button" id="btn-upload-photo" class="flex-1 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase flex items-center justify-center gap-2" disabled>
+                    <span class="material-symbols-outlined text-base">image</span>
+                    Analizar
+                </button>
+                <button type="button" id="btn-save-photo" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase items-center justify-center gap-2" style="display: none;">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    Guardar
+                </button>
+                <a href="{{ path('meal_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">close</span>
+                    Cancelar
+                </a>
+            </div>
+        </div>
+
+        </div>
+
     </div>
 </div>
 
 {# Script para pre-calcular calorías (4 cal/g proteína, 4 cal/g carbos, 9 cal/g grasas) #}
 <script>
+    // Formulario Manual - Alimentos con IA
+    let foodsList = [];
+
+    function validateForm() {
+        const foodType = document.getElementById('food_type').value;
+        const calories = parseFloat(document.getElementById('calories_total').value);
+
+        if (!foodType) {
+            alert('Selecciona un tipo de comida');
+            return false;
+        }
+
+        if (!calories || calories <= 0) {
+            alert('Agrega al menos un alimento para calcular las calorías');
+            return false;
+        }
+
+        return true;
+    }
+
+    async function addFood() {
+        const foodName = document.getElementById('food_name').value.trim();
+        const foodWeight = parseFloat(document.getElementById('food_weight').value);
+
+        if (!foodName || !foodWeight || foodWeight <= 0) {
+            alert('Ingresa nombre del alimento y peso válido');
+            return false;
+        }
+
+        const loading = document.getElementById('loading-ai');
+        const errorDiv = document.getElementById('error-ai');
+        const errorText = document.getElementById('error-ai-text');
+
+        loading.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
+
+        try {
+            console.log('Enviando solicitud para:', foodName, foodWeight);
+            const response = await fetch('/api/food-macros', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    food_name: foodName,
+                    weight_g: foodWeight
+                })
+            });
+
+            console.log('Respuesta recibida:', response.status);
+            const data = await response.json();
+            console.log('Datos:', data);
+            loading.classList.add('hidden');
+
+            if (response.ok && data.success) {
+                foodsList.push({
+                    name: foodName,
+                    weight: foodWeight,
+                    calories: data.macros.calories,
+                    proteins: data.macros.proteins,
+                    carbs: data.macros.carbs,
+                    fats: data.macros.fats
+                });
+
+                document.getElementById('food_name').value = '';
+                document.getElementById('food_weight').value = '';
+
+                renderFoodsList();
+                showCalculateButton();
+                console.log('Alimento agregado correctamente');
+            } else {
+                console.error('Error en la respuesta:', data);
+                errorText.textContent = data.error || 'Error al obtener información del alimento';
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            loading.classList.add('hidden');
+            console.error('Error en addFood:', error);
+            errorText.textContent = 'Error: ' + error.message;
+            errorDiv.classList.remove('hidden');
+        }
+        
+        return false;
+    }
+
+    function showCalculateButton() {
+        if (foodsList.length > 0) {
+            document.getElementById('btn-calculate').classList.remove('hidden');
+        }
+    }
+
+    function calculateMacros() {
+        const totals = foodsList.reduce((acc, food) => {
+            return {
+                calories: acc.calories + food.calories,
+                proteins: acc.proteins + food.proteins,
+                carbs: acc.carbs + food.carbs,
+                fats: acc.fats + food.fats
+            };
+        }, { calories: 0, proteins: 0, carbs: 0, fats: 0 });
+
+        document.getElementById('calories_total').value = Math.round(totals.calories * 10) / 10;
+        document.getElementById('proteines_g').value = Math.round(totals.proteins * 10) / 10;
+        document.getElementById('carbohidrats_g').value = Math.round(totals.carbs * 10) / 10;
+        document.getElementById('fats_g').value = Math.round(totals.fats * 10) / 10;
+
+        // Mostrar la sección de macros
+        document.getElementById('macros-section').style.display = 'grid';
+        document.getElementById('btn-calculate').classList.add('hidden');
+    }
+
+    function removeFood(index) {
+        foodsList.splice(index, 1);
+        renderFoodsList();
+        
+        if (foodsList.length === 0) {
+            document.getElementById('btn-calculate').classList.add('hidden');
+            document.getElementById('macros-section').style.display = 'none';
+        }
+    }
+
+    function renderFoodsList() {
+        const list = document.getElementById('foods-list');
+        list.innerHTML = foodsList.map((food, index) => `
+            <div class="bg-slate-900/50 border border-slate-700 rounded-lg p-2 flex justify-between items-center">
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-white">${food.name}</p>
+                    <p class="text-xs text-slate-400">${food.weight}g • ${Math.round(food.calories)} kcal</p>
+                </div>
+                <button type="button" onclick="removeFood(${index})" class="text-red-400 hover:text-red-300 p-1">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+            </div>
+        `).join('');
+    }
+
+    // Permitir Enter para agregar alimento
+    document.getElementById('food_weight').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addFood();
+        }
+    });
+
+    // Foto IA
+    const photoInput = document.getElementById('photo_input');
+    const photoPreview = document.getElementById('photo-preview');
+    const previewImg = document.getElementById('preview-img');
+    const btnUpload = document.getElementById('btn-upload-photo');
+    const btnSave = document.getElementById('btn-save-photo');
+    const loading = document.getElementById('loading');
+    const analysisResult = document.getElementById('analysis-result');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+
+    // Permitir arrastrar y soltar
+    const photoLabel = document.querySelector('label[for="photo_input"]');
+    photoLabel.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        photoLabel.classList.add('border-primary', 'bg-slate-900/30');
+    });
+    photoLabel.addEventListener('dragleave', () => {
+        photoLabel.classList.remove('border-primary', 'bg-slate-900/30');
+    });
+    photoLabel.addEventListener('drop', (e) => {
+        e.preventDefault();
+        photoLabel.classList.remove('border-primary', 'bg-slate-900/30');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            photoInput.files = files;
+            handlePhotoSelect();
+        }
+    });
+
+    photoInput.addEventListener('change', handlePhotoSelect);
+
+    function handlePhotoSelect() {
+        const file = photoInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                photoPreview.classList.remove('hidden');
+                btnUpload.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    btnUpload.addEventListener('click', uploadPhoto);
+
+    btnSave.addEventListener('click', saveMeal);
+
+    async function saveMeal() {
+        const mealId = btnSave.dataset.mealId;
+        if (mealId) {
+            // La comida ya fue guardada por el servidor
+            window.location.href = '{{ path("meal_index") }}';
+        }
+    }
+
+    async function uploadPhoto() {
+        const file = photoInput.files[0];
+        const foodType = document.getElementById('food_type_photo').value;
+
+        if (!file || !foodType) {
+            errorText.textContent = 'Selecciona una foto y un tipo de comida';
+            errorMessage.classList.remove('hidden');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        loading.classList.remove('hidden');
+        analysisResult.classList.add('hidden');
+        errorMessage.classList.add('hidden');
+        btnUpload.disabled = true;
+
+        try {
+            const response = await fetch('/meals/photo', {
+                method: 'POST',
+                body: formData
+            });
+
+            const contentType = response.headers.get('content-type');
+            let data;
+            
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                console.error('Server returned non-JSON response:', text.substring(0, 500));
+                throw new Error('Servidor devolvió HTML en lugar de JSON');
+            }
+
+            loading.classList.add('hidden');
+
+            if (response.ok && data.success) {
+                // Mostrar resultados
+                document.getElementById('result-calories').textContent = Math.round(data.meal.calories_total) + ' kcal';
+                document.getElementById('result-proteines').textContent = Math.round(data.meal.proteines_g * 10) / 10 + 'g';
+                document.getElementById('result-carbs').textContent = Math.round(data.meal.carbohidrats_g * 10) / 10 + 'g';
+                document.getElementById('result-fats').textContent = Math.round(data.meal.fats_g * 10) / 10 + 'g';
+                document.getElementById('result-items').textContent = data.detected_items?.join(', ') || 'Alimentos detectados';
+
+                analysisResult.classList.remove('hidden');
+                btnSave.style.display = 'flex';
+
+                // Guardar los datos para enviar después
+                btnSave.dataset.mealId = data.meal.id;
+            } else {
+                errorText.textContent = data.error || 'Error al analizar la foto: ' + (response.status === 500 ? 'Error del servidor' : response.statusText);
+                errorMessage.classList.remove('hidden');
+                btnUpload.disabled = false;
+            }
+        } catch (error) {
+            loading.classList.add('hidden');
+            errorText.textContent = 'Error: ' + error.message;
+            errorMessage.classList.remove('hidden');
+            btnUpload.disabled = false;
+            console.error('Upload error:', error);
+        }
+    }
+
+    // Cálculo de calorías manual
     document.getElementById('proteines_g').addEventListener('input', calculateCalories);
     document.getElementById('carbohidrats_g').addEventListener('input', calculateCalories);
     document.getElementById('fats_g').addEventListener('input', calculateCalories);
