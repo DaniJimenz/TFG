@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar {{ user.name }} - Admin{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white min-h-screen py-12 px-4">
+    <div class="max-w-2xl mx-auto">
+
+        {# HEADER #}
+        <div class="mb-8">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="h-1 w-12 bg-primary"></div>
+                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Editar Usuario</span>
+            </div>
+            <h1 class="text-4xl font-black uppercase tracking-tighter">
+                {{ user.name }} <span class="text-primary">{{ user.lastname }}</span>
+            </h1>
+        </div>
+
+        {# FORMULARIO #}
+        <form method="POST" class="bg-[#0d1117] border border-slate-800 rounded-lg p-8 space-y-6">
+
+            {# Email #}
+            <div>
+                <label for="email" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Email
+                </label>
+                <input type="email" name="email" id="email" value="{{ user.email }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+            </div>
+
+            {# Nombre y Apellido #}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="name" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Nombre
+                    </label>
+                    <input type="text" name="name" id="name" value="{{ user.name }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+                </div>
+                <div>
+                    <label for="lastname" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Apellido
+                    </label>
+                    <input type="text" name="lastname" id="lastname" value="{{ user.lastname }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+                </div>
+            </div>
+
+            {# Información Personal #}
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label for="age" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Edad
+                    </label>
+                    <input type="number" name="age" id="age" value="{{ user.age ?? '' }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                </div>
+                <div>
+                    <label for="height" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Altura (cm)
+                    </label>
+                    <input type="number" name="height" id="height" step="0.01" value="{{ user.height ?? '' }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                </div>
+                <div>
+                    <label for="actual_weight" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Peso Actual (kg)
+                    </label>
+                    <input type="number" name="actual_weight" id="actual_weight" step="0.1" value="{{ user.actualWeight ?? '' }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                </div>
+                <div>
+                    <label for="gender" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Género
+                    </label>
+                    <select name="gender" id="gender" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                        <option value="">Selecciona...</option>
+                        <option value="M" {% if user.gender == 'M' %}selected{% endif %}>Masculino</option>
+                        <option value="F" {% if user.gender == 'F' %}selected{% endif %}>Femenino</option>
+                    </select>
+                </div>
+            </div>
+
+            {# Nivel de Actividad #}
+            <div>
+                <label for="activity_level" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Nivel de Actividad
+                </label>
+                <select name="activity_level" id="activity_level" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                    <option value="">Selecciona...</option>
+                    <option value="sedentario" {% if user.activityLevel == 'sedentario' %}selected{% endif %}>Sedentario</option>
+                    <option value="ligero" {% if user.activityLevel == 'ligero' %}selected{% endif %}>Ligero</option>
+                    <option value="moderado" {% if user.activityLevel == 'moderado' %}selected{% endif %}>Moderado</option>
+                    <option value="activo" {% if user.activityLevel == 'activo' %}selected{% endif %}>Activo</option>
+                    <option value="muy_activo" {% if user.activityLevel == 'muy_activo' %}selected{% endif %}>Muy Activo</option>
+                </select>
+            </div>
+
+            {# XP y Nivel #}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-800 pt-6">
+                <div>
+                    <label for="points_xp" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Puntos XP
+                    </label>
+                    <input type="number" name="points_xp" id="points_xp" value="{{ user.pointsXp }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+                </div>
+                <div>
+                    <label for="level" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                        Nivel
+                    </label>
+                    <input type="number" name="level" id="level" value="{{ user.level }}" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+                </div>
+            </div>
+
+            {# Rol #}
+            <div class="border-t border-slate-800 pt-6">
+                <label for="rol" class="block text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Rol
+                </label>
+                <select name="rol" id="rol" class="w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all" required>
+                    <option value="ROLE_USER" {% if user.rol == 'ROLE_USER' %}selected{% endif %}>Usuario Regular</option>
+                    <option value="ROLE_ADMIN" {% if user.rol == 'ROLE_ADMIN' %}selected{% endif %}>Administrador</option>
+                </select>
+            </div>
+
+            {# Botones #}
+            <div class="flex gap-4 border-t border-slate-800 pt-6">
+                <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">save</span>
+                    Guardar Cambios
+                </button>
+                <a href="{{ path('admin_users_show', {id: user.id}) }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">close</span>
+                    Cancelar
+                </a>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

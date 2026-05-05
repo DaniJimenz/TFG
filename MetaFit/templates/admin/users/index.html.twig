@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestión de Usuarios - Admin{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white min-h-screen py-12 px-4">
+    <div class="max-w-7xl mx-auto">
+
+        {# HEADER #}
+        <div class="mb-8">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="h-1 w-12 bg-primary"></div>
+                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Panel Admin</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <h1 class="text-4xl font-black uppercase tracking-tighter">
+                    Usuarios <span class="text-primary">Registrados</span>
+                </h1>
+                <a href="{{ path('admin_users_export_csv') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-all font-bold uppercase text-sm flex items-center gap-2">
+                    <span class="material-symbols-outlined">download</span>
+                    Exportar CSV
+                </a>
+            </div>
+        </div>
+
+        {# SEARCH Y FILTROS #}
+        <div class="mb-8 flex gap-4 items-end">
+            <form method="GET" class="flex gap-4 w-full">
+                <input 
+                    type="text" 
+                    name="search" 
+                    value="{{ search }}"
+                    placeholder="Buscar por email o nombre..."
+                    class="flex-1 bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold placeholder-slate-500 focus:border-primary focus:outline-none transition-all"
+                >
+                <select name="sort" class="bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                    <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Fecha Registro</option>
+                    <option value="name" {% if sort == 'name' %}selected{% endif %}>Nombre</option>
+                    <option value="points_xp" {% if sort == 'points_xp' %}selected{% endif %}>XP</option>
+                </select>
+                <select name="direction" class="bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                    <option value="DESC" {% if direction == 'DESC' %}selected{% endif %}>Descendente</option>
+                    <option value="ASC" {% if direction == 'ASC' %}selected{% endif %}>Ascendente</option>
+                </select>
+                <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all font-bold uppercase text-sm">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+            </form>
+        </div>
+
+        {# TABLA DE USUARIOS #}
+        <div class="bg-[#0d1117] border border-slate-800 rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-900 border-b border-slate-800">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Email</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Nombre</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">XP / Nivel</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Entrenamientos</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Rol</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Estado</th>
+                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition-all">
+                            <td class="px-6 py-4 text-sm">{{ user.email }}</td>
+                            <td class="px-6 py-4 text-sm font-bold">{{ user.name }} {{ user.lastname }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="text-primary font-bold">{{ user.pointsXp }} XP</span> / Lvl {{ user.level }}
+                            </td>
+                            <td class="px-6 py-4 text-sm">{{ user.trainings|length }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                {% if user.rol == 'ROLE_ADMIN' %}
+                                    <span class="bg-red-900/30 text-red-400 px-3 py-1 rounded-full text-xs font-bold uppercase">Admin</span>
+                                {% else %}
+                                    <span class="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-bold uppercase">Usuario</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                {% if user.deletedAt %}
+                                    <span class="text-red-500 font-bold">❌ Inactivo</span>
+                                {% else %}
+                                    <span class="text-green-500 font-bold">✓ Activo</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <div class="flex gap-2">
+                                    <a href="{{ path('admin_users_show', {id: user.id}) }}" class="text-primary hover:text-primary/80 font-bold transition-all">
+                                        <span class="material-symbols-outlined text-lg">visibility</span>
+                                    </a>
+                                    <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="text-blue-400 hover:text-blue-300 font-bold transition-all">
+                                        <span class="material-symbols-outlined text-lg">edit</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# PAGINACIÓN #}
+        {% if pagination.total_pages > 1 %}
+        <div class="mt-8 flex items-center justify-center gap-2">
+            {% if pagination.current_page > 1 %}
+                <a href="?page=1&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all">«</a>
+                <a href="?page={{ pagination.current_page - 1 }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all">‹</a>
+            {% endif %}
+
+            {% for page in 1..pagination.total_pages %}
+                {% if page >= pagination.current_page - 2 and page <= pagination.current_page + 2 %}
+                    <a href="?page={{ page }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 rounded-lg font-bold transition-all {% if page == pagination.current_page %}bg-primary text-white{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+                        {{ page }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+
+            {% if pagination.current_page < pagination.total_pages %}
+                <a href="?page={{ pagination.current_page + 1 }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all">›</a>
+                <a href="?page={{ pagination.total_pages }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all">»</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {# INFO #}
+        <div class="mt-8 text-center text-slate-400">
+            <p class="text-sm">Mostrando {{ users|length }} de {{ pagination.total }} usuarios</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

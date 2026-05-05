@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Estadísticas - Admin{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white min-h-screen py-12 px-4">
+    <div class="max-w-7xl mx-auto">
+
+        {# HEADER #}
+        <div class="mb-8">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="h-1 w-12 bg-primary"></div>
+                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Panel Admin</span>
+            </div>
+            <h1 class="text-4xl font-black uppercase tracking-tighter">
+                Estadísticas <span class="text-primary">Generales</span>
+            </h1>
+        </div>
+
+        {# TARJETAS PRINCIPALES #}
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            {# Usuarios #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="material-symbols-outlined text-4xl text-primary">people</span>
+                    <span class="text-2xl font-bold text-green-500">+{{ stats.users.new_last_week }}</span>
+                </div>
+                <p class="text-3xl font-black mb-2">{{ stats.users.total }}</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Usuarios Totales</p>
+                <p class="text-xs text-slate-500 mt-2">{{ stats.users.active }} activos | {{ stats.users.admin }} admins</p>
+            </div>
+
+            {# Entrenamientos #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="material-symbols-outlined text-4xl text-blue-500">fitness_center</span>
+                    <span class="text-2xl font-bold text-blue-500">{{ stats.trainings.completion_rate }}%</span>
+                </div>
+                <p class="text-3xl font-black mb-2">{{ stats.trainings.total }}</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Entrenamientos</p>
+                <p class="text-xs text-slate-500 mt-2">{{ stats.trainings.completed }} completados | {{ stats.trainings.this_week }} esta semana</p>
+            </div>
+
+            {# Comidas #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="material-symbols-outlined text-4xl text-orange-500">restaurant</span>
+                    <span class="text-2xl font-bold text-orange-500">{{ stats.meals.this_week }}</span>
+                </div>
+                <p class="text-3xl font-black mb-2">{{ stats.meals.total }}</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Comidas Registradas</p>
+                <p class="text-xs text-slate-500 mt-2">Esta semana</p>
+            </div>
+
+            {# Rutinas #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="material-symbols-outlined text-4xl text-purple-500">schedule</span>
+                    <span class="text-2xl font-bold text-purple-500">{{ stats.routines.active }}</span>
+                </div>
+                <p class="text-3xl font-black mb-2">{{ stats.routines.total }}</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Rutinas</p>
+                <p class="text-xs text-slate-500 mt-2">Activas</p>
+            </div>
+        </div>
+
+        {# GRÁFICOS #}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {# Entrenamientos por Día #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <h3 class="text-lg font-bold uppercase tracking-tighter mb-6 border-b border-slate-800 pb-4">
+                    Entrenamientos - Últimos <span class="text-primary">7 Días</span>
+                </h3>
+                <div id="trainingChart" style="height: 300px;"></div>
+            </div>
+
+            {# Usuarios más Activos #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <h3 class="text-lg font-bold uppercase tracking-tighter mb-6 border-b border-slate-800 pb-4">
+                    Usuarios Más <span class="text-primary">Activos</span>
+                </h3>
+                <div class="space-y-3">
+                    {% for name, data in activeUsers %}
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-bold">{{ name }}</p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary" style="width: {{ (data.count / activeUsers|first.count) * 100 }}%"></div>
+                                </div>
+                                <p class="text-xs font-bold text-primary min-w-12">{{ data.count }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Top Ejercicios #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6 lg:col-span-2">
+                <h3 class="text-lg font-bold uppercase tracking-tighter mb-6 border-b border-slate-800 pb-4">
+                    Top 10 Ejercicios Más <span class="text-primary">Realizados</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for exercise, count in topExercises %}
+                        <div class="flex items-center justify-between bg-slate-900/50 p-4 rounded-lg">
+                            <p class="text-sm font-bold">{{ exercise }}</p>
+                            <span class="bg-primary text-white px-3 py-1 rounded-full text-xs font-bold">{{ count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# LINKS RÁPIDOS #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <a href="{{ path('admin_users_index') }}" class="bg-[#0d1117] border border-slate-800 hover:border-primary rounded-lg p-6 transition-all group">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="material-symbols-outlined text-3xl text-primary group-hover:scale-110 transition-all">manage_accounts</span>
+                    <span class="material-symbols-outlined text-slate-600">arrow_forward</span>
+                </div>
+                <h4 class="font-bold uppercase text-sm mb-2">Gestión de Usuarios</h4>
+                <p class="text-xs text-slate-400">Ver y editar cuentas de usuarios, asignar roles</p>
+            </a>
+
+            <a href="{{ path('admin_exercises_index') }}" class="bg-[#0d1117] border border-slate-800 hover:border-primary rounded-lg p-6 transition-all group">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="material-symbols-outlined text-3xl text-primary group-hover:scale-110 transition-all">fitness_center</span>
+                    <span class="material-symbols-outlined text-slate-600">arrow_forward</span>
+                </div>
+                <h4 class="font-bold uppercase text-sm mb-2">Gestión de Ejercicios</h4>
+                <p class="text-xs text-slate-400">Crear, editar y eliminar ejercicios</p>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    // Gráfico de entrenamientos por día
+    const ctx = document.getElementById('trainingChart').getContext('2d');
+    const labels = Object.keys({{ trainingsByDay|json_encode|raw }});
+    const data = Object.values({{ trainingsByDay|json_encode|raw }});
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Entrenamientos',
+                data: data,
+                borderColor: '#00ff88',
+                backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointBackgroundColor: '#00ff88',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#999' }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#999' }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

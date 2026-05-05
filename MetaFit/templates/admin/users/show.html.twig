@@ -1,0 +1,174 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ user.name }} {{ user.lastname }} - Admin{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white min-h-screen py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+
+        {# HEADER #}
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="h-1 w-12 bg-primary"></div>
+                        <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Detalle Usuario</span>
+                    </div>
+                    <h1 class="text-4xl font-black uppercase tracking-tighter">
+                        {{ user.name }} <span class="text-primary">{{ user.lastname }}</span>
+                    </h1>
+                </div>
+                <a href="{{ path('admin_users_index') }}" class="text-slate-400 hover:text-white transition-all">
+                    <span class="material-symbols-outlined text-4xl">arrow_back</span>
+                </a>
+            </div>
+        </div>
+
+        {# INFORMACIÓN GENERAL #}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {# ESTADO #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Estado</h3>
+                {% if user.deletedAt %}
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-red-500 text-3xl">❌</span>
+                        <div>
+                            <p class="font-bold text-red-500">Inactivo</p>
+                            <p class="text-xs text-slate-400">Desde {{ user.deletedAt|date('d/m/Y') }}</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ path('admin_users_toggle_status', {id: user.id}) }}" class="mt-4">
+                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ user.id) }}">
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold uppercase text-sm transition-all">
+                            Reactivar
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-green-500 text-3xl">✓</span>
+                        <div>
+                            <p class="font-bold text-green-500">Activo</p>
+                            <p class="text-xs text-slate-400">Desde {{ user.createdAt|date('d/m/Y') }}</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ path('admin_users_toggle_status', {id: user.id}) }}" class="mt-4">
+                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ user.id) }}">
+                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold uppercase text-sm transition-all">
+                            Desactivar
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+
+            {# ROL #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Rol</h3>
+                <div class="mb-4">
+                    {% if user.rol == 'ROLE_ADMIN' %}
+                        <span class="bg-red-900/30 text-red-400 px-4 py-2 rounded-lg text-sm font-bold uppercase">Admin</span>
+                    {% else %}
+                        <span class="bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-sm font-bold uppercase">Usuario</span>
+                    {% endif %}
+                </div>
+                <form method="POST" action="{{ path('admin_users_change_role', {id: user.id}) }}" class="mt-4">
+                    <select name="role" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold text-sm mb-2">
+                        <option value="ROLE_USER" {% if user.rol == 'ROLE_USER' %}selected{% endif %}>Usuario</option>
+                        <option value="ROLE_ADMIN" {% if user.rol == 'ROLE_ADMIN' %}selected{% endif %}>Admin</option>
+                    </select>
+                    <input type="hidden" name="_token" value="{{ csrf_token('role' ~ user.id) }}">
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-bold uppercase text-sm transition-all">
+                        Cambiar Rol
+                    </button>
+                </form>
+            </div>
+
+            {# XP Y NIVEL #}
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">XP y Nivel</h3>
+                <div class="mb-4">
+                    <p class="text-3xl font-black text-primary">{{ user.pointsXp }}</p>
+                    <p class="text-xs text-slate-400">Puntos XP</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-black">{{ user.level }}</p>
+                    <p class="text-xs text-slate-400">Nivel</p>
+                </div>
+            </div>
+        </div>
+
+        {# INFORMACIÓN PERSONAL #}
+        <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6 mb-8">
+            <h3 class="text-lg font-black uppercase tracking-tighter mb-6 border-b border-slate-800 pb-4">
+                Información <span class="text-primary">Personal</span>
+            </h3>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Email</p>
+                    <p class="font-bold text-white">{{ user.email }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Edad</p>
+                    <p class="font-bold text-white">{{ user.age ?? 'No especificado' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Altura (cm)</p>
+                    <p class="font-bold text-white">{{ user.height ?? 'No especificado' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Peso Actual (kg)</p>
+                    <p class="font-bold text-white">{{ user.actualWeight ?? 'No especificado' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Género</p>
+                    <p class="font-bold text-white">
+                        {% if user.gender == 'M' %}Masculino
+                        {% elseif user.gender == 'F' %}Femenino
+                        {% else %}No especificado{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Nivel de Actividad</p>
+                    <p class="font-bold text-white">{{ user.activityLevel ?? 'No especificado' }}</p>
+                </div>
+            </div>
+        </div>
+
+        {# ESTADÍSTICAS #}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-4 text-center">
+                <p class="text-2xl font-black text-primary">{{ user.trainings|length }}</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Entrenamientos</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-4 text-center">
+                <p class="text-2xl font-black text-primary">{{ user.meals|length }}</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Comidas</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-4 text-center">
+                <p class="text-2xl font-black text-primary">{{ user.routines|length }}</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Rutinas</p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-4 text-center">
+                <p class="text-2xl font-black text-primary">{{ user.achievement|length }}</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Logros</p>
+            </div>
+        </div>
+
+        {# ACCIONES #}
+        <div class="flex gap-4">
+            <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">edit</span>
+                Editar Usuario
+            </a>
+            <form method="POST" action="{{ path('admin_users_delete', {id: user.id}) }}" class="flex-1" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este usuario?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                <button type="submit" class="w-full border border-red-600 hover:bg-red-600/20 text-red-400 hover:text-red-300 px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">delete</span>
+                    Eliminar
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
