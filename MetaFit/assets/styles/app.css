@@ -1,3 +1,130 @@
+:root {
+  /* Colores */
+  --bg-primary: #121212; /* Fondo principal */
+  --bg-card: #1e1e1e; /* Define Secciones */
+  --accent: #ccff00; /* Acción Principal*/
+  --text-main: #ffffff; /* Texto principal */
+  --text-muted: #a0a0a0; /* Texto secundario */
+  --error: #ff4d4d; /* Mensaje de error */
+
+  /* Tipografía: 'Inter' para máxima legibilidad de datos y números bajo fatiga.
+     Estética: Estilo 'Condensed Bold' en títulos para transmitir fuerza y disciplina.
+     UX: Contraste alto (Lima/Negro) para facilitar la lectura en entornos con mucha luz o en movimiento.
+  */
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    background-color: skyblue;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-main);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+/* Tarjetas */
+.card, .workout-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 20px;
+  border-left: 4px solid var(--accent);
+  transition: transform 0.2s ease;
+}
+
+.card:hover, .workout-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Botones */
+.btn, .btn-primary {
+  background-color: var(--accent);
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.btn:hover, .btn-primary:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.btn-secondary {
+  background-color: var(--bg-card);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+}
+
+.btn-secondary:hover {
+  background-color: var(--accent);
+  color: #000;
+}
+
+/* Formularios */
+input, textarea, select {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--text-muted);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: var(--font-main);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.1);
+}
+
+/* Mensajes de error */
+.error, .alert-danger {
+  color: var(--error);
+  background-color: rgba(255, 77, 77, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid var(--error);
+}
+
+/* Texto secundario */
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* Enlace de acento */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #ffffff;
 }
