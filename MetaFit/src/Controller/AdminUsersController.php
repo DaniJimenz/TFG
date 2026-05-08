@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Route('/admin/users', name: 'admin_users_')]
 #[IsGranted('ROLE_ADMIN')]
@@ -73,10 +75,29 @@ class AdminUsersController extends AbstractController
      * Editar usuario
      */
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(User $user, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(User $user, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
+
+            $constraints = new Assert\Collection([
+                'email' => new Assert\Required([new Assert\NotBlank(), new Assert\Email()]),
+                'name' => new Assert\Optional([new Assert\Type('string')]),
+                'lastname' => new Assert\Optional([new Assert\Type('string')]),
+                'age' => new Assert\Optional([new Assert\Type('numeric')]),
+                'height' => new Assert\Optional([new Assert\Type('numeric')]),
+                'actual_weight' => new Assert\Optional([new Assert\Type('numeric')]),
+                'points_xp' => new Assert\Optional([new Assert\Type('numeric')]),
+                'level' => new Assert\Optional([new Assert\Type('numeric')]),
+            ]);
+            $constraints->allowExtraFields = true;
+            $constraints->allowMissingFields = true;
+
+            $violations = $validator->validate($data, $constraints);
+            if (count($violations) > 0) {
+                $this->addFlash('error', 'Revisa los datos introducidos. Formato inválido.');
+                return $this->redirectToRoute('admin_users_edit', ['id' => $user->getId()]);
+            }
 
             $user->setEmail($data['email']);
             $user->setName($data['name']);

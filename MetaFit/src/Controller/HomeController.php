@@ -7,6 +7,8 @@ use App\Repository\MealRepository;
 use App\Repository\RoutineRepository;
 use App\Repository\TrainingRepository;
 use App\Service\DashboardStatsService;
+use App\Service\RecommendationService;
+use App\Service\RoutineService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,7 +20,14 @@ class HomeController extends AbstractController
 {
     #[Route('/home', name: 'app_home')]
     #[IsGranted('ROLE_USER')]
-    public function index(ExerciseRepository $exerciseRepository, DashboardStatsService $dashboardStatsService, MealRepository $mealRepository, RoutineRepository $routineRepository): Response
+    public function index(
+        ExerciseRepository $exerciseRepository, 
+        DashboardStatsService $dashboardStatsService, 
+        MealRepository $mealRepository, 
+        RoutineRepository $routineRepository,
+        RecommendationService $recommendationService,
+        RoutineService $routineService
+    ): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -27,26 +36,12 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // Aseguramos que los valores coincidan con los de tu DB de ejercicios
-        // Si en tu DB de ejercicios los niveles son "Baja", "Media", "Alta", esto funcionará
-        $dificultad = $user->getActivityLevel() ?? 'Baja';
-        $sexo = $user->getGender() ?? 'H';
-
-        $rutina = [];
-
-        try {
-            if ($sexo === 'M' || $sexo === 'Mujer') {
-                $rutina = array_merge($rutina, $exerciseRepository->findRandomByGroupAndDifficulty('Piernas', $dificultad, 3));
-                $rutina = array_merge($rutina, $exerciseRepository->findRandomByGroupAndDifficulty('Espalda', $dificultad, 1));
-            } else {
-                $rutina = array_merge($rutina, $exerciseRepository->findRandomByGroupAndDifficulty('Pecho', $dificultad, 2));
-                $rutina = array_merge($rutina, $exerciseRepository->findRandomByGroupAndDifficulty('Espalda', $dificultad, 2));
-            }
-            $rutina = array_merge($rutina, $exerciseRepository->findRandomByGroupAndDifficulty('Core', $dificultad, 1));
-        } catch (\Exception $e) {
-            // Si la consulta falla (ej. por el RAND()), la rutina estará vacía pero la página cargará
-            $rutina = [];
-        }
+        // Obtener objetivos diarios calculados en base a su perfil actual
+        $dailyGoals = $recommendationService->calculateDailyGoals($user);
+        
+        // Obtener la rutina persistida del usuario
+        $activeRoutines = $routineService->getUserActiveRoutines($user);
+        $rutina = !empty($activeRoutines) ? $activeRoutines[0]->getExercises()->toArray() : [];
 
         // Obtener estadísticas del dashboard
         $stats = $dashboardStatsService->getUserDashboardStats($user);
@@ -62,6 +57,7 @@ class HomeController extends AbstractController
         
         return $this->render('home/index.html.twig', [
             'user' => $user,
+            'dailyGoals' => $dailyGoals,
             'rutina' => $rutina,
             'stats' => $stats,
             'recentTrainings' => $recentTrainings,

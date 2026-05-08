@@ -1,143 +1,81 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Onboarding{% endblock %}
+{% block title %}Comienza tu viaje - MetaFit AI{% endblock %}
 
 {% block body %}
-    <style>
-        .cinematic-bg {
-            background: radial-gradient(circle at center, #1a3a4a 0%, #101c22 100%);
-            min-height: 100vh;
-        }
-        .glass-card {
-            background: rgba(24, 43, 52, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(13, 166, 242, 0.15);
-        }
-        .metric-input:focus-within {
-            border-color: #0da6f2;
-            background: rgba(13, 166, 242, 0.05);
-        }
-        /* Eliminar scroll lateral y permitir vertical suave */
-        body { overflow-x: hidden; }
-    </style>
+    <div class="bg-background-dark min-h-screen flex items-center justify-center p-4">
+        {# TARJETA PRINCIPAL #}
+        <div class="bg-[#0d1117] border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl relative overflow-hidden">
+            
+            {# Decoración sutil de fondo #}
+            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
 
-    <div class="bg-background-dark cinematic-bg flex flex-col items-center py-12 px-6">
-        <div class="w-full max-w-7xl">
-
-            <div class="flex flex-col items-center mb-8">
-                <div class="flex items-center gap-4 mb-2">
-                    <h1 class="text-4xl md:text-5xl font-black tracking-tighter text-white italic uppercase">
-                        META<span class="text-primary">FIT</span> AI
-                    </h1>
-                    <div class="bg-primary p-2 md:p-3 rounded-2xl shadow-[0_0_20px_rgba(13,166,242,0.4)]">
-                        <span class="material-symbols-outlined text-white text-3xl md:text-4xl">bolt</span>
-                    </div>
+            {# Mostrar Errores de Validación de Symfony #}
+            {% for message in app.flashes('error') %}
+                <div class="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl p-3 mb-6 relative z-10 text-sm font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">error</span>
+                    {{ message }}
                 </div>
-                <p class="text-[#90b7cb] font-bold tracking-[0.3em] uppercase text-[10px] md:text-xs opacity-70">
-                    Configuración de Perfil Biométrico y objetivos
+            {% endfor %}
+
+            <div class="text-center mb-8 relative z-10">
+                <h1 class="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-white mb-2">
+                    Completa tu <span class="text-primary">Perfil</span>
+                </h1>
+                <p class="text-slate-400 text-sm">
+                    La IA necesita estos datos para generar tu primera rutina y calcular tus macros.
                 </p>
             </div>
 
-            <form method="POST" class="glass-card rounded-3xl p-6 md:p-10 shadow-2xl">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-14">
-
-                    <div class="space-y-10">
-                        <div class="space-y-4">
-                            <label class="text-primary text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                                <span class="w-2 h-2 bg-primary rounded-full"></span> 01. Género
-                            </label>
-                            <div class="grid grid-cols-3 gap-3">
-                                {% for g in [{'v':'M','l':'Hombre','i':'male'}, {'v':'F','l':'Mujer','i':'female'}, {'v':'O','l':'Otro','i':'transgender'}] %}
-                                    <label class="group flex flex-col items-center justify-center p-4 rounded-2xl border border-[#315668] bg-[#101c22]/50 cursor-pointer hover:border-primary/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                                        <input type="radio" name="gender" value="{{ g.v }}" class="sr-only" {{ loop.first ? 'checked' }}>
-                                        <span class="material-symbols-outlined text-[#90b7cb] group-hover:text-primary mb-1 text-2xl md:text-3xl">{{ g.i }}</span>
-                                        <span class="text-[#90b7cb] group-hover:text-white text-[9px] font-bold uppercase">{{ g.l }}</span>
-                                    </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <label class="text-primary text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                                <span class="w-2 h-2 bg-primary rounded-full"></span> 02. Objetivo Principal
-                            </label>
-                            <div class="grid grid-cols-2 gap-3">
-                                {% for obj in [
-                                    {'v':'hipertrofia','l':'Hipertrofia','i':'fitness_center'},
-                                    {'v':'perdida_grasa','l':'Quemar Grasa','i':'local_fire_department'},
-                                    {'v':'definicion','l':'Definición','i':'monitoring'},
-                                    {'v':'fuerza','l':'Fuerza Máxima','i':'weight'},
-                                    {'v':'mantenimiento','l':'Mantenimiento','i':'rebase'},
-                                    {'v':'salud','l':'Salud/Longevidad','i':'favorite'}
-                                ] %}
-                                    <label class="flex items-center gap-3 p-4 rounded-xl border border-[#315668] bg-[#101c22]/50 cursor-pointer hover:border-primary transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                                        <input type="radio" name="purpose" value="{{ obj.v }}" class="sr-only" {{ loop.first ? 'checked' }}>
-                                        <span class="material-symbols-outlined text-primary text-xl">{{ obj.i }}</span>
-                                        <span class="text-white text-xs font-bold uppercase tracking-tight">{{ obj.l }}</span>
-                                    </label>
-                                {% endfor %}
-                            </div>
-                        </div>
+            <form method="POST" action="{{ path('app_onboarding') }}" class="space-y-4 relative z-10">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Edad</label>
+                        <input type="number" name="age" required class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
                     </div>
-
-                    <div class="space-y-10">
-                        <div class="space-y-4">
-                            <label class="text-primary text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                                <span class="w-2 h-2 bg-primary rounded-full"></span> 03. Parámetros Físicos
-                            </label>
-                            <div class="grid grid-cols-1 gap-3">
-                                {% for field in [
-                                    {'n':'age','l':'Edad Actual','u':'Años','p':'25','i':'calendar_today'},
-                                    {'n':'height','l':'Estatura','u':'CM','p':'180','i':'straighten'},
-                                    {'n':'weight','l':'Peso Corporal','u':'KG','p':'75.5','i':'scale'}
-                                ] %}
-                                    <div class="metric-input flex items-center gap-3 p-1 pl-4 rounded-xl border border-[#315668] bg-[#101c22]/50 transition-all">
-                                        <span class="material-symbols-outlined text-[#315668] text-lg">{{ field.i }}</span>
-                                        <div class="flex-1">
-                                            <p class="text-[8px] text-[#90b7cb] font-black uppercase tracking-tighter">{{ field.l }}</p>
-                                            <input name="{{ field.n }}" type="number" step="0.1" required class="w-full bg-transparent border-none p-0 text-base text-white font-bold outline-none placeholder:text-[#315668]" placeholder="{{ field.p }}">
-                                        </div>
-                                        <span class="bg-[#1a3a4a] px-3 py-2 rounded-lg text-[9px] font-black text-primary uppercase">{{ field.u }}</span>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <label class="text-primary text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                                <span class="w-2 h-2 bg-primary rounded-full"></span> 04. Frecuencia de Actividad
-                            </label>
-                            <div class="grid grid-cols-1 gap-2">
-                                {% for act in [
-                                    {'v':'sedentario','l':'Sedentario','d':'Poco ejercicio diario','i':'chair'},
-                                    {'v':'moderado','l':'Moderado','d':'Entreno de 2 a 3 días','i':'directions_run'},
-                                    {'v':'activo','l':'Intenso','d':'Atleta o trabajo físico','i':'speed'}
-                                ] %}
-                                    <label class="group flex items-center gap-3 p-3 rounded-xl border border-[#315668] bg-[#101c22]/50 cursor-pointer hover:border-primary transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10">
-                                        <input type="radio" name="activity_level" value="{{ act.v }}" class="sr-only" {{ act.v == 'moderado' ? 'checked' }}>
-                                        <div class="bg-[#1a3a4a] p-2 rounded-lg group-hover:bg-primary/20 transition-colors">
-                                            <span class="material-symbols-outlined text-primary text-lg">{{ act.i }}</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="text-white text-[11px] font-bold uppercase tracking-tight">{{ act.l }}</p>
-                                            <p class="text-[9px] text-[#90b7cb] leading-tight">{{ act.d }}</p>
-                                        </div>
-                                        <div class="w-4 h-4 border-2 border-[#315668] rounded-full flex items-center justify-center transition-colors has-[:checked]:border-primary">
-                                            <div class="w-2 h-2 bg-primary rounded-full opacity-0 transition-opacity has-[:checked]:opacity-100"></div>
-                                        </div>
-                                    </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <div class="pt-4">
-                            <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-black py-4 rounded-xl shadow-[0_10px_30px_rgba(13,166,242,0.3)] transition-all flex items-center justify-center gap-3 group uppercase tracking-[0.2em] text-xs">
-                                FINALIZAR ANALÍTICA
-                                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
-                            </button>
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Sexo</label>
+                        <select name="gender" required class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                            <option value="H">Hombre</option>
+                            <option value="M">Mujer</option>
+                        </select>
                     </div>
                 </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Altura (cm)</label>
+                        <input type="number" step="0.1" name="height" required class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Peso (kg)</label>
+                        <input type="number" step="0.1" name="weight" required class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Nivel de Actividad</label>
+                    <select name="activity_level" required class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="Baja">Baja (Sedentario)</option>
+                        <option value="Media">Media (1-3 días/semana)</option>
+                        <option value="Alta">Alta (4-5 días/semana)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Objetivo Principal</label>
+                    <select name="purpose" required class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="Perder grasa">Perder grasa</option>
+                        <option value="Mantenimiento">Mantenimiento general</option>
+                        <option value="Ganar masa muscular">Ganar masa muscular</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full mt-6 bg-primary hover:bg-primary/90 text-white font-bold text-sm uppercase py-4 rounded-xl transition-all flex justify-center items-center gap-2">
+                    Generar mi plan
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                </button>
             </form>
         </div>
     </div>

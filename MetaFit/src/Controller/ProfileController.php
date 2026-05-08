@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Route('/profile', name: 'profile_')]
 #[IsGranted('ROLE_USER')]
@@ -44,7 +46,8 @@ class ProfileController extends AbstractController
     #[Route('/edit-personal', name: 'edit_personal', methods: ['GET', 'POST'])]
     public function editPersonal(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -52,6 +55,25 @@ class ProfileController extends AbstractController
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
             
+            $constraints = new Assert\Collection([
+                'name' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('string')]),
+                'lastname' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('string')]),
+                'age' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 14, 'max' => 100])]),
+                'height' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 100, 'max' => 250])]),
+                'gender' => new Assert\Optional([new Assert\Choice(['H', 'M', 'Hombre', 'Mujer'])]),
+                'actual_weight' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 30, 'max' => 300])]),
+                'purpose' => new Assert\Optional([new Assert\Type('string')]),
+                'activity_level' => new Assert\Optional([new Assert\Type('string')]),
+            ]);
+            $constraints->allowExtraFields = true;
+            $constraints->allowMissingFields = true;
+
+            $violations = $validator->validate($data, $constraints);
+            if (count($violations) > 0) {
+                $this->addFlash('error', 'Los datos introducidos no son válidos. Por favor, revisa tus medidas.');
+                return $this->redirectToRoute('profile_edit_personal');
+            }
+
             $user->setName($data['name']);
             $user->setLastname($data['lastname']);
             $user->setAge((int)($data['age'] ?? null));
@@ -81,7 +103,8 @@ class ProfileController extends AbstractController
     public function preferences(
         Request $request,
         TrainingPreferenceRepository $prefRepo,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -97,6 +120,23 @@ class ProfileController extends AbstractController
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
             
+            $constraints = new Assert\Collection([
+                'preferred_time' => new Assert\Optional([new Assert\Type('string')]),
+                'training_intensity' => new Assert\Optional([new Assert\Type('string')]),
+                'training_duration_minutes' => new Assert\Optional([new Assert\Type('numeric'), new Assert\Positive()]),
+                'rest_between_sets_seconds' => new Assert\Optional([new Assert\Type('numeric'), new Assert\Positive()]),
+                'reminder_minutes_before' => new Assert\Optional([new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+                'measurement_unit' => new Assert\Optional([new Assert\Choice(['kg', 'lbs'])]),
+            ]);
+            $constraints->allowExtraFields = true;
+            $constraints->allowMissingFields = true;
+
+            $violations = $validator->validate($data, $constraints);
+            if (count($violations) > 0) {
+                $this->addFlash('error', 'Los datos de preferencias no son válidos. Revisa los valores introducidos.');
+                return $this->redirectToRoute('profile_preferences');
+            }
+
             $preferences->setPreferredTime($data['preferred_time']);
             $preferences->setTrainingIntensity($data['training_intensity']);
             $preferences->setTrainingDurationMinutes((int)($data['training_duration_minutes'] ?? 60));
@@ -141,6 +181,11 @@ class ProfileController extends AbstractController
         if ($request->isMethod('POST')) {
             $action = $request->request->get('action');
             
+            if (!$this->isCsrfTokenValid('social_action', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguridad inválido.');
+                return $this->redirectToRoute('profile_social');
+            }
+
             if ($action === 'update') {
                 $connectionId = $request->request->get('connection_id');
                 $connection = $entityManager->getRepository(\App\Entity\SocialConnection::class)->find($connectionId);
@@ -191,6 +236,11 @@ class ProfileController extends AbstractController
         if ($request->isMethod('POST')) {
             $action = $request->request->get('action');
             
+            if (!$this->isCsrfTokenValid('backup_action', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguridad inválido.');
+                return $this->redirectToRoute('profile_backups');
+            }
+
             if ($action === 'create_backup') {
                 $data = $request->request->all();
                 
@@ -248,6 +298,11 @@ class ProfileController extends AbstractController
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
             
+            if (!$this->isCsrfTokenValid('change_password', $data['_token'] ?? '')) {
+                $this->addFlash('error', 'Token de seguridad inválido. Inténtalo de nuevo.');
+                return $this->redirectToRoute('profile_change_password');
+            }
+
             if (!$passwordHasher->isPasswordValid($user, $data['current_password'])) {
                 $this->addFlash('error', 'Contraseña actual incorrecta');
                 return $this->redirectToRoute('profile_change_password');
@@ -292,6 +347,11 @@ class ProfileController extends AbstractController
         $preferences = $prefRepo->findOneBy(['user' => $user]);
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('privacy_settings', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguridad inválido.');
+                return $this->redirectToRoute('profile_privacy');
+            }
+
             if (!$preferences) {
                 $preferences = new TrainingPreference();
                 $preferences->setUser($user);

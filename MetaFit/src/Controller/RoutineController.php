@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Route('/routines', name: 'routine_')]
 #[IsGranted('ROLE_USER')]
@@ -49,7 +51,8 @@ class RoutineController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
-        RoutineService $routineService
+        RoutineService $routineService,
+        ValidatorInterface $validator
     ): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -57,6 +60,20 @@ class RoutineController extends AbstractController
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
             
+            $constraints = new Assert\Collection([
+                'name' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('string')]),
+                'objective' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('string')]),
+                'days_week' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 1, 'max' => 7])]),
+                'dispo_material' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('string')]),
+            ]);
+            $constraints->allowExtraFields = true;
+
+            $violations = $validator->validate($data, $constraints);
+            if (count($violations) > 0) {
+                $this->addFlash('error', 'Los datos de la rutina no son válidos. Por favor, revisa los campos.');
+                return $this->redirectToRoute('routine_new');
+            }
+
             try {
                 $routine = $routineService->createRoutine($user, [
                     'name' => $data['name'],
@@ -271,16 +288,20 @@ class RoutineController extends AbstractController
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
     public function delete(
         Routine $routine,
+        Request $request,
         EntityManagerInterface $entityManager
     ): Response {
         if ($routine->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
-        $entityManager->remove($routine);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Rutina eliminada');
+        if ($this->isCsrfTokenValid('delete_routine_' . $routine->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($routine);
+            $entityManager->flush();
+            $this->addFlash('success', 'Rutina eliminada');
+        } else {
+            $this->addFlash('error', 'Token de seguridad inválido.');
+        }
 
         return $this->redirectToRoute('routine_index');
     }

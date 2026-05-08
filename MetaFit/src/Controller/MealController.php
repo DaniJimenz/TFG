@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Route('/meals', name: 'meal_')]
 #[IsGranted('ROLE_USER')]
@@ -78,19 +80,38 @@ class MealController extends AbstractController
      * Crear una nueva comida (manual)
      */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
         if ($request->isMethod('POST')) {
+            $data = $request->request->all();
+
+            $constraints = new Assert\Collection([
+                'food_type' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(['desayuno', 'comida', 'merienda', 'cena'])]),
+                'calories_total' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+                'proteines_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+                'carbohidrats_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+                'fats_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+                'notes' => new Assert\Optional([new Assert\Type('string')]),
+            ]);
+            $constraints->allowExtraFields = true;
+            $constraints->allowMissingFields = true;
+            
+            $violations = $validator->validate($data, $constraints);
+            if (count($violations) > 0) {
+                $this->addFlash('error', 'Revisa los macros introducidos. Deben ser números positivos o cero.');
+                return $this->redirectToRoute('meal_new');
+            }
+
             $meal = new Meal();
             $meal->setAppUser($user);
-            $meal->setFoodType($request->request->get('food_type')); // desayuno, comida, merienda, cena
-            $meal->setCaloriesTotal((float)$request->request->get('calories_total'));
-            $meal->setProteinesG((float)$request->request->get('proteines_g'));
-            $meal->setCarbohidratesG((float)$request->request->get('carbohidrats_g'));
-            $meal->setFatsG((float)$request->request->get('fats_g'));
+            $meal->setFoodType($data['food_type']);
+            $meal->setCaloriesTotal((float)$data['calories_total']);
+            $meal->setProteinesG((float)$data['proteines_g']);
+            $meal->setCarbohidratesG((float)$data['carbohidrats_g']);
+            $meal->setFatsG((float)$data['fats_g']);
             $meal->setBarScanner(false);
             $meal->setRegisterMethod('manual');
             $meal->setRegisterDate(new \DateTimeImmutable());
@@ -205,7 +226,7 @@ class MealController extends AbstractController
      * Editar comida existente
      */
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Meal $meal, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(Meal $meal, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         // Verificar permisos
         if ($meal->getAppUser() !== $this->getUser()) {
@@ -213,12 +234,30 @@ class MealController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
-            $meal->setFoodType($request->request->get('food_type'));
-            $meal->setCaloriesTotal((float)$request->request->get('calories_total'));
-            $meal->setProteinesG((float)$request->request->get('proteines_g'));
-            $meal->setCarbohidratesG((float)$request->request->get('carbohidrats_g'));
-            $meal->setFatsG((float)$request->request->get('fats_g'));
-            $meal->setNotes($request->request->get('notes', null));
+            $data = $request->request->all();
+
+            $constraints = new Assert\Collection([
+                'food_type' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(['desayuno', 'comida', 'merienda', 'cena'])]),
+                'calories_total' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+                'proteines_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+                'carbohidrats_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+                'fats_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
+            ]);
+            $constraints->allowExtraFields = true;
+            $constraints->allowMissingFields = true;
+            
+            $violations = $validator->validate($data, $constraints);
+            if (count($violations) > 0) {
+                $this->addFlash('error', 'Revisa los macros introducidos. Deben ser números positivos o cero.');
+                return $this->redirectToRoute('meal_edit', ['id' => $meal->getId()]);
+            }
+
+            $meal->setFoodType($data['food_type']);
+            $meal->setCaloriesTotal((float)$data['calories_total']);
+            $meal->setProteinesG((float)$data['proteines_g']);
+            $meal->setCarbohidratesG((float)$data['carbohidrats_g']);
+            $meal->setFatsG((float)$data['fats_g']);
+            $meal->setNotes($data['notes'] ?? null);
 
             $entityManager->flush();
 
