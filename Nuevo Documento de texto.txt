@@ -1,0 +1,21 @@
+IDEAS 
+
+1. Olvido de Contraseña y Correos Transaccionales
+He revisado la seguridad y tienes el cambio de contraseña dentro del perfil, pero, ¿qué pasa si un usuario no puede iniciar sesión porque se le ha olvidado?
+
+Lo que falta: El flujo clásico de "He olvidado mi contraseña" en la pantalla de Login.
+Cómo implementarlo: Symfony lo hace muy fácil con symfonycasts/reset-password-bundle. Generas un token temporal, se lo envías por email (usando symfony/mailer y un servicio gratuito como SendGrid o MailerSend) y le permites crear una nueva. Esto es obligatorio en cualquier app real.
+
+
+2. Convertirla en una PWA (Progressive Web App)
+La gente usa las aplicaciones de fitness en el gimnasio, no sentados delante de un ordenador. Si tienen que abrir Chrome/Safari en el móvil y teclear tu URL cada vez, se cansarán rápido.
+
+Lo que falta: Añadir un archivo manifest.json y un pequeño Service Worker en JavaScript.
+Por qué lo hace real: Esto permitirá que, al entrar en tu web desde el móvil, les salga un botón de "Instalar aplicación". Se creará un icono de MetaFit en la pantalla de inicio de su iPhone o Android y se abrirá a pantalla completa sin la barra del navegador, dándoles la sensación de estar usando una app nativa descargada de la App Store.
+
+
+3. Registro de Hidratación (Tracker de Agua)
+Tienes un control de macronutrientes (proteínas, grasas, carbohidratos, calorías) espectacular. Pero te falta el nutriente más básico.
+
+Lo que falta: Unos simples botones de "+" en el Dashboard para ir sumando vasos de agua a lo largo del día, con una meta de 2.5L o 3L diarios.
+Por qué lo hace real: Es una de las funciones más usadas en apps como MyFitnessPal o Yazio. Es muy fácil de programar (solo sumar números en base de datos por día) y añade muchísima interacción diaria del usuario con la plataforma.
