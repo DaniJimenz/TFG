@@ -112,6 +112,11 @@ class RoutineController extends AbstractController
 
         // Agregar ejercicio
         if ($request->isMethod('POST') && $request->request->get('action') === 'add_exercise') {
+            if (!$this->isCsrfTokenValid('edit_routine_' . $routine->getId(), $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguridad inválido al añadir ejercicio.');
+                return $this->redirectToRoute('routine_edit', ['id' => $routine->getId()]);
+            }
+
             $exerciseId = $request->request->get('exercise_id');
             $exercise = $exerciseRepository->find($exerciseId);
             
@@ -123,6 +128,11 @@ class RoutineController extends AbstractController
 
         // Remover ejercicio
         if ($request->isMethod('POST') && $request->request->get('action') === 'remove_exercise') {
+            if (!$this->isCsrfTokenValid('edit_routine_' . $routine->getId(), $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de seguridad inválido al remover ejercicio.');
+                return $this->redirectToRoute('routine_edit', ['id' => $routine->getId()]);
+            }
+
             $exerciseId = $request->request->get('exercise_id');
             $exercise = $exerciseRepository->find($exerciseId);
             
@@ -172,7 +182,8 @@ class RoutineController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        $exerciseData = json_decode($request->getContent(), true)['exercises'] ?? [];
+        $payload = json_decode($request->getContent(), true);
+        $exerciseData = is_array($payload) ? ($payload['exercises'] ?? []) : [];
         
         // Registrar entrenamientos
         $completedTrainings = $routineService->completeRoutineSession($routine, $user, $exerciseData);
@@ -189,12 +200,9 @@ class RoutineController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // Desbloquear logro de primer entrenamiento
-        $firstWorkoutAchievement = $entityManager->getRepository(\App\Entity\Achievement::class)
-            ->findOneBy(['judgment' => 'first_workout']);
-        if ($firstWorkoutAchievement) {
-            $achievementService->unlockAchievement($user, $firstWorkoutAchievement);
-        }
+        // Verificar y desbloquear logros correspondientes (primer entrenamiento, rachas, etc.)
+        $achievementService->checkWorkoutAchievements($user);
+        $achievementService->checkStreakAchievements($user);
 
         $this->addFlash('success', "¡Entrenamiento completado! +{$xpGained} XP");
 

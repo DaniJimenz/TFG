@@ -19,6 +19,7 @@
 
         {# FORMULARIO #}
         <form method="POST" class="bg-[#0d1117] border border-slate-800 rounded-lg p-8 space-y-6">
+            <input type="hidden" name="_token" value="{{ csrf_token('edit_user_' ~ user.id) }}">
 
             {# Email #}
             <div>

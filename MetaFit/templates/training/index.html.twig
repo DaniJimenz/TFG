@@ -33,7 +33,7 @@
         </div>
 
         {# ESTADÍSTICAS RÁPIDAS #}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
             <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total Entrenamientos</p>
                 <p class="text-3xl font-black italic text-primary">{{ trainings|length }}</p>
@@ -45,12 +45,6 @@
             <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Últimas 7 Días</p>
                 <p class="text-3xl font-black italic">{{ trainings|filter(t => t.date >= date('-7 days'))|length }}</p>
-            </div>
-            <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
-                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Esta Semana</p>
-                <a href="{{ path('training_weekly_summary') }}" class="text-primary hover:text-primary/80 transition">
-                    <span class="material-symbols-outlined text-2xl">trending_up</span>
-                </a>
             </div>
         </div>
 

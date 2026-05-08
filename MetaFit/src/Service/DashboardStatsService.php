@@ -20,19 +20,19 @@ class DashboardStatsService
      */
     public function getUserDashboardStats(User $user): array
     {
-        $allTrainings = $this->trainingRepository->findBy(['appUser' => $user], ['date' => 'DESC']);
+        $allTrainings = $this->trainingRepository->findAllByUserWithRelations($user);
         $completedTrainings = array_filter($allTrainings, fn($t) => $t->isCompleted());
         
         // Entrenamientos por semana (últimos 7 días)
-        $weekTrainings = $this->getTrainingsLastDays($user, 7);
+        $weekTrainings = $this->getTrainingsLastDays($allTrainings, 7);
         
         // Entrenamientos por mes (últimos 30 días)
-        $monthTrainings = $this->getTrainingsLastDays($user, 30);
+        $monthTrainings = $this->getTrainingsLastDays($allTrainings, 30);
 
         // Calorías estimadas (aproximado: 5 calorías por minuto de entrenamiento)
-        $totalCalories = array_reduce($allTrainings, fn($sum, $t) => $sum + ($t->getDurationMinutes() ?? 0 * 5), 0);
-        $weekCalories = array_reduce($weekTrainings, fn($sum, $t) => $sum + ($t->getDurationMinutes() ?? 0 * 5), 0);
-        $monthCalories = array_reduce($monthTrainings, fn($sum, $t) => $sum + ($t->getDurationMinutes() ?? 0 * 5), 0);
+        $totalCalories = array_reduce($allTrainings, fn($sum, $t) => $sum + (($t->getDurationMinutes() ?? 0) * 5), 0);
+        $weekCalories = array_reduce($weekTrainings, fn($sum, $t) => $sum + (($t->getDurationMinutes() ?? 0) * 5), 0);
+        $monthCalories = array_reduce($monthTrainings, fn($sum, $t) => $sum + (($t->getDurationMinutes() ?? 0) * 5), 0);
 
         // Racha actual (streak)
         $currentStreak = $this->calculateCurrentStreak($allTrainings);
@@ -66,7 +66,7 @@ class DashboardStatsService
         $favoriteExercise = array_key_first($exercises) ?? 'N/A';
 
         // Progreso últimas 2 semanas
-        $last2WeeksTrainings = $this->getTrainingsLastDays($user, 14);
+        $last2WeeksTrainings = $this->getTrainingsLastDays($allTrainings, 14);
         $last2WeeksData = $this->groupTrainingsByDay($last2WeeksTrainings);
 
         return [
@@ -98,9 +98,8 @@ class DashboardStatsService
     /**
      * Obtener entrenamientos de los últimos N días
      */
-    private function getTrainingsLastDays(User $user, int $days): array
+    private function getTrainingsLastDays(array $allTrainings, int $days): array
     {
-        $allTrainings = $this->trainingRepository->findBy(['appUser' => $user], ['date' => 'DESC']);
         $cutoffDate = new \DateTime("-{$days} days");
         
         return array_filter($allTrainings, function($training) use ($cutoffDate) {
@@ -175,23 +174,28 @@ class DashboardStatsService
     {
         $grouped = [];
         
-        foreach ($trainings as $training) {
-            $day = $training->getDate()->format('Y-m-d');
-            if (!isset($grouped[$day])) {
-                $grouped[$day] = [
-                    'date' => $training->getDate()->format('d/m'),
-                    'count' => 0,
-                    'minutes' => 0,
-                    'calories' => 0,
-                ];
-            }
-            $grouped[$day]['count']++;
-            $grouped[$day]['minutes'] += $training->getDurationMinutes() ?? 0;
-            $grouped[$day]['calories'] += ($training->getDurationMinutes() ?? 0) * 5;
+        // Pre-rellenar los últimos 14 días para que el gráfico no tenga "agujeros temporales"
+        for ($i = 13; $i >= 0; $i--) {
+            $date = new \DateTime("-{$i} days");
+            $grouped[$date->format('Y-m-d')] = [
+                'date' => $date->format('d/m'),
+                'count' => 0,
+                'minutes' => 0,
+                'calories' => 0,
+            ];
         }
 
-        // Ordenar por fecha y retornar últimos 14 días
-        return array_slice(array_reverse($grouped), 0, 14);
+        foreach ($trainings as $training) {
+            $day = $training->getDate()->format('Y-m-d');
+            if (isset($grouped[$day])) {
+                $grouped[$day]['count']++;
+                $grouped[$day]['minutes'] += $training->getDurationMinutes() ?? 0;
+                $grouped[$day]['calories'] += ($training->getDurationMinutes() ?? 0) * 5;
+            }
+        }
+
+        // Ya están ordenados cronológicamente desde hace 14 días hasta hoy
+        return array_values($grouped);
     }
 
     /**

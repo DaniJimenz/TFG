@@ -9,6 +9,7 @@ use App\Form\TrainingFormType;
 use App\Repository\TrainingRepository;
 use App\Repository\ExerciseRepository;
 use App\Repository\RoutineRepository;
+use App\Service\RoutineService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,10 +31,7 @@ class TrainingController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        $trainings = $trainingRepository->findBy(
-            ['appUser' => $user],
-            ['date' => 'DESC']
-        );
+        $trainings = $trainingRepository->findAllByUserWithRelations($user);
 
         return $this->render('training/index.html.twig', [
             'trainings' => $trainings,
@@ -61,7 +59,8 @@ class TrainingController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        RoutineService $routineService
     ): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -74,9 +73,8 @@ class TrainingController extends AbstractController
             $training->setAppUser($user);
             $training->setDate(new \DateTimeImmutable());
 
-            // Calcular 1RM estimado (Epley formula: weight * (1 + reps/30))
-            $oneRm = $training->getWeight() * (1 + ($training->getRepetitions() / 30));
-            $training->setOneRmEstimated($oneRm);
+            // Calcular 1RM estimado
+            $training->setOneRmEstimated($routineService->calculateOneRM($training->getWeight(), $training->getRepetitions()));
 
             $entityManager->persist($training);
             $entityManager->flush();
@@ -98,7 +96,8 @@ class TrainingController extends AbstractController
     public function edit(
         Training $training,
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        RoutineService $routineService
     ): Response {
         if ($training->getAppUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException('You cannot edit this training.');
@@ -108,9 +107,8 @@ class TrainingController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Recalcular 1RM
-            $oneRm = $training->getWeight() * (1 + ($training->getRepetitions() / 30));
-            $training->setOneRmEstimated($oneRm);
+            // Recalcular 1RM estimado
+            $training->setOneRmEstimated($routineService->calculateOneRM($training->getWeight(), $training->getRepetitions()));
 
             $entityManager->flush();
 
@@ -139,7 +137,7 @@ class TrainingController extends AbstractController
             $entityManager->remove($training);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Training deleted successfully!');
+            $this->addFlash('success', '¡Entrenamiento eliminado exitosamente!');
         }
 
         return $this->redirectToRoute('training_index');
@@ -243,23 +241,6 @@ class TrainingController extends AbstractController
         return $this->render('training/exercise_history.html.twig', [
             'exercise' => $exercise,
             'trainings' => $trainings,
-        ]);
-    }
-
-    /**
-     * Resumen semanal de entrenamientos
-     */
-    #[Route('/weekly-summary', name: 'weekly_summary', methods: ['GET'])]
-    public function weeklySummary(TrainingRepository $trainingRepository): Response
-    {
-        /** @var \App\Entity\User $user */
-        $user = $this->getUser();
-
-        $sevenDaysAgo = new \DateTimeImmutable('-7 days');
-        $weekTrainings = $trainingRepository->findTrainingsAfterDate($user, $sevenDaysAgo);
-
-        return $this->render('training/weekly_summary.html.twig', [
-            'weekly_summary' => $weekTrainings,
         ]);
     }
 }

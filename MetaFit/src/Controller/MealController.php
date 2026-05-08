@@ -31,16 +31,19 @@ class MealController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        // Traemos todas las comidas del usuario
+        // Limitamos las comidas a las últimas 50 para la vista
         $meals = $mealRepository->findBy(
             ['appUser' => $user],
-            ['register_date' => 'DESC']
+            ['register_date' => 'DESC'],
+            50
         );
 
         // Calcular macros de hoy
-        $today = new \DateTime();
-        $today->setTime(0, 0, 0);
-        $tomorrow = (new \DateTime())->setTime(23, 59, 59);
+        $today = clone new \DateTimeImmutable('today');
+        $tomorrow = clone new \DateTimeImmutable('tomorrow');
+
+        // Pedimos a la BD solo las de hoy, no iteramos sobre todo el historial
+        $todayMeals = $mealRepository->findMealsByDateRange($user, $today, $tomorrow);
 
         $todayMacros = [
             'calories' => 0,
@@ -48,6 +51,13 @@ class MealController extends AbstractController
             'carbs' => 0,
             'fats' => 0
         ];
+
+        foreach ($todayMeals as $meal) {
+            $todayMacros['calories'] += $meal->getCaloriesTotal() ?? 0;
+            $todayMacros['proteins'] += $meal->getProteinesG() ?? 0;
+            $todayMacros['carbs'] += $meal->getCarbohidratesG() ?? 0;
+            $todayMacros['fats'] += $meal->getFatsG() ?? 0;
+        }
 
         // Agrupar comidas por día
         $mealsByDay = [];
@@ -59,14 +69,6 @@ class MealController extends AbstractController
                 $mealsByDay[$dateKey] = [];
             }
             $mealsByDay[$dateKey][] = $meal;
-
-            // Sumar macros de hoy
-            if ($mealDate >= $today && $mealDate <= $tomorrow) {
-                $todayMacros['calories'] += $meal->getCaloriesTotal() ?? 0;
-                $todayMacros['proteins'] += $meal->getProteinesG() ?? 0;
-                $todayMacros['carbs'] += $meal->getCarbohidratesG() ?? 0;
-                $todayMacros['fats'] += $meal->getFatsG() ?? 0;
-            }
         }
 
         return $this->render('meal/index.html.twig', [
@@ -120,7 +122,7 @@ class MealController extends AbstractController
             $entityManager->persist($meal);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Meal registered successfully!');
+            $this->addFlash('success', '¡Comida registrada exitosamente!');
 
             return $this->redirectToRoute('meal_index');
         }
@@ -261,7 +263,7 @@ class MealController extends AbstractController
 
             $entityManager->flush();
 
-            $this->addFlash('success', 'Meal updated successfully!');
+            $this->addFlash('success', '¡Comida actualizada exitosamente!');
 
             return $this->redirectToRoute('meal_index');
         }
@@ -283,10 +285,18 @@ class MealController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('delete_meal_' . $meal->getId(), $request->request->get('_token'))) {
+            // Eliminar la imagen física del servidor para no saturar el disco
+            if ($meal->getUrlImage()) {
+                $imagePath = $this->getParameter('kernel.project_dir') . '/public' . $meal->getUrlImage();
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+
             $entityManager->remove($meal);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Meal deleted successfully!');
+            $this->addFlash('success', '¡Comida eliminada exitosamente!');
         }
 
         return $this->redirectToRoute('meal_index');

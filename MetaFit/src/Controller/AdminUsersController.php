@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Repository\TrainingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -37,7 +39,8 @@ class AdminUsersController extends AbstractController
                 ->setParameter('search', "%{$search}%");
         }
 
-        $total = count($query->getQuery()->getResult());
+        $countQuery = clone $query;
+        $total = (int) $countQuery->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
 
         $users = $query
             ->orderBy("u.{$sort}", $direction)
@@ -80,6 +83,11 @@ class AdminUsersController extends AbstractController
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
 
+            if (!$this->isCsrfTokenValid('edit_user_' . $user->getId(), $data['_token'] ?? '')) {
+                $this->addFlash('error', 'Token de seguridad inválido.');
+                return $this->redirectToRoute('admin_users_edit', ['id' => $user->getId()]);
+            }
+
             $constraints = new Assert\Collection([
                 'email' => new Assert\Required([new Assert\NotBlank(), new Assert\Email()]),
                 'name' => new Assert\Optional([new Assert\Type('string')]),
@@ -99,16 +107,23 @@ class AdminUsersController extends AbstractController
                 return $this->redirectToRoute('admin_users_edit', ['id' => $user->getId()]);
             }
 
+            // Verificar que el email no exista ya en OTRO usuario
+            $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+            if ($existingUser && $existingUser->getId() !== $user->getId()) {
+                $this->addFlash('error', 'Este email ya está registrado por otro usuario en la plataforma.');
+                return $this->redirectToRoute('admin_users_edit', ['id' => $user->getId()]);
+            }
+
             $user->setEmail($data['email']);
             $user->setName($data['name']);
             $user->setLastname($data['lastname']);
-            $user->setAge((int)($data['age'] ?? $user->getAge()));
-            $user->setHeight((float)($data['height'] ?? $user->getHeight()));
-            $user->setGender($data['gender'] ?? $user->getGender());
-            $user->setActualWeight((float)($data['actual_weight'] ?? $user->getActualWeight()));
-            $user->setActivityLevel($data['activity_level'] ?? $user->getActivityLevel());
-            $user->setPointsXp((int)($data['points_xp'] ?? $user->getPointsXp()));
-            $user->setLevel((int)($data['level'] ?? $user->getLevel()));
+            $user->setAge(isset($data['age']) && $data['age'] !== '' ? (int)$data['age'] : $user->getAge());
+            $user->setHeight(isset($data['height']) && $data['height'] !== '' ? (float)$data['height'] : $user->getHeight());
+            $user->setGender(!empty($data['gender']) ? $data['gender'] : $user->getGender());
+            $user->setActualWeight(isset($data['actual_weight']) && $data['actual_weight'] !== '' ? (float)$data['actual_weight'] : $user->getActualWeight());
+            $user->setActivityLevel(!empty($data['activity_level']) ? $data['activity_level'] : $user->getActivityLevel());
+            $user->setPointsXp(isset($data['points_xp']) && $data['points_xp'] !== '' ? (int)$data['points_xp'] : $user->getPointsXp());
+            $user->setLevel(isset($data['level']) && $data['level'] !== '' ? (int)$data['level'] : $user->getLevel());
             
             if (isset($data['rol'])) {
                 $user->setRol($data['rol']);
@@ -196,31 +211,49 @@ class AdminUsersController extends AbstractController
      * Exportar usuarios a CSV
      */
     #[Route('/export/csv', name: 'export_csv', methods: ['GET'])]
-    public function exportCsv(UserRepository $userRepository): Response
+    public function exportCsv(UserRepository $userRepository, TrainingRepository $trainingRepository): Response
     {
-        $users = $userRepository->findAll();
+        $response = new StreamedResponse(function () use ($userRepository, $trainingRepository) {
+            $handle = fopen('php://output', 'w+');
+            
+            // BOM para que Excel lea los acentos (UTF-8) correctamente
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, ['ID', 'Email', 'Nombre', 'Apellido', 'Edad', 'Altura', 'Género', 'Actividad', 'XP', 'Nivel', 'Rol', 'Creado', 'Entrenamientos Completados']);
 
-        $csv = "ID,Email,Nombre,Apellido,Edad,Altura,Género,Actividad,XP,Nivel,Rol,Creado\n";
-        
-        foreach ($users as $user) {
-            $csv .= sprintf(
-                "%d,%s,%s,%s,%d,%.2f,%s,%s,%d,%d,%s,%s\n",
-                $user->getId(),
-                $user->getEmail(),
-                $user->getName() ?? '',
-                $user->getLastname() ?? '',
-                $user->getAge() ?? 0,
-                $user->getHeight() ?? 0,
-                $user->getGender() ?? '',
-                $user->getActivityLevel() ?? '',
-                $user->getPointsXp() ?? 0,
-                $user->getLevel() ?? 0,
-                $user->getRol() ?? 'ROLE_USER',
-                $user->getCreatedAt()->format('Y-m-d H:i:s')
-            );
-        }
+            // La forma ideal sería por bloques (iterables), pero con el stream 
+            // evitamos al menos tener un string gigante compilándose
+            
+            // Pre-cargar todos los conteos de entrenamientos en 1 sola consulta (Adiós N+1)
+            $counts = $trainingRepository->createQueryBuilder('t')
+                ->select('IDENTITY(t.appUser) as userId, COUNT(t.id) as c')
+                ->where('t.completed = true')
+                ->groupBy('t.appUser')
+                ->getQuery()
+                ->getResult();
+            $countsMap = array_column($counts, 'c', 'userId');
 
-        $response = new Response($csv);
+            $users = $userRepository->findAll();
+            foreach ($users as $user) {
+                $trainingCount = $countsMap[$user->getId()] ?? 0;
+                fputcsv($handle, [
+                    $user->getId(),
+                    $user->getEmail(),
+                    $user->getName() ?? '',
+                    $user->getLastname() ?? '',
+                    $user->getAge() ?? 0,
+                    $user->getHeight() ?? 0,
+                    $user->getGender() ?? '',
+                    $user->getActivityLevel() ?? '',
+                    $user->getPointsXp() ?? 0,
+                    $user->getLevel() ?? 0,
+                    $user->getRol() ?? 'ROLE_USER',
+                    $user->getCreatedAt()->format('Y-m-d H:i:s'),
+                    $trainingCount
+                ]);
+            }
+            fclose($handle);
+        });
+
         $response->headers->set('Content-Type', 'text/csv');
         $response->headers->set('Content-Disposition', 'attachment; filename="users_' . date('Y-m-d_H-i-s') . '.csv"');
 

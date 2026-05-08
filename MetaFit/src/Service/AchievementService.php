@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Entity\UserAchievement;
 use App\Repository\AchievementRepository;
 use App\Repository\UserAchievementRepository;
+use App\Repository\TrainingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AchievementService
@@ -15,6 +16,7 @@ class AchievementService
         private EntityManagerInterface $entityManager,
         private AchievementRepository $achievementRepository,
         private UserAchievementRepository $userAchievementRepository,
+        private TrainingRepository $trainingRepository,
     ) {}
 
     /**
@@ -74,8 +76,25 @@ class AchievementService
         // Logro: 7 días de racha
         $streak7Achievement = $this->achievementRepository->findOneBy(['judgment' => 'streak_7_days']);
         if ($streak7Achievement && !$this->hasAchievement($user, $streak7Achievement)) {
-            // Aquí iría la lógica para verificar si el usuario tiene 7 días de racha
-            // Por ahora solo demostramos la estructura
+            $trainings = $this->trainingRepository->findBy(['appUser' => $user], ['date' => 'DESC']);
+            
+            // Comprobar días únicos consecutivos
+            $consecutiveDays = 0;
+            $expectedDate = new \DateTime();
+            
+            foreach ($trainings as $training) {
+                $tDate = $training->getDate()->format('Y-m-d');
+                if ($tDate === $expectedDate->format('Y-m-d') || $tDate === clone($expectedDate)->modify('-1 day')->format('Y-m-d')) {
+                    if ($tDate !== $expectedDate->format('Y-m-d')) {
+                        $expectedDate->modify('-1 day');
+                    }
+                    $consecutiveDays++;
+                    if ($consecutiveDays >= 7) {
+                        $unlockedAchievements[] = $this->unlockAchievement($user, $streak7Achievement);
+                        break;
+                    }
+                }
+            }
         }
 
         return $unlockedAchievements;

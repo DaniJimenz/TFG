@@ -3,16 +3,19 @@
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Psr\Log\LoggerInterface;
 
 class PexelsService
 {
     private HttpClientInterface $httpClient;
     private string $apiKey;
+    private LoggerInterface $logger;
 
-    public function __construct(HttpClientInterface $httpClient, string $pexelsApiKey)
+    public function __construct(HttpClientInterface $httpClient, string $pexelsApiKey, LoggerInterface $logger)
     {
         $this->httpClient = $httpClient;
         $this->apiKey = $pexelsApiKey;
+        $this->logger = $logger;
     }
 
     /**
@@ -40,7 +43,8 @@ class PexelsService
                 return $data['photos'][0]['src']['large'];
             }
         } catch (\Exception $e) {
-            // En caso de error, retornar null
+            // Registrar el error para facilitar el debugging
+            $this->logger->error('Error en Pexels API (Image): ' . $e->getMessage());
             return null;
         }
 
@@ -95,6 +99,7 @@ class PexelsService
                 }
             }
         } catch (\Exception $e) {
+            $this->logger->error('Error en Pexels API (Video): ' . $e->getMessage());
             return null;
         }
 

@@ -52,13 +52,13 @@ class Routine
     /**
      * @var Collection<int, Training>
      */
-    #[ORM\OneToMany(targetEntity: Training::class, mappedBy: 'routine')]
+    #[ORM\OneToMany(targetEntity: Training::class, mappedBy: 'routine', cascade: ['remove'], orphanRemoval: true)]
     private Collection $trainings;
 
     /**
      * @var Collection<int, ExerciseTraining>
      */
-    #[ORM\OneToMany(targetEntity: ExerciseTraining::class, mappedBy: 'routine')]
+    #[ORM\OneToMany(targetEntity: ExerciseTraining::class, mappedBy: 'routine', cascade: ['remove'], orphanRemoval: true)]
     private Collection $exerciseTrainings;
 
     public function __construct()

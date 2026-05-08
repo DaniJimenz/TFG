@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MealRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Meal
 {
     #[ORM\Id]
@@ -50,15 +51,8 @@ class Meal
     #[ORM\JoinColumn(nullable: false)]
     private ?User $appUser = null;
 
-    /**
-     * @var Collection<int, MealFood>
-     */
-    #[ORM\OneToMany(targetEntity: MealFood::class, mappedBy: 'meal')]
-    private Collection $mealFood;
-
     public function __construct()
     {
-        $this->mealFood = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -198,33 +192,12 @@ class Meal
         return $this;
     }
 
-    /**
-     * @return Collection<int, MealFood>
-     */
-    public function getMealFood(): Collection
+    #[ORM\PostRemove]
+    public function deleteImageFile(): void
     {
-        return $this->mealFood;
-    }
-
-    public function addMealFood(MealFood $mealFood): static
-    {
-        if (!$this->mealFood->contains($mealFood)) {
-            $this->mealFood->add($mealFood);
-            $mealFood->setMeal($this);
+        // __DIR__ sube dos niveles (Entity -> src -> MetaFit) para llegar a /public
+        if ($this->url_image && file_exists(__DIR__ . '/../../public' . $this->url_image)) {
+            unlink(__DIR__ . '/../../public' . $this->url_image);
         }
-
-        return $this;
-    }
-
-    public function removeMealFood(MealFood $mealFood): static
-    {
-        if ($this->mealFood->removeElement($mealFood)) {
-            // set the owning side to null (unless already changed)
-            if ($mealFood->getMeal() === $this) {
-                $mealFood->setMeal(null);
-            }
-        }
-
-        return $this;
     }
 }

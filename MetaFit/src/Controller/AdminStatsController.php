@@ -28,49 +28,54 @@ class AdminStatsController extends AbstractController
         AchievementRepository $achievementRepository
     ): Response {
         // Estadísticas de usuarios
-        $totalUsers = count($userRepository->findAll());
-        $activeUsers = count($userRepository->createQueryBuilder('u')
+        $totalUsers = $userRepository->count([]);
+        $activeUsers = (int) $userRepository->createQueryBuilder('u')
+            ->select('count(u.id)')
             ->where('u.deleted_at IS NULL')
             ->getQuery()
-            ->getResult());
-        $adminUsers = count($userRepository->findBy(['rol' => 'ROLE_ADMIN']));
+            ->getSingleScalarResult();
+        $adminUsers = $userRepository->count(['rol' => 'ROLE_ADMIN']);
 
         // Usuarios creados en últimos 7 días
         $sevenDaysAgo = new \DateTimeImmutable('-7 days');
-        $newUsersLastWeek = count($userRepository->createQueryBuilder('u')
+        $newUsersLastWeek = (int) $userRepository->createQueryBuilder('u')
+            ->select('count(u.id)')
             ->where('u.created_at >= :date')
             ->setParameter('date', $sevenDaysAgo)
             ->getQuery()
-            ->getResult());
+            ->getSingleScalarResult();
 
         // Estadísticas de entrenamientos
-        $totalTrainings = count($trainingRepository->findAll());
-        $completedTrainings = count($trainingRepository->createQueryBuilder('t')
+        $totalTrainings = $trainingRepository->count([]);
+        $completedTrainings = (int) $trainingRepository->createQueryBuilder('t')
+            ->select('count(t.id)')
             ->where('t.completed = true')
             ->getQuery()
-            ->getResult());
+            ->getSingleScalarResult();
 
         // Entrenamientos esta semana
-        $trainingsThisWeek = count($trainingRepository->createQueryBuilder('t')
+        $trainingsThisWeek = (int) $trainingRepository->createQueryBuilder('t')
+            ->select('count(t.id)')
             ->where('t.date >= :date')
             ->setParameter('date', $sevenDaysAgo)
             ->getQuery()
-            ->getResult());
+            ->getSingleScalarResult();
 
         // Estadísticas de comidas
-        $totalMeals = count($mealRepository->findAll());
-        $mealsThisWeek = count($mealRepository->createQueryBuilder('m')
+        $totalMeals = $mealRepository->count([]);
+        $mealsThisWeek = (int) $mealRepository->createQueryBuilder('m')
+            ->select('count(m.id)')
             ->where('m.register_date >= :date')
             ->setParameter('date', $sevenDaysAgo)
             ->getQuery()
-            ->getResult());
+            ->getSingleScalarResult();
 
         // Estadísticas de rutinas
-        $totalRoutines = count($routineRepository->findAll());
-        $activeRoutines = count($routineRepository->findBy(['active' => true]));
+        $totalRoutines = $routineRepository->count([]);
+        $activeRoutines = $routineRepository->count(['active' => true]);
 
         // Logros
-        $totalAchievements = count($achievementRepository->findAll());
+        $totalAchievements = $achievementRepository->count([]);
 
         // Usuarios más activos (últimos 30 días)
         $thirtyDaysAgo = new \DateTimeImmutable('-30 days');
@@ -121,29 +126,26 @@ class AdminStatsController extends AbstractController
      */
     private function getMostActiveUsers($trainingRepository, \DateTimeImmutable $fromDate): array
     {
-        $trainings = $trainingRepository->createQueryBuilder('t')
+        $results = $trainingRepository->createQueryBuilder('t')
+            ->select('u.id, u.name, u.lastname, COUNT(t.id) as training_count')
+            ->join('t.appUser', 'u')
             ->where('t.date >= :date')
             ->setParameter('date', $fromDate)
+            ->groupBy('u.id')
+            ->orderBy('training_count', 'DESC')
+            ->setMaxResults(10)
             ->getQuery()
-            ->getResult();
+            ->getArrayResult();
 
         $userActivity = [];
-        foreach ($trainings as $training) {
-            $userId = $training->getAppUser()->getId();
-            $userName = $training->getAppUser()->getName() . ' ' . $training->getAppUser()->getLastname();
-            
-            if (!isset($userActivity[$userId])) {
-                $userActivity[$userId] = [
-                    'name' => $userName,
-                    'count' => 0,
-                ];
-            }
-            $userActivity[$userId]['count']++;
+        foreach ($results as $row) {
+            $userActivity[$row['id']] = [
+                'name' => $row['name'] . ' ' . $row['lastname'],
+                'count' => $row['training_count'],
+            ];
         }
 
-        uasort($userActivity, fn($a, $b) => $b['count'] <=> $a['count']);
-
-        return array_slice($userActivity, 0, 10);
+        return $userActivity;
     }
 
     /**
@@ -151,21 +153,21 @@ class AdminStatsController extends AbstractController
      */
     private function getTopExercises($trainingRepository): array
     {
-        $trainings = $trainingRepository->findAll();
+        $results = $trainingRepository->createQueryBuilder('t')
+            ->select('e.name, COUNT(t.id) as exercise_count')
+            ->join('t.exercise', 'e')
+            ->groupBy('e.id')
+            ->orderBy('exercise_count', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getArrayResult();
 
         $exerciseCount = [];
-        foreach ($trainings as $training) {
-            $exerciseName = $training->getExercise()->getName();
-            
-            if (!isset($exerciseCount[$exerciseName])) {
-                $exerciseCount[$exerciseName] = 0;
-            }
-            $exerciseCount[$exerciseName]++;
+        foreach ($results as $row) {
+            $exerciseCount[$row['name']] = $row['exercise_count'];
         }
 
-        arsort($exerciseCount);
-
-        return array_slice($exerciseCount, 0, 10);
+        return $exerciseCount;
     }
 
     /**
@@ -180,14 +182,15 @@ class AdminStatsController extends AbstractController
             $startOfDay = $date->setTime(0, 0, 0);
             $endOfDay = $date->setTime(23, 59, 59);
 
-            $trainings = $trainingRepository->createQueryBuilder('t')
+            $count = (int) $trainingRepository->createQueryBuilder('t')
+                ->select('COUNT(t.id)')
                 ->where('t.date >= :start AND t.date <= :end')
                 ->setParameter('start', $startOfDay)
                 ->setParameter('end', $endOfDay)
                 ->getQuery()
-                ->getResult();
+                ->getSingleScalarResult();
 
-            $data[$date->format('Y-m-d')] = count($trainings);
+            $data[$date->format('Y-m-d')] = $count;
         }
 
         return $data;

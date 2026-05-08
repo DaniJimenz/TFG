@@ -50,18 +50,22 @@ class HomeController extends AbstractController
         // Obtener datos del último mes para el calendario
         $startDate = new DateTimeImmutable('-30 days');
         $endDate = new DateTimeImmutable();
-        $meals = $mealRepository->findBy(
-            ['appUser' => $user],
-            ['register_date' => 'DESC']
-        );
+        $totalMealsCount = $mealRepository->count(['appUser' => $user]);
         
+        // Calcular el IMC en el controlador (Lógica de negocio)
+        $imc = 0;
+        if ($user->getHeight() > 0 && $user->getActualWeight() > 0) {
+            $imc = $user->getActualWeight() / (($user->getHeight() / 100) ** 2);
+        }
+
         return $this->render('home/index.html.twig', [
             'user' => $user,
             'dailyGoals' => $dailyGoals,
             'rutina' => $rutina,
             'stats' => $stats,
             'recentTrainings' => $recentTrainings,
-            'meals' => $meals,
+            'totalMealsCount' => $totalMealsCount,
+            'imc' => $imc,
         ]);
     }
 

@@ -66,7 +66,7 @@ class RoutineService
     /**
      * Registrar entrenamiento
      */
-    public function recordTraining(User $user, Exercise $exercise, array $data): Training
+    public function recordTraining(User $user, Exercise $exercise, array $data, bool $flush = true): Training
     {
         $training = new Training();
         $training->setAppUser($user);
@@ -86,7 +86,9 @@ class RoutineService
         }
 
         $this->entityManager->persist($training);
-        $this->entityManager->flush();
+        if ($flush) {
+            $this->entityManager->flush();
+        }
 
         return $training;
     }
@@ -154,10 +156,14 @@ class RoutineService
 
         foreach ($routine->getExercises() as $exercise) {
             if (isset($exerciseData[$exercise->getId()])) {
-                $training = $this->recordTraining($user, $exercise, $exerciseData[$exercise->getId()]);
+                // Pasamos false para no hacer flush por cada ejercicio
+                $training = $this->recordTraining($user, $exercise, $exerciseData[$exercise->getId()], false);
                 $completedTrainings[] = $training;
             }
         }
+
+        // Hacemos un solo flush al final (Optimización y Atomicidad)
+        $this->entityManager->flush();
 
         // Desbloquear logro si es el primer entrenamiento
         // (esto se maneja en AchievementService)

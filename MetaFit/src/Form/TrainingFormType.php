@@ -13,6 +13,9 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Positive;
+use Symfony\Component\Validator\Constraints\PositiveOrZero;
 
 class TrainingFormType extends AbstractType
 {
@@ -35,18 +38,34 @@ class TrainingFormType extends AbstractType
             ->add('completedSeries', IntegerType::class, [
                 'label' => 'Series Completadas',
                 'attr' => ['min' => 1],
+                'constraints' => [
+                    new NotBlank(message: 'Las series son obligatorias'),
+                    new Positive(message: 'Debes completar al menos 1 serie')
+                ],
             ])
             ->add('repetitions', IntegerType::class, [
                 'label' => 'Repeticiones',
                 'attr' => ['min' => 1],
+                'constraints' => [
+                    new NotBlank(message: 'Las repeticiones son obligatorias'),
+                    new Positive(message: 'Debes hacer al menos 1 repetición')
+                ],
             ])
             ->add('weight', NumberType::class, [
                 'label' => 'Peso (kg)',
                 'attr' => ['min' => 0, 'step' => 0.5],
+                'constraints' => [
+                    new NotBlank(message: 'El peso es obligatorio (usa 0 si es con peso corporal)'),
+                    new PositiveOrZero(message: 'El peso no puede ser negativo')
+                ],
             ])
             ->add('durationMinutes', IntegerType::class, [
                 'label' => 'Duración (minutos)',
                 'attr' => ['min' => 1],
+                'constraints' => [
+                    new NotBlank(message: 'La duración es obligatoria'),
+                    new Positive(message: 'La duración debe ser de al menos 1 minuto')
+                ],
             ])
             ->add('completed', CheckboxType::class, [
                 'label' => 'Entrenamiento Completado',

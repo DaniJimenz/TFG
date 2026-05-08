@@ -32,12 +32,33 @@ class TrainingRepository extends ServiceEntityRepository
     //    }
 
     /**
+     * OPTIMIZADO: Carga los entrenamientos junto con sus ejercicios y rutinas (JOIN)
+     * para evitar el problema de consultas N+1.
+     */
+    public function findAllByUserWithRelations($user): array
+    {
+        return $this->createQueryBuilder('t')
+            ->select('t', 'e', 'r')
+            ->leftJoin('t.exercise', 'e')
+            ->leftJoin('t.routine', 'r')
+            ->andWhere('t.appUser = :user')
+            ->setParameter('user', $user)
+            ->orderBy('t.date', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
      * Find trainings after a specific date for a user
      * @return Training[]
      */
     public function findTrainingsAfterDate($user, \DateTimeImmutable $date): array
     {
         return $this->createQueryBuilder('t')
+            ->select('t', 'e', 'r')
+            ->leftJoin('t.exercise', 'e')
+            ->leftJoin('t.routine', 'r')
             ->andWhere('t.appUser = :user')
             ->andWhere('t.date >= :date')
             ->setParameter('user', $user)

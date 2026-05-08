@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Entity\Subscription;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -37,9 +36,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $points_xp = 0;
 
     #[ORM\Column]
-    private ?int $continuity = 0;
-
-    #[ORM\Column]
     private ?int $level = 0;
 
     #[ORM\Column(length: 100, nullable: true)]
@@ -72,66 +68,41 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $activity_level = null;
 
-    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Subscription::class)]
-    private ?Subscription $subscription = null;
-
-    /**
-     * @var Collection<int, Allergen>
-     */
-    #[ORM\ManyToMany(targetEntity: Allergen::class, inversedBy: 'users')]
-    private Collection $allergens;
-
     /**
      * @var Collection<int, Routine>
      */
-    #[ORM\OneToMany(targetEntity: Routine::class, mappedBy: 'owner')]
+    #[ORM\OneToMany(targetEntity: Routine::class, mappedBy: 'owner', cascade: ['remove'], orphanRemoval: true)]
     private Collection $routines;
 
     /**
      * @var Collection<int, Training>
      */
-    #[ORM\OneToMany(targetEntity: Training::class, mappedBy: 'appUser')]
+    #[ORM\OneToMany(targetEntity: Training::class, mappedBy: 'appUser', cascade: ['remove'], orphanRemoval: true)]
     private Collection $trainings;
 
     /**
      * @var Collection<int, UserAchievement>
      */
-    #[ORM\OneToMany(targetEntity: UserAchievement::class, mappedBy: 'appUser')]
+    #[ORM\OneToMany(targetEntity: UserAchievement::class, mappedBy: 'appUser', cascade: ['remove'], orphanRemoval: true)]
     private Collection $achievement;
 
     /**
      * @var Collection<int, Meal>
      */
-    #[ORM\OneToMany(targetEntity: Meal::class, mappedBy: 'appUser')]
+    #[ORM\OneToMany(targetEntity: Meal::class, mappedBy: 'appUser', cascade: ['remove'], orphanRemoval: true)]
     private Collection $meals;
 
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: TrainingPreference::class, cascade: ['persist', 'remove'])]
     private ?TrainingPreference $trainingPreference = null;
 
-    /**
-     * @var Collection<int, SocialConnection>
-     */
-    #[ORM\OneToMany(targetEntity: SocialConnection::class, mappedBy: 'user', cascade: ['remove'])]
-    private Collection $socialConnections;
-
-    /**
-     * @var Collection<int, DataBackup>
-     */
-    #[ORM\OneToMany(targetEntity: DataBackup::class, mappedBy: 'user', cascade: ['remove'])]
-    private Collection $backups;
-
     public function __construct()
     {
-        $this->allergens = new ArrayCollection();
         $this->routines = new ArrayCollection();
         $this->trainings = new ArrayCollection();
         $this->achievement = new ArrayCollection();
         $this->meals = new ArrayCollection();
-        $this->socialConnections = new ArrayCollection();
-        $this->backups = new ArrayCollection();
 
         $this->points_xp = 0; // Así cada usuario nuevo empieza con 0 puntos //
-        $this->continuity = 0;
         $this->level = 0;
         $this->created_at = new \DateTimeImmutable(); //Fecha de registro automática //
         $this->rol = 'ROLE_USER'; // Rol por defecto // 
@@ -198,18 +169,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPointsXp(int $points_xp): static
     {
         $this->points_xp = $points_xp;
-
-        return $this;
-    }
-
-    public function getContinuity(): ?int
-    {
-        return $this->continuity;
-    }
-
-    public function setContinuity(int $continuity): static
-    {
-        $this->continuity = $continuity;
 
         return $this;
     }
@@ -342,50 +301,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setActivityLevel(string $activity_level): static
     {
         $this->activity_level = $activity_level;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Allergen>
-     */
-    public function getAllergens(): Collection
-    {
-        return $this->allergens;
-    }
-
-    public function addAllergen(Allergen $allergen): static
-    {
-        if (!$this->allergens->contains($allergen)) {
-            $this->allergens->add($allergen);
-        }
-
-        return $this;
-    }
-
-    public function removeAllergen(Allergen $allergen): static
-    {
-        $this->allergens->removeElement($allergen);
-
-        return $this;
-    }
-
-    public function getSubscription(): ?Subscription
-    {
-        return $this->subscription;
-    }
-
-    public function setSubscription(?Subscription $subscription): static
-    {
-        if ($subscription === null && $this->subscription !== null) {
-            $this->subscription->setUser(null);
-        }
-
-        if ($subscription !== null && $subscription->getUser() !== $this) {
-            $subscription->setUser($this);
-        }
-
-        $this->subscription = $subscription;
 
         return $this;
     }
@@ -546,60 +461,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTrainingPreference(?TrainingPreference $trainingPreference): static
     {
         $this->trainingPreference = $trainingPreference;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, SocialConnection>
-     */
-    public function getSocialConnections(): Collection
-    {
-        return $this->socialConnections;
-    }
-
-    public function addSocialConnection(SocialConnection $socialConnection): static
-    {
-        if (!$this->socialConnections->contains($socialConnection)) {
-            $this->socialConnections->add($socialConnection);
-            $socialConnection->setUser($this);
-        }
-        return $this;
-    }
-
-    public function removeSocialConnection(SocialConnection $socialConnection): static
-    {
-        if ($this->socialConnections->removeElement($socialConnection)) {
-            if ($socialConnection->getUser() === $this) {
-                $socialConnection->setUser(null);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, DataBackup>
-     */
-    public function getBackups(): Collection
-    {
-        return $this->backups;
-    }
-
-    public function addBackup(DataBackup $backup): static
-    {
-        if (!$this->backups->contains($backup)) {
-            $this->backups->add($backup);
-            $backup->setUser($this);
-        }
-        return $this;
-    }
-
-    public function removeBackup(DataBackup $backup): static
-    {
-        if ($this->backups->removeElement($backup)) {
-            if ($backup->getUser() === $this) {
-                $backup->setUser(null);
-            }
-        }
         return $this;
     }
 }

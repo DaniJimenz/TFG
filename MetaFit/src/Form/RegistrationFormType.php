@@ -11,6 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 
@@ -29,12 +30,18 @@ class RegistrationFormType extends AbstractType
                     new NotBlank(message: 'Por favor, introduce tus apellidos'),
                 ],
             ])
-            ->add('email')
+            ->add('email', TextType::class, [
+                'constraints' => [
+                    new NotBlank(message: 'Por favor, introduce un correo electrónico'),
+                    new Email(message: 'El correo electrónico no es válido'),
+                ],
+            ])
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
+                'label' => 'Acepto los términos y condiciones',
                 'constraints' => [
                     new IsTrue(
-                        message: 'You should agree to our terms.',
+                        message: 'Debes aceptar nuestros términos y condiciones.',
                     ),
                 ],
             ])
@@ -48,8 +55,8 @@ class RegistrationFormType extends AbstractType
                         message: 'Por favor, Introduce una contraseña',
                     ),
                     new Length(
-                        min:6,
-                        minMessage: 'Your password should be at least {{ limit }} characters',
+                        min: 8,
+                        minMessage: 'Tu contraseña debe tener al menos {{ limit }} caracteres',
                         // max length allowed by Symfony for security reasons
                         max:4096,
                     ),

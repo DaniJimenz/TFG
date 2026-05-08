@@ -4,10 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\TrainingPreference;
-use App\Entity\DataBackup;
 use App\Repository\TrainingPreferenceRepository;
-use App\Repository\SocialConnectionRepository;
-use App\Repository\DataBackupRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -165,125 +162,6 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * Gestionar conexiones sociales
-     */
-    #[Route('/social', name: 'social', methods: ['GET', 'POST'])]
-    public function social(
-        Request $request,
-        SocialConnectionRepository $socialRepo,
-        EntityManagerInterface $entityManager
-    ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
-        
-        $connections = $socialRepo->findBy(['user' => $user]);
-
-        if ($request->isMethod('POST')) {
-            $action = $request->request->get('action');
-            
-            if (!$this->isCsrfTokenValid('social_action', $request->request->get('_token'))) {
-                $this->addFlash('error', 'Token de seguridad inválido.');
-                return $this->redirectToRoute('profile_social');
-            }
-
-            if ($action === 'update') {
-                $connectionId = $request->request->get('connection_id');
-                $connection = $entityManager->getRepository(\App\Entity\SocialConnection::class)->find($connectionId);
-                
-                if ($connection && $connection->getUser() === $user) {
-                    $connection->setShareStats(isset($request->request->get('data')['share_stats']));
-                    $connection->setAutoPost(isset($request->request->get('data')['auto_post']));
-                    $connection->setLastSync(new \DateTimeImmutable());
-                    $entityManager->persist($connection);
-                    $entityManager->flush();
-                    
-                    return $this->json(['success' => true]);
-                }
-            }
-            
-            if ($action === 'disconnect') {
-                $connectionId = $request->request->get('connection_id');
-                $connection = $entityManager->getRepository(\App\Entity\SocialConnection::class)->find($connectionId);
-                
-                if ($connection && $connection->getUser() === $user) {
-                    $entityManager->remove($connection);
-                    $entityManager->flush();
-                    
-                    $this->addFlash('success', '¡Conexión eliminada!');
-                }
-            }
-        }
-
-        return $this->render('profile/social.html.twig', [
-            'connections' => $connections,
-        ]);
-    }
-
-    /**
-     * Gestionar datos y backups
-     */
-    #[Route('/backups', name: 'backups', methods: ['GET', 'POST'])]
-    public function backups(
-        Request $request,
-        DataBackupRepository $backupRepo,
-        EntityManagerInterface $entityManager
-    ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
-        
-        $backups = $backupRepo->findBy(['user' => $user], ['created_at' => 'DESC']);
-
-        if ($request->isMethod('POST')) {
-            $action = $request->request->get('action');
-            
-            if (!$this->isCsrfTokenValid('backup_action', $request->request->get('_token'))) {
-                $this->addFlash('error', 'Token de seguridad inválido.');
-                return $this->redirectToRoute('profile_backups');
-            }
-
-            if ($action === 'create_backup') {
-                $data = $request->request->all();
-                
-                $backup = new DataBackup();
-                $backup->setUser($user);
-                $backup->setFileName('metafit_backup_' . $user->getId() . '_' . date('Y-m-d_H-i-s') . '.json');
-                $backup->setBackupType($data['backup_type'] ?? 'full');
-                $backup->setIncludePersonalData(isset($data['include_personal_data']));
-                $backup->setIncludeRoutines(isset($data['include_routines']));
-                $backup->setIncludeTrainings(isset($data['include_trainings']));
-                $backup->setIncludeMeals(isset($data['include_meals']));
-                $backup->setIncludeAchievements(isset($data['include_achievements']));
-                $backup->setCreatedAt(new \DateTimeImmutable());
-                $backup->setExpiresAt(new \DateTimeImmutable('+30 days'));
-                $backup->setIsAutomated(false);
-                $backup->setFileSizeBytes(0); // Se calcula al generar
-
-                $entityManager->persist($backup);
-                $entityManager->flush();
-
-                $this->addFlash('success', '¡Backup creado exitosamente!');
-                return $this->redirectToRoute('profile_backups');
-            }
-            
-            if ($action === 'delete_backup') {
-                $backupId = $request->request->get('backup_id');
-                $backup = $backupRepo->find($backupId);
-                
-                if ($backup && $backup->getUser() === $user) {
-                    $entityManager->remove($backup);
-                    $entityManager->flush();
-                    
-                    $this->addFlash('success', '¡Backup eliminado!');
-                }
-            }
-        }
-
-        return $this->render('profile/backups.html.twig', [
-            'backups' => $backups,
-        ]);
-    }
-
-    /**
      * Cambiar contraseña
      */
     #[Route('/change-password', name: 'change_password', methods: ['GET', 'POST'])]
@@ -330,49 +208,5 @@ class ProfileController extends AbstractController
         }
 
         return $this->render('profile/change_password.html.twig');
-    }
-
-    /**
-     * Privacidad y seguridad
-     */
-    #[Route('/privacy', name: 'privacy', methods: ['GET', 'POST'])]
-    public function privacy(
-        Request $request,
-        TrainingPreferenceRepository $prefRepo,
-        EntityManagerInterface $entityManager
-    ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
-        
-        $preferences = $prefRepo->findOneBy(['user' => $user]);
-
-        if ($request->isMethod('POST')) {
-            if (!$this->isCsrfTokenValid('privacy_settings', $request->request->get('_token'))) {
-                $this->addFlash('error', 'Token de seguridad inválido.');
-                return $this->redirectToRoute('profile_privacy');
-            }
-
-            if (!$preferences) {
-                $preferences = new TrainingPreference();
-                $preferences->setUser($user);
-            }
-
-            $data = $request->request->all();
-            $preferences->setProfilePublic(isset($data['profile_public']));
-            $preferences->setStatsVisible(isset($data['stats_visible']));
-            $preferences->setAchievementsVisible(isset($data['achievements_visible']));
-            $preferences->setRoutinesVisible(isset($data['routines_visible']));
-            $preferences->setUpdatedAt(new \DateTimeImmutable());
-
-            $entityManager->persist($preferences);
-            $entityManager->flush();
-
-            $this->addFlash('success', '¡Configuración de privacidad actualizada!');
-            return $this->redirectToRoute('profile_privacy');
-        }
-
-        return $this->render('profile/privacy.html.twig', [
-            'preferences' => $preferences,
-        ]);
     }
 }
