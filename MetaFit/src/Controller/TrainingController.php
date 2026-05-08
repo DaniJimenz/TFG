@@ -9,6 +9,7 @@ use App\Form\TrainingFormType;
 use App\Repository\TrainingRepository;
 use App\Repository\ExerciseRepository;
 use App\Repository\RoutineRepository;
+use App\Service\AchievementService;
 use App\Service\RoutineService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -60,7 +61,8 @@ class TrainingController extends AbstractController
     public function new(
         Request $request,
         EntityManagerInterface $entityManager,
-        RoutineService $routineService
+        RoutineService $routineService,
+        AchievementService $achievementService
     ): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -76,10 +78,22 @@ class TrainingController extends AbstractController
             // Calcular 1RM estimado
             $training->setOneRmEstimated($routineService->calculateOneRM($training->getWeight(), $training->getRepetitions()));
 
+            // Recompensar al usuario con XP por su entrenamiento manual
+            $user->setPointsXp($user->getPointsXp() + 10);
+            
+            // Subir de nivel si corresponde
+            if ($user->getPointsXp() >= ($user->getLevel() + 1) * 100) {
+                $user->setLevel($user->getLevel() + 1);
+            }
+
             $entityManager->persist($training);
+            $entityManager->persist($user);
             $entityManager->flush();
 
-            $this->addFlash('success', '¡Entrenamiento registrado exitosamente!');
+            $achievementService->checkWorkoutAchievements($user);
+            $achievementService->checkStreakAchievements($user);
+
+            $this->addFlash('success', '¡Entrenamiento registrado exitosamente! +10 XP');
 
             return $this->redirectToRoute('training_index');
         }
@@ -163,6 +177,7 @@ class TrainingController extends AbstractController
             'total_weight_lifted' => 0,
             'total_duration' => 0,
             'avg_weight' => 0,
+            'sum_weights' => 0,
         ];
 
         $completedCount = 0;
@@ -171,12 +186,13 @@ class TrainingController extends AbstractController
                 $completedCount++;
             }
             $stats['total_weight_lifted'] += ($training->getWeight() * $training->getRepetitions() * $training->getCompletedSeries());
+            $stats['sum_weights'] += $training->getWeight();
             $stats['total_duration'] += $training->getDurationMinutes();
         }
 
         $stats['completed_trainings'] = $completedCount;
         if ($stats['total_trainings'] > 0) {
-            $stats['avg_weight'] = round($stats['total_weight_lifted'] / $stats['total_trainings'], 2);
+            $stats['avg_weight'] = round($stats['sum_weights'] / $stats['total_trainings'], 2);
         }
 
         // Agrupar entrenamientos por ejercicio para mostrar los más trabajados

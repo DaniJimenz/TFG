@@ -23,22 +23,23 @@ class QuickEditExerciseType extends AbstractType
             ->add('muscular_group', ChoiceType::class, [
                 'label' => 'Grupo Muscular',
                 'choices' => [
-                    'Pecho' => 'chest',
-                    'Espalda' => 'back',
-                    'Piernas' => 'legs',
-                    'Hombros' => 'shoulders',
-                    'Brazos' => 'arms',
-                    'Core' => 'core',
-                    'Glúteos' => 'glutes',
+                    'Pecho' => 'Pecho',
+                    'Espalda' => 'Espalda',
+                    'Piernas' => 'Piernas',
+                    'Hombros' => 'Hombros',
+                    'Brazos' => 'Brazos',
+                    'Core' => 'Core',
+                    'Antebrazos' => 'Antebrazos',
+                    'Glúteos' => 'Glúteos',
                 ],
                 'mapped' => true,
             ])
             ->add('difficulty', ChoiceType::class, [
                 'label' => 'Dificultad',
                 'choices' => [
-                    'Principiante' => 'beginner',
-                    'Intermedio' => 'intermediate',
-                    'Avanzado' => 'advanced',
+                    'Baja' => 'Baja',
+                    'Media' => 'Media',
+                    'Alta' => 'Alta',
                 ],
                 'mapped' => true,
             ])

@@ -111,12 +111,12 @@ class HomeController extends AbstractController
             $mealsData = [];
             foreach ($meals as $meal) {
                 $mealsData[] = [
-                    'name' => $meal->getName(),
-                    'type' => $meal->getFoodType(),
-                    'calories' => $meal->getCalories(),
-                    'proteins' => $meal->getProteines(),
-                    'carbs' => $meal->getCarbohidrats(),
-                    'fats' => $meal->getFats(),
+                    'name' => ucfirst($meal->getFoodType()), // Usamos el tipo de comida como nombre
+                    'type' => ucfirst($meal->getFoodType()),
+                    'calories' => $meal->getCaloriesTotal(),
+                    'proteins' => $meal->getProteinesG(),
+                    'carbs' => $meal->getCarbohidratesG(),
+                    'fats' => $meal->getFatsG(),
                     'date' => $meal->getRegisterDate()->format('H:i'),
                 ];
             }

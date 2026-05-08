@@ -73,10 +73,10 @@ class ProfileController extends AbstractController
 
             $user->setName($data['name']);
             $user->setLastname($data['lastname']);
-            $user->setAge((int)($data['age'] ?? null));
-            $user->setHeight((float)($data['height'] ?? null));
-            $user->setGender($data['gender'] ?? null);
-            $user->setActualWeight((float)($data['actual_weight'] ?? null));
+            $user->setAge(isset($data['age']) && $data['age'] !== '' ? (int)$data['age'] : $user->getAge());
+            $user->setHeight(isset($data['height']) && $data['height'] !== '' ? (float)$data['height'] : $user->getHeight());
+            $user->setGender(!empty($data['gender']) ? $data['gender'] : $user->getGender());
+            $user->setActualWeight(isset($data['actual_weight']) && $data['actual_weight'] !== '' ? (float)$data['actual_weight'] : $user->getActualWeight());
             $user->setPurpose($data['purpose'] ?? null);
             $user->setActivityLevel($data['activity_level'] ?? null);
             $user->setUpdatedAt(new \DateTimeImmutable());
@@ -181,12 +181,12 @@ class ProfileController extends AbstractController
                 return $this->redirectToRoute('profile_change_password');
             }
 
-            if (!$passwordHasher->isPasswordValid($user, $data['current_password'])) {
+            if (!$passwordHasher->isPasswordValid($user, $data['current_password'] ?? '')) {
                 $this->addFlash('error', 'Contraseña actual incorrecta');
                 return $this->redirectToRoute('profile_change_password');
             }
 
-            if ($data['new_password'] !== $data['confirm_password']) {
+            if (($data['new_password'] ?? '') !== ($data['confirm_password'] ?? '')) {
                 $this->addFlash('error', 'Las contraseñas nuevas no coinciden');
                 return $this->redirectToRoute('profile_change_password');
             }

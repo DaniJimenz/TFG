@@ -74,7 +74,7 @@ class DashboardStatsService
             'completedTrainings' => count($completedTrainings),
             'weekTrainings' => count($weekTrainings),
             'monthTrainings' => count($monthTrainings),
-            
+
             'totalCalories' => (int)$totalCalories,
             'weekCalories' => (int)$weekCalories,
             'monthCalories' => (int)$monthCalories,
@@ -85,7 +85,7 @@ class DashboardStatsService
             
             'currentStreak' => $currentStreak,
             'longestStreak' => $longestStreak,
-            
+                
             'avgWeight' => round($avgWeight, 2),
             'topMuscleGroup' => $topMuscleGroup,
             'favoriteExercise' => $favoriteExercise,
@@ -150,9 +150,10 @@ class DashboardStatsService
 
         foreach ($trainings as $training) {
             if ($lastDate) {
-                $lastDate = (new \DateTime())->setTimestamp($lastDate->getTimestamp());
-                $trainingDate = (new \DateTime())->setTimestamp($training->getDate()->getTimestamp());
-                $interval = $lastDate->diff($trainingDate)->days;
+                // Seteamos a las 00:00:00 para evitar el bug de las 24 horas estrictas de PHP
+                $lastDateObj = (new \DateTime())->setTimestamp($lastDate->getTimestamp())->setTime(0, 0, 0);
+                $trainingDateObj = (new \DateTime())->setTimestamp($training->getDate()->getTimestamp())->setTime(0, 0, 0);
+                $interval = $lastDateObj->diff($trainingDateObj)->days;
 
                 if ($interval === 1) {
                     $currentStreak++;

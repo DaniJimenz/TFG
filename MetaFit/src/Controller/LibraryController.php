@@ -92,6 +92,12 @@ class LibraryController extends AbstractController
     public function delete(Exercise $exercise, Request $request, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete_exercise_' . $exercise->getId(), $request->request->get('_token'))) {
+            // Prevenir Error 500: No borrar si ya ha sido usado por usuarios
+            if ($exercise->getTrainings()->count() > 0 || $exercise->getRoutines()->count() > 0) {
+                $this->addFlash('error', 'No se puede eliminar: Hay usuarios que ya están utilizando este ejercicio en sus rutinas o historial.');
+                return $this->redirectToRoute('app_library_index');
+            }
+
             // Eliminar imagen asociada
             $this->imageUploadService->deleteExerciseImage($exercise->getUrlImage());
             
