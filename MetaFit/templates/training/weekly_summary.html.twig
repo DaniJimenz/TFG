@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mi Progreso - MetaFit AI{% endblock %}
+{% block title %}Resumen Semanal - MetaFit AI{% endblock %}
 
 {% block body %}
 <div class="bg-background-dark text-white">
@@ -11,19 +11,19 @@
             <div>
                 <div class="flex items-center gap-4 mb-4">
                     <div class="h-1 w-12 bg-primary"></div>
-                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Análisis Detallado</span>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Análisis Semanal</span>
                 </div>
                 <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
                     Mi <span class="text-primary">Progreso</span>
                 </h1>
                 <p class="text-gray-400 text-lg font-light">
-                    Últimos 30 días
+                    Últimos 7 días
                 </p>
             </div>
             <div class="flex gap-3">
-                <a href="{{ path('training_weekly_summary') }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
-                    <span class="material-symbols-outlined">calendar_month</span>
-                    Semanal
+                <a href="{{ path('training_progress') }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    Mensual
                 </a>
                 <a href="{{ path('training_index') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
                     <span class="material-symbols-outlined">history</span>
@@ -37,7 +37,7 @@
             <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total Entrenamientos</p>
                 <p class="text-3xl font-black italic text-primary">{{ stats.total_trainings }}</p>
-                <p class="text-xs text-slate-600 mt-2">en 30 días</p>
+                <p class="text-xs text-slate-600 mt-2">en 7 días</p>
             </div>
             <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
                 <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Completados</p>
@@ -103,12 +103,11 @@
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-slate-400 font-bold">Entrenamientos/Semana</span>
                             <span class="text-accent-purple font-bold">
-                                {% set avg_weekly = (stats.total_trainings / 4.28)|number_format(1) %}
-                                {{ avg_weekly }}
+                                {{ stats.total_trainings }}
                             </span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-2">
-                            <div class="bg-accent-purple h-2 rounded-full" style="width: {{ (avg_weekly / 7 * 100)|number_format(0) }}%"></div>
+                            <div class="bg-accent-purple h-2 rounded-full" style="width: {{ (stats.total_trainings / 7 * 100)|number_format(0) }}%"></div>
                         </div>
                     </div>
                 </div>
@@ -150,7 +149,7 @@
                 </div>
             {% else %}
                 <div class="text-center py-8">
-                    <p class="text-slate-400">No hay suficientes datos para mostrar los ejercicios más trabajados</p>
+                    <p class="text-slate-400">No hay suficientes datos para mostrar los ejercicios más trabajados en esta semana</p>
                 </div>
             {% endif %}
         </div>

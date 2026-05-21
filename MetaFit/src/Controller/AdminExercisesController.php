@@ -27,7 +27,7 @@ class AdminExercisesController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/quick-edit', name: 'quick_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/quick-edit', name: 'quick_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function quickEdit(Exercise $exercise, Request $request, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
     {
         $form = $this->createForm(QuickEditExerciseType::class, $exercise);

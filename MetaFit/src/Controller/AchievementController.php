@@ -58,7 +58,7 @@ class AchievementController extends AbstractController
     /**
      * Ver detalle de un logro
      */
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(int $id, AchievementRepository $achievementRepository): Response
     {
         $achievement = $achievementRepository->find($id);

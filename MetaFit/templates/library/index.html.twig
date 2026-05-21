@@ -3,17 +3,21 @@
 {% block title %}Biblioteca de Ejercicios - MetaFit AI{% endblock %}
 
 {% block body %}
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8">
         {# Título y subtítulo con estilo MetaFit #}
-        <div class="mb-10 flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 mb-6 md:mb-8">
             <div>
-                <h1 class="text-4xl font-black italic uppercase text-white tracking-tighter">
-                    Biblioteca de <span class="text-primary">Ejercicios</span>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Biblioteca</span>
+                </div>
+                <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                    Ejercicios <span class="text-primary">Disponibles</span>
                 </h1>
-                <p class="text-slate-500 mt-2 font-medium">Domina cada movimiento con guías de técnica impulsadas por IA.</p>
+                <p class="text-gray-400 text-lg font-light">Domina cada movimiento con guías de técnica impulsadas por IA.</p>
             </div>
             {% if is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('app_library_new') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                <a href="{{ path('app_library_new') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2 w-fit">
                     <span class="material-symbols-outlined">add</span>
                     Nuevo Ejercicio
                 </a>
@@ -45,7 +49,7 @@
             {% for exercise in exercises %}
                 <div class="exercise-card cursor-pointer bg-[#0d1117]/40 border border-slate-800/50 rounded-3xl overflow-hidden group hover:border-primary/40 transition-all duration-500"
                      data-name="{{ exercise.name|lower }}"
-                     data-group="{{ exercise.muscularGroup }}"
+                     data-group="{{ exercise.muscularGroup|lower }}"
                      data-desc="{{ exercise.description|escape('html') }}"
                      data-tech="{{ exercise.technique|escape('html') }}"
                      data-video="{{ exercise.urlVideo|escape('html') }}">
@@ -157,14 +161,14 @@
             function filterExercises() {
                 const searchTerm = searchInput.value.toLowerCase().trim();
                 const activeBtn = document.querySelector('.active-cat');
-                const activeCategory = activeBtn ? activeBtn.textContent.trim() : 'Todos';
+                const activeCategory = activeBtn ? activeBtn.textContent.trim().toLowerCase() : 'todos';
 
                 cards.forEach(card => {
                     const name = card.dataset.name.toLowerCase();
-                    const group = card.dataset.group;
+                    const group = card.dataset.group.toLowerCase();
 
                     const matchesSearch = searchTerm === '' || name.includes(searchTerm);
-                    const matchesCategory = activeCategory === 'Todos' || group === activeCategory;
+                    const matchesCategory = activeCategory === 'todos' || group === activeCategory;
 
                     card.style.display = (matchesSearch && matchesCategory) ? 'block' : 'none';
                 });

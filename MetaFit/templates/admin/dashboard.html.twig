@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Panel Administrativo - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8">
+    {# HEADER #}
+    <div class="mb-12">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="h-1 w-12 bg-red-500"></div>
+            <span class="text-red-500 font-bold tracking-[0.3em] uppercase text-sm">Sistema Admin</span>
+        </div>
+        <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+            Panel <span class="text-red-500">Administrativo</span>
+        </h1>
+        <p class="text-gray-400 text-lg font-light">Control total de la plataforma MetaFit</p>
+    </div>
+
+    {# KPIs PRINCIPALES #}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        {# Usuarios Totales #}
+        <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Usuarios Totales</p>
+                    <p class="text-3xl font-black italic text-red-500 mt-2">{{ totalUsers }}</p>
+                </div>
+                <span class="material-symbols-outlined text-red-500 text-4xl opacity-20">group</span>
+            </div>
+            <p class="text-xs text-slate-600">{{ newUsersLastWeek }} nuevos esta semana</p>
+        </div>
+
+        {# Usuarios Activos #}
+        <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Usuarios Activos</p>
+                    <p class="text-3xl font-black italic text-green-500 mt-2">{{ activeUsers }}</p>
+                </div>
+                <span class="material-symbols-outlined text-green-500 text-4xl opacity-20">check_circle</span>
+            </div>
+            <p class="text-xs text-slate-600">{{ ((activeUsers / totalUsers * 100)|round(1)) }}% de actividad</p>
+        </div>
+
+        {# Entrenamientos Totales #}
+        <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Entrenamientos</p>
+                    <p class="text-3xl font-black italic text-accent-purple mt-2">{{ totalTrainings }}</p>
+                </div>
+                <span class="material-symbols-outlined text-accent-purple text-4xl opacity-20">fitness_center</span>
+            </div>
+            <p class="text-xs text-slate-600">{{ trainingsLastWeek }} esta semana</p>
+        </div>
+
+        {# Base de Ejercicios #}
+        <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Ejercicios</p>
+                    <p class="text-3xl font-black italic mt-2">{{ totalExercises }}</p>
+                </div>
+                <span class="material-symbols-outlined text-slate-600 text-4xl opacity-20">library_books</span>
+            </div>
+            <p class="text-xs text-slate-600">En la base de datos</p>
+        </div>
+    </div>
+
+    {# ACCIONES RÁPIDAS #}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {# Gestionar Usuarios #}
+        <a href="{{ path('admin_users_index') }}" class="bg-[#0d1117] border border-slate-800 hover:border-red-500/50 p-8 rounded-2xl transition-all group">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <span class="inline-block p-3 bg-red-900/20 rounded-lg mb-4 group-hover:bg-red-900/30 transition-all">
+                        <span class="material-symbols-outlined text-red-500">manage_accounts</span>
+                    </span>
+                    <h3 class="text-xl font-bold uppercase tracking-tighter mb-2">Usuarios</h3>
+                </div>
+                <span class="material-symbols-outlined text-slate-600 group-hover:text-red-500 transition">arrow_forward</span>
+            </div>
+            <p class="text-slate-400 text-sm">Gestiona usuarios, roles y permisos</p>
+        </a>
+
+        {# Gestionar Ejercicios #}
+        <a href="{{ path('admin_exercises_index') }}" class="bg-[#0d1117] border border-slate-800 hover:border-red-500/50 p-8 rounded-2xl transition-all group">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <span class="inline-block p-3 bg-red-900/20 rounded-lg mb-4 group-hover:bg-red-900/30 transition-all">
+                        <span class="material-symbols-outlined text-red-500">edit</span>
+                    </span>
+                    <h3 class="text-xl font-bold uppercase tracking-tighter mb-2">Ejercicios</h3>
+                </div>
+                <span class="material-symbols-outlined text-slate-600 group-hover:text-red-500 transition">arrow_forward</span>
+            </div>
+            <p class="text-slate-400 text-sm">Crea, edita y elimina ejercicios</p>
+        </a>
+
+        {# Estadísticas #}
+        <a href="{{ path('admin_stats_index') }}" class="bg-[#0d1117] border border-slate-800 hover:border-red-500/50 p-8 rounded-2xl transition-all group">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <span class="inline-block p-3 bg-red-900/20 rounded-lg mb-4 group-hover:bg-red-900/30 transition-all">
+                        <span class="material-symbols-outlined text-red-500">analytics</span>
+                    </span>
+                    <h3 class="text-xl font-bold uppercase tracking-tighter mb-2">Estadísticas</h3>
+                </div>
+                <span class="material-symbols-outlined text-slate-600 group-hover:text-red-500 transition">arrow_forward</span>
+            </div>
+            <p class="text-slate-400 text-sm">Análisis profundo de la plataforma</p>
+        </a>
+    </div>
+
+    {# USUARIOS MÁS ACTIVOS #}
+    <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8 mb-12">
+        <h2 class="text-2xl font-black italic uppercase tracking-tighter mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-red-500">trending_up</span>
+            Usuarios Más Activos
+        </h2>
+
+        {% if topUsers is not empty %}
+            <div class="space-y-3">
+                {% for user in topUsers %}
+                    <div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl hover:bg-slate-900 transition-all border border-slate-800/50">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-red-900/20 flex items-center justify-center text-red-500 font-bold">
+                                {{ user.name|first|upper }}
+                            </div>
+                            <div>
+                                <p class="font-bold text-white">{{ user.name }}</p>
+                                <p class="text-xs text-slate-500">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-red-500">{{ user.training_count }}</p>
+                            <p class="text-xs text-slate-500">entrenamientos</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-8 text-slate-500">
+                <span class="material-symbols-outlined text-3xl mb-2">inbox</span>
+                <p>No hay datos disponibles</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {# INFORMACIÓN RÁPIDA #}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        {# Últimas Acciones #}
+        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
+            <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6">Información del Sistema</h2>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between items-center py-2 border-b border-slate-800/50">
+                    <span class="text-slate-400">Versión de MetaFit</span>
+                    <span class="text-red-500 font-bold">1.0.0</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-800/50">
+                    <span class="text-slate-400">Fecha Actual</span>
+                    <span class="text-white font-bold">{{ "now"|date("d/m/Y") }}</span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <span class="text-slate-400">Estado del Sistema</span>
+                    <span class="text-green-500 font-bold flex items-center gap-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Operativo
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {# Atajos de Administración #}
+        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
+            <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6">Atajos Útiles</h2>
+            <div class="space-y-2">
+                <a href="{{ path('admin_users_index') }}" class="block p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900 transition-all text-sm font-bold text-slate-300 hover:text-red-500">
+                    → Ir a Gestión de Usuarios
+                </a>
+                <a href="{{ path('admin_exercises_index') }}" class="block p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900 transition-all text-sm font-bold text-slate-300 hover:text-red-500">
+                    → Ir a Gestión de Ejercicios
+                </a>
+                <a href="{{ path('admin_stats_index') }}" class="block p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900 transition-all text-sm font-bold text-slate-300 hover:text-red-500">
+                    → Ver Estadísticas Detalladas
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

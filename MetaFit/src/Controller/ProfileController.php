@@ -29,6 +29,13 @@ class ProfileController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         
+        // Si es admin, renderizar perfil de admin
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $this->render('profile/admin_index.html.twig', [
+                'user' => $user,
+            ]);
+        }
+        
         $preferences = $prefRepo->findOneBy(['user' => $user]);
 
         return $this->render('profile/index.html.twig', [
@@ -55,10 +62,10 @@ class ProfileController extends AbstractController
             $constraints = new Assert\Collection([
                 'name' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('string')]),
                 'lastname' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('string')]),
-                'age' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 14, 'max' => 100])]),
-                'height' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 100, 'max' => 250])]),
+                'age' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 14, max: 100)]),
+                'height' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 100, max: 250)]),
                 'gender' => new Assert\Optional([new Assert\Choice(['H', 'M', 'Hombre', 'Mujer'])]),
-                'actual_weight' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 30, 'max' => 300])]),
+                'actual_weight' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 30, max: 300)]),
                 'purpose' => new Assert\Optional([new Assert\Type('string')]),
                 'activity_level' => new Assert\Optional([new Assert\Type('string')]),
             ]);

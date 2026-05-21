@@ -3,134 +3,171 @@
 {% block title %}Gestión de Usuarios - Admin{% endblock %}
 
 {% block body %}
-<div class="bg-background-dark text-white min-h-screen py-12 px-4">
-    <div class="max-w-7xl mx-auto">
-
-        {# HEADER #}
-        <div class="mb-8">
-            <div class="flex items-center gap-4 mb-4">
-                <div class="h-1 w-12 bg-primary"></div>
-                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Panel Admin</span>
-            </div>
-            <div class="flex items-center justify-between">
-                <h1 class="text-4xl font-black uppercase tracking-tighter">
-                    Usuarios <span class="text-primary">Registrados</span>
-                </h1>
-                <a href="{{ path('admin_users_export_csv') }}" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-all font-bold uppercase text-sm flex items-center gap-2">
-                    <span class="material-symbols-outlined">download</span>
-                    Exportar CSV
-                </a>
-            </div>
+<div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8">
+    {# HEADER #}
+    <div class="mb-12">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="h-1 w-12 bg-red-500"></div>
+            <span class="text-red-500 font-bold tracking-[0.3em] uppercase text-sm">Gestión</span>
         </div>
-
-        {# SEARCH Y FILTROS #}
-        <div class="mb-8 flex gap-4 items-end">
-            <form method="GET" class="flex gap-4 w-full">
-                <input 
-                    type="text" 
-                    name="search" 
-                    value="{{ search }}"
-                    placeholder="Buscar por email o nombre..."
-                    class="flex-1 bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold placeholder-slate-500 focus:border-primary focus:outline-none transition-all"
-                >
-                <select name="sort" class="bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
-                    <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Fecha Registro</option>
-                    <option value="name" {% if sort == 'name' %}selected{% endif %}>Nombre</option>
-                    <option value="points_xp" {% if sort == 'points_xp' %}selected{% endif %}>XP</option>
-                </select>
-                <select name="direction" class="bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
-                    <option value="DESC" {% if direction == 'DESC' %}selected{% endif %}>Descendente</option>
-                    <option value="ASC" {% if direction == 'ASC' %}selected{% endif %}>Ascendente</option>
-                </select>
-                <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all font-bold uppercase text-sm">
-                    <span class="material-symbols-outlined">search</span>
-                </button>
-            </form>
+        <div class="flex items-center justify-between">
+            <h1 class="text-5xl font-black uppercase tracking-tighter">
+                Usuarios <span class="text-red-500">Registrados</span>
+            </h1>
+            <a href="{{ path('admin_users_export_csv') }}" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase flex items-center gap-2">
+                <span class="material-symbols-outlined">download</span>
+                Exportar CSV
+            </a>
         </div>
+    </div>
 
-        {# TABLA DE USUARIOS #}
-        <div class="bg-[#0d1117] border border-slate-800 rounded-lg overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-slate-900 border-b border-slate-800">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Email</th>
-                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Nombre</th>
-                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">XP / Nivel</th>
-                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Entrenamientos</th>
-                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Rol</th>
-                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Estado</th>
-                            <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition-all">
-                            <td class="px-6 py-4 text-sm">{{ user.email }}</td>
-                            <td class="px-6 py-4 text-sm font-bold">{{ user.name }} {{ user.lastname }}</td>
-                            <td class="px-6 py-4 text-sm">
-                                <span class="text-primary font-bold">{{ user.pointsXp }} XP</span> / Lvl {{ user.level }}
-                            </td>
-                            <td class="px-6 py-4 text-sm">{{ user.trainings|length }}</td>
-                            <td class="px-6 py-4 text-sm">
-                                {% if user.rol == 'ROLE_ADMIN' %}
-                                    <span class="bg-red-900/30 text-red-400 px-3 py-1 rounded-full text-xs font-bold uppercase">Admin</span>
-                                {% else %}
-                                    <span class="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-bold uppercase">Usuario</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 text-sm">
-                                {% if user.deletedAt %}
-                                    <span class="text-red-500 font-bold">❌ Inactivo</span>
-                                {% else %}
-                                    <span class="text-green-500 font-bold">✓ Activo</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 text-sm">
-                                <div class="flex gap-2">
-                                    <a href="{{ path('admin_users_show', {id: user.id}) }}" class="text-primary hover:text-primary/80 font-bold transition-all">
-                                        <span class="material-symbols-outlined text-lg">visibility</span>
-                                    </a>
-                                    <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="text-blue-400 hover:text-blue-300 font-bold transition-all">
-                                        <span class="material-symbols-outlined text-lg">edit</span>
-                                    </a>
+    {# SEARCH Y FILTROS #}
+    <div class="mb-8 flex gap-4 items-end flex-wrap">
+        <form method="GET" class="flex gap-4 flex-1 min-w-80 flex-wrap">
+            <input 
+                type="text" 
+                name="search" 
+                value="{{ search }}"
+                placeholder="Buscar por email o nombre..."
+                class="flex-1 min-w-64 bg-[#0d1117] border border-slate-800 rounded-xl px-4 py-3 text-white font-bold placeholder-slate-600 focus:border-primary focus:outline-none transition-all"
+            >
+            <select name="sort" class="bg-[#0d1117] border border-slate-800 rounded-xl px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Fecha Registro</option>
+                <option value="name" {% if sort == 'name' %}selected{% endif %}>Nombre</option>
+                <option value="points_xp" {% if sort == 'points_xp' %}selected{% endif %}>XP</option>
+            </select>
+            <select name="direction" class="bg-[#0d1117] border border-slate-800 rounded-xl px-4 py-3 text-white font-bold focus:border-primary focus:outline-none transition-all">
+                <option value="DESC" {% if direction == 'DESC' %}selected{% endif %}>Descendente</option>
+                <option value="ASC" {% if direction == 'ASC' %}selected{% endif %}>Ascendente</option>
+            </select>
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase text-sm flex items-center gap-2">
+                <span class="material-symbols-outlined">search</span>
+                <span class="hidden sm:inline">Buscar</span>
+            </button>
+        </form>
+    </div>
+
+    {# TABLA DE USUARIOS #}
+    <div class="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-900/50 border-b border-slate-800">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Usuario</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Email</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">XP / Nivel</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Entrenamientos</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Rol</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Estado</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="border-b border-slate-800 hover:bg-slate-900/50 transition-all">
+                        <td class="px-6 py-4 text-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-red-900/20 flex items-center justify-center text-red-500 font-bold text-xs">
+                                    {{ user.name|first|upper }}
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                                <span class="font-bold">{{ user.name }} {{ user.lastname }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-400">{{ user.email }}</td>
+                        <td class="px-6 py-4 text-sm">
+                            <span class="text-primary font-bold">{{ user.pointsXp }} XP</span>
+                            <span class="text-slate-600 ml-2">/ Lvl {{ user.level }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm font-bold">{{ user.trainings|length }}</td>
+                        <td class="px-6 py-4 text-sm">
+                            {% if user.rol == 'ROLE_ADMIN' %}
+                                <span class="inline-flex items-center gap-1 bg-red-900/30 text-red-400 px-3 py-1 rounded-full text-xs font-bold uppercase border border-red-500/20">
+                                    <span class="material-symbols-outlined text-xs">admin_panel_settings</span>
+                                    Admin
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-bold uppercase border border-slate-700">
+                                    <span class="material-symbols-outlined text-xs">person</span>
+                                    Usuario
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            {% if user.deletedAt %}
+                                <span class="inline-flex items-center gap-1 text-red-500 font-bold">
+                                    <span class="material-symbols-outlined text-sm">block</span>
+                                    Inactivo
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 text-green-500 font-bold">
+                                    <span class="material-symbols-outlined text-sm">verified</span>
+                                    Activo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            <div class="flex gap-2">
+                                <a href="{{ path('admin_users_show', {id: user.id}) }}" class="p-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-all" title="Ver">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                </a>
+                                <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="p-2 bg-blue-900/20 text-blue-400 hover:bg-blue-900/40 rounded-lg transition-all" title="Editar">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center text-slate-500">
+                                <span class="material-symbols-outlined text-5xl mb-2">person_off</span>
+                                <p>No hay usuarios que coincidan con tu búsqueda</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+    </div>
 
-        {# PAGINACIÓN #}
-        {% if pagination.total_pages > 1 %}
-        <div class="mt-8 flex items-center justify-center gap-2">
-            {% if pagination.current_page > 1 %}
-                <a href="?page=1&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all">«</a>
-                <a href="?page={{ pagination.current_page - 1 }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all">‹</a>
-            {% endif %}
+    {# PAGINACIÓN #}
+    {% if pagination.total_pages > 1 %}
+    <div class="mt-8 flex items-center justify-center gap-2">
+        {% if pagination.current_page > 1 %}
+            <a href="?page=1&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all" title="Primera página">
+                <span class="material-symbols-outlined">first_page</span>
+            </a>
+            <a href="?page={{ pagination.current_page - 1 }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all" title="Página anterior">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </a>
+        {% endif %}
 
+        <div class="flex items-center gap-1">
             {% for page in 1..pagination.total_pages %}
                 {% if page >= pagination.current_page - 2 and page <= pagination.current_page + 2 %}
-                    <a href="?page={{ page }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 rounded-lg font-bold transition-all {% if page == pagination.current_page %}bg-primary text-white{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
+                    <a href="?page={{ page }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="w-10 h-10 rounded-lg font-bold transition-all flex items-center justify-center {% if page == pagination.current_page %}bg-primary text-white{% else %}bg-slate-800 hover:bg-slate-700{% endif %}">
                         {{ page }}
                     </a>
                 {% endif %}
             {% endfor %}
-
-            {% if pagination.current_page < pagination.total_pages %}
-                <a href="?page={{ pagination.current_page + 1 }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all">›</a>
-                <a href="?page={{ pagination.total_pages }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all">»</a>
-            {% endif %}
         </div>
+
+        {% if pagination.current_page < pagination.total_pages %}
+            <a href="?page={{ pagination.current_page + 1 }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all" title="Página siguiente">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </a>
+            <a href="?page={{ pagination.total_pages }}&search={{ search }}&sort={{ sort }}&direction={{ direction }}" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg font-bold transition-all" title="Última página">
+                <span class="material-symbols-outlined">last_page</span>
+            </a>
         {% endif %}
-
-        {# INFO #}
-        <div class="mt-8 text-center text-slate-400">
-            <p class="text-sm">Mostrando {{ users|length }} de {{ pagination.total }} usuarios</p>
-        </div>
-
     </div>
+    {% endif %}
+
+    {# INFO #}
+    <div class="mt-8 text-center text-slate-400 text-sm">
+        <p>Mostrando <span class="text-primary font-bold">{{ users|length }}</span> de <span class="text-primary font-bold">{{ pagination.total }}</span> usuarios</p>
+    </div>
+
 </div>
 {% endblock %}

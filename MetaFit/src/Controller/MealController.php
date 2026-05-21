@@ -133,7 +133,7 @@ class MealController extends AbstractController
     /**
      * Ver detalle de una comida específica
      */
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Meal $meal): Response
     {
         // Verificar que la comida pertenece al usuario autenticado
@@ -227,7 +227,7 @@ class MealController extends AbstractController
     /**
      * Editar comida existente
      */
-    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(Meal $meal, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         // Verificar permisos
@@ -276,7 +276,7 @@ class MealController extends AbstractController
     /**
      * Eliminar comida
      */
-    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Meal $meal, Request $request, EntityManagerInterface $entityManager): Response
     {
         // Verificar permisos y token CSRF

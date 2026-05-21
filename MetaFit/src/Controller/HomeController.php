@@ -18,6 +18,15 @@ use DateTimeImmutable;
 
 class HomeController extends AbstractController
 {
+    #[Route('/', name: 'app_index')]
+    public function root(): Response
+    {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+        return $this->redirectToRoute('app_login');
+    }
+
     #[Route('/home', name: 'app_home')]
     #[IsGranted('ROLE_USER')]
     public function index(

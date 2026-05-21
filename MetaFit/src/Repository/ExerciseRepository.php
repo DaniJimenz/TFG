@@ -21,15 +21,16 @@ class ExerciseRepository extends ServiceEntityRepository
      */
     public function findRandomByGroupAndDifficulty(string $group, string $difficulty, int $limit): array
     {
-        return $this->createQueryBuilder('e')
+        $qb = $this->createQueryBuilder('e')
             ->andWhere('e.muscular_group = :group')
             ->andWhere('e.difficulty = :difficulty')
             ->setParameter('group', $group)
             ->setParameter('difficulty', $difficulty)
-            ->addSelect('RAND() as HIDDEN rand')
-            ->orderBy('rand')
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($limit);
+        
+        // Usar PHP para aleatorizar en lugar de RAND() de base de datos
+        $results = $qb->getQuery()->getResult();
+        shuffle($results);
+        return $results;
     }
 }

@@ -4,16 +4,16 @@
 
 {% block body %}
 <div class="bg-background-dark text-white min-h-screen py-12 px-4">
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8">
 
         {# HEADER #}
         <div class="mb-8">
             <div class="flex items-center gap-4 mb-4">
-                <div class="h-1 w-12 bg-primary"></div>
-                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Panel Admin</span>
+                <div class="h-1 w-12 bg-red-500"></div>
+                <span class="text-red-500 font-bold tracking-[0.3em] uppercase text-sm">Panel Admin</span>
             </div>
             <h1 class="text-4xl font-black uppercase tracking-tighter">
-                Estadísticas <span class="text-primary">Generales</span>
+                Estadísticas <span class="text-red-500">Generales</span>
             </h1>
         </div>
 
@@ -22,7 +22,7 @@
             {# Usuarios #}
             <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="material-symbols-outlined text-4xl text-primary">people</span>
+                    <span class="material-symbols-outlined text-4xl text-red-500">people</span>
                     <span class="text-2xl font-bold text-green-500">+{{ stats.users.new_last_week }}</span>
                 </div>
                 <p class="text-3xl font-black mb-2">{{ stats.users.total }}</p>
@@ -69,7 +69,7 @@
             {# Entrenamientos por Día #}
             <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
                 <h3 class="text-lg font-bold uppercase tracking-tighter mb-6 border-b border-slate-800 pb-4">
-                    Entrenamientos - Últimos <span class="text-primary">7 Días</span>
+                    Entrenamientos - Últimos <span class="text-red-500">7 Días</span>
                 </h3>
                 <div id="trainingChart" style="height: 300px;"></div>
             </div>
@@ -77,7 +77,7 @@
             {# Usuarios más Activos #}
             <div class="bg-[#0d1117] border border-slate-800 rounded-lg p-6">
                 <h3 class="text-lg font-bold uppercase tracking-tighter mb-6 border-b border-slate-800 pb-4">
-                    Usuarios Más <span class="text-primary">Activos</span>
+                    Usuarios Más <span class="text-red-500">Activos</span>
                 </h3>
                 <div class="space-y-3">
                     {% for name, data in activeUsers %}
@@ -85,9 +85,9 @@
                             <p class="text-sm font-bold">{{ name }}</p>
                             <div class="flex items-center gap-3">
                                 <div class="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-primary" style="width: {{ (data.count / activeUsers|first.count) * 100 }}%"></div>
+                                    <div class="h-full bg-red-500" style="width: {{ (data.count / activeUsers|first.count) * 100 }}%"></div>
                                 </div>
-                                <p class="text-xs font-bold text-primary min-w-12">{{ data.count }}</p>
+                                <p class="text-xs font-bold text-red-500 min-w-12">{{ data.count }}</p>
                             </div>
                         </div>
                     {% endfor %}

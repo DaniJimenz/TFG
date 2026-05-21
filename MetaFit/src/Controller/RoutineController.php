@@ -63,7 +63,7 @@ class RoutineController extends AbstractController
             $constraints = new Assert\Collection([
                 'name' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('string')]),
                 'objective' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('string')]),
-                'days_week' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 1, 'max' => 7])]),
+                'days_week' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 1, max: 7)]),
                 'dispo_material' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('string')]),
             ]);
             $constraints->allowExtraFields = true;
@@ -95,7 +95,7 @@ class RoutineController extends AbstractController
     /**
      * Editar rutina
      */
-    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(
         Routine $routine,
         Request $request,
@@ -152,7 +152,7 @@ class RoutineController extends AbstractController
     /**
      * Iniciar sesión de entrenamiento
      */
-    #[Route('/{id}/start', name: 'start', methods: ['GET'])]
+    #[Route('/{id}/start', name: 'start', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function start(Routine $routine): Response
     {
         if ($routine->getOwner() !== $this->getUser()) {
@@ -167,7 +167,7 @@ class RoutineController extends AbstractController
     /**
      * Guardar sesión de entrenamiento completada
      */
-    #[Route('/{id}/complete', name: 'complete', methods: ['POST'])]
+    #[Route('/{id}/complete', name: 'complete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function complete(
         Routine $routine,
         Request $request,
@@ -212,7 +212,7 @@ class RoutineController extends AbstractController
     /**
      * Ver progreso de un ejercicio
      */
-    #[Route('/exercise/{id}/progress', name: 'exercise_progress', methods: ['GET'])]
+    #[Route('/exercise/{id}/progress', name: 'exercise_progress', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function exerciseProgress(
         Exercise $exercise,
         RoutineService $routineService
@@ -273,7 +273,7 @@ class RoutineController extends AbstractController
     /**
      * API: Obtener recomendación de carga
      */
-    #[Route('/api/exercise/{id}/next-load', name: 'api_next_load', methods: ['GET'])]
+    #[Route('/api/exercise/{id}/next-load', name: 'api_next_load', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function apiNextLoad(
         Exercise $exercise,
         RoutineService $routineService
@@ -293,7 +293,7 @@ class RoutineController extends AbstractController
     /**
      * Eliminar rutina
      */
-    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(
         Routine $routine,
         Request $request,

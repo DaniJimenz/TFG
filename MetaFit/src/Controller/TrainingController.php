@@ -42,7 +42,7 @@ class TrainingController extends AbstractController
     /**
      * Ver detalle de un entrenamiento
      */
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Training $training): Response
     {
         if ($training->getAppUser() !== $this->getUser()) {
@@ -106,7 +106,7 @@ class TrainingController extends AbstractController
     /**
      * Editar entrenamiento
      */
-    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(
         Training $training,
         Request $request,
@@ -140,7 +140,7 @@ class TrainingController extends AbstractController
     /**
      * Eliminar entrenamiento
      */
-    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Training $training, Request $request, EntityManagerInterface $entityManager): Response
     {
         if ($training->getAppUser() !== $this->getUser()) {
@@ -236,9 +236,87 @@ class TrainingController extends AbstractController
     }
 
     /**
+     * Resumen semanal del usuario - gráficos y estadísticas por semana
+     */
+    #[Route('/weekly-summary', name: 'weekly_summary', methods: ['GET'])]
+    public function weeklySummary(TrainingRepository $trainingRepository): Response
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        // Entrenamientos de la última semana
+        $sevenDaysAgo = new \DateTimeImmutable('-7 days');
+        $recentTrainings = $trainingRepository->findTrainingsAfterDate($user, $sevenDaysAgo);
+
+        // Estadísticas
+        $stats = [
+            'total_trainings' => count($recentTrainings),
+            'completed_trainings' => 0,
+            'total_weight_lifted' => 0,
+            'total_duration' => 0,
+            'avg_weight' => 0,
+            'sum_weights' => 0,
+        ];
+
+        $completedCount = 0;
+        foreach ($recentTrainings as $training) {
+            if ($training->isCompleted()) {
+                $completedCount++;
+            }
+            $stats['total_weight_lifted'] += ($training->getWeight() * $training->getRepetitions() * $training->getCompletedSeries());
+            $stats['sum_weights'] += $training->getWeight();
+            $stats['total_duration'] += $training->getDurationMinutes();
+        }
+
+        $stats['completed_trainings'] = $completedCount;
+        if ($stats['total_trainings'] > 0) {
+            $stats['avg_weight'] = round($stats['sum_weights'] / $stats['total_trainings'], 2);
+        }
+
+        // Agrupar entrenamientos por ejercicio para mostrar los más trabajados
+        $trainingsByExercise = [];
+        foreach ($recentTrainings as $training) {
+            $exerciseId = $training->getExercise()->getId();
+            if (!isset($trainingsByExercise[$exerciseId])) {
+                $trainingsByExercise[$exerciseId] = [
+                    'exercise' => $training->getExercise(),
+                    'count' => 0,
+                    'pr' => 0,
+                    'avg' => 0,
+                    'total_weight' => 0,
+                ];
+            }
+            
+            $weight = $training->getWeight();
+            $trainingsByExercise[$exerciseId]['count']++;
+            $trainingsByExercise[$exerciseId]['total_weight'] += $weight;
+            
+            if ($weight > $trainingsByExercise[$exerciseId]['pr']) {
+                $trainingsByExercise[$exerciseId]['pr'] = $weight;
+            }
+        }
+
+        // Calcular promedios
+        foreach ($trainingsByExercise as &$exercise) {
+            $exercise['avg'] = $exercise['count'] > 0 ? $exercise['total_weight'] / $exercise['count'] : 0;
+        }
+
+        // Ordenar por cantidad de veces realizado
+        usort($trainingsByExercise, function($a, $b) {
+            return $b['count'] - $a['count'];
+        });
+
+        return $this->render('training/weekly_summary.html.twig', [
+            'stats' => $stats,
+            'exercises' => $trainingsByExercise,
+            'recentTrainings' => $recentTrainings,
+        ]);
+    }
+
+    /**
      * Historial de un ejercicio específico
      */
-    #[Route('/exercise/{exerciseId}/history', name: 'exercise_history', methods: ['GET'])]
+    #[Route('/exercise/{exerciseId}/history', name: 'exercise_history', requirements: ['exerciseId' => '\d+'], methods: ['GET'])]
     public function exerciseHistory(
         int $exerciseId,
         TrainingRepository $trainingRepository,

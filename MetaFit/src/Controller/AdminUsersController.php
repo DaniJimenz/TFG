@@ -66,7 +66,7 @@ class AdminUsersController extends AbstractController
     /**
      * Ver detalle de usuario
      */
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(User $user): Response
     {
         return $this->render('admin/users/show.html.twig', [
@@ -77,7 +77,7 @@ class AdminUsersController extends AbstractController
     /**
      * Editar usuario
      */
-    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(User $user, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         if ($request->isMethod('POST')) {
@@ -145,7 +145,7 @@ class AdminUsersController extends AbstractController
     /**
      * Eliminar usuario
      */
-    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(User $user, EntityManagerInterface $entityManager, Request $request): Response
     {
         // Verificar token CSRF
@@ -164,7 +164,7 @@ class AdminUsersController extends AbstractController
     /**
      * Desactivar/Reactivar usuario
      */
-    #[Route('/{id}/toggle-status', name: 'toggle_status', methods: ['POST'])]
+    #[Route('/{id}/toggle-status', name: 'toggle_status', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function toggleStatus(User $user, EntityManagerInterface $entityManager, Request $request): Response
     {
         // Verificar token CSRF
@@ -187,7 +187,7 @@ class AdminUsersController extends AbstractController
     /**
      * Cambiar rol de usuario
      */
-    #[Route('/{id}/change-role', name: 'change_role', methods: ['POST'])]
+    #[Route('/{id}/change-role', name: 'change_role', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function changeRole(User $user, EntityManagerInterface $entityManager, Request $request): Response
     {
         if ($this->isCsrfTokenValid('role' . $user->getId(), $request->request->get('_token'))) {

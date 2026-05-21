@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Perfil Admin - MetaFit AI{% endblock %}
+
+{% block body %}
+    <div class="bg-background-dark text-white">
+        <div class="max-w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
+
+            {# HEADER #}
+            <div class="mb-6 md:mb-8">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="h-1 w-12 bg-red-500"></div>
+                    <span class="text-red-500 font-bold tracking-[0.3em] uppercase text-sm">Admin</span>
+                </div>
+                <h1 class="text-6xl font-black italic uppercase tracking-tighter mb-2">
+                    Configuración Admin
+                </h1>
+                <p class="text-gray-400">{{ user.getEmail() }}</p>
+            </div>
+
+            {# GRID DE OPCIONES ADMINISTRATIVAS #}
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+
+                {# INFORMACIÓN PERSONAL #}
+                <a href="{{ path('profile_edit_personal') }}" class="group bg-[#0d1117] border border-slate-800 rounded-2xl p-6 hover:border-red-500 transition-all">
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-4xl text-red-500 group-hover:scale-110 transition-transform">person</span>
+                        <div>
+                            <h3 class="text-xl font-black uppercase">Información Personal</h3>
+                            <p class="text-slate-400 text-sm mt-1">Nombre, email, datos de contacto</p>
+                        </div>
+                    </div>
+                </a>
+
+                {# CONTRASEÑA #}
+                <a href="{{ path('profile_change_password') }}" class="group bg-[#0d1117] border border-slate-800 rounded-2xl p-6 hover:border-red-500 transition-all">
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-4xl text-red-500 group-hover:scale-110 transition-transform">lock</span>
+                        <div>
+                            <h3 class="text-xl font-black uppercase">Seguridad</h3>
+                            <p class="text-slate-400 text-sm mt-1">Cambiar contraseña de cuenta</p>
+                        </div>
+                    </div>
+                </a>
+
+                {# OPCIONES DE ADMIN #}
+                <div class="group bg-[#0d1117] border border-slate-800 rounded-2xl p-6 cursor-not-allowed opacity-60">
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-4xl text-slate-600 group-hover:scale-110 transition-transform">settings</span>
+                        <div>
+                            <h3 class="text-xl font-black uppercase">Configuración Sistema</h3>
+                            <p class="text-slate-400 text-sm mt-1">Próximamente: Ajustes globales</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {# TARJETAS DE INFORMACIÓN #}
+            <div class="grid md:grid-cols-3 gap-6">
+
+                {# INFORMACIÓN DE CUENTA ADMIN #}
+                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-red-500">admin_panel_settings</span>
+                        <h3 class="text-lg font-black uppercase">Cuenta Admin</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-slate-400 text-sm">Email</p>
+                            <p class="font-bold">{{ user.getEmail() }}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 text-sm">Rol</p>
+                            <p class="font-bold text-red-500">ADMINISTRADOR</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 text-sm">Estado</p>
+                            <p class="font-bold text-green-500">✓ Activo</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 text-sm">Cuenta creada</p>
+                            <p class="font-bold">{{ user.getCreatedAt()|date('d/m/Y H:i') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {# DATOS PERSONALES #}
+                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined">badge</span>
+                        <h3 class="text-lg font-black uppercase">Datos Personales</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-slate-400 text-sm">Nombre Completo</p>
+                            <p class="font-bold">{{ user.getName() }} {{ user.getLastname() }}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 text-sm">Teléfono</p>
+                            <p class="font-bold">{{ user.getTelephone() ?? '—' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 text-sm">Edad</p>
+                            <p class="font-bold">{{ user.getAge() ?? '—' }} años</p>
+                        </div>
+                    </div>
+                </div>
+
+                {# PERMISOS #}
+                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-red-500">security</span>
+                        <h3 class="text-lg font-black uppercase">Permisos</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-sm">check_circle</span>
+                            <p class="text-sm">Gestión de usuarios</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-sm">check_circle</span>
+                            <p class="text-sm">Gestión de ejercicios</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-sm">check_circle</span>
+                            <p class="text-sm">Ver estadísticas</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-sm">check_circle</span>
+                            <p class="text-sm">Acceso al dashboard</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {# ACCIONES RÁPIDAS #}
+            <div class="mt-12 grid md:grid-cols-2 gap-6">
+                <div class="bg-red-900/20 border border-red-500/30 rounded-2xl p-6">
+                    <h3 class="text-xl font-black uppercase mb-4 text-red-500">Acceso Rápido</h3>
+                    <div class="space-y-3">
+                        <a href="{{ path('admin_dashboard') }}" class="block p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all font-bold text-sm">
+                            → Ir al Dashboard Admin
+                        </a>
+                        <a href="{{ path('admin_users_index') }}" class="block p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all font-bold text-sm">
+                            → Gestión de Usuarios
+                        </a>
+                        <a href="{{ path('admin_exercises_index') }}" class="block p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all font-bold text-sm">
+                            → Gestión de Ejercicios
+                        </a>
+                        <a href="{{ path('admin_stats_index') }}" class="block p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all font-bold text-sm">
+                            → Estadísticas del Sistema
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+                    <h3 class="text-xl font-black uppercase mb-4">Información</h3>
+                    <div class="space-y-2 text-sm text-slate-400">
+                        <p>✓ Tienes acceso completo a todas las funciones administrativas.</p>
+                        <p>✓ Puedes gestionar usuarios, ejercicios y ver estadísticas del sistema.</p>
+                        <p>✓ Todos tus cambios se registran en los logs de auditoría.</p>
+                        <p class="mt-4 text-yellow-600">⚠ Por favor, usa responsablemente tus permisos de administrador.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

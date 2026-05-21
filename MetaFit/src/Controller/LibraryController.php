@@ -58,7 +58,7 @@ class LibraryController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Exercise $exercise, Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -87,7 +87,7 @@ class LibraryController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(Exercise $exercise, Request $request, EntityManagerInterface $entityManager): Response
     {

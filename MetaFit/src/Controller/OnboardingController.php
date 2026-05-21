@@ -37,12 +37,12 @@ final class OnboardingController extends AbstractController
 
             // Validación estricta y segura de los datos de entrada
             $constraints = new Assert\Collection([
-                'age' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 14, 'max' => 100])]),
-                'height' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 100, 'max' => 250])]),
-                'weight' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(['min' => 30, 'max' => 300])]),
-                'gender' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(['H', 'M'])]),
-                'activity_level' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(['Baja', 'Media', 'Alta'])]),
-                'purpose' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(['Perder grasa', 'Mantenimiento', 'Ganar masa muscular'])]),
+                'age' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 14, max: 100)]),
+                'height' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 100, max: 250)]),
+                'weight' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 30, max: 300)]),
+                'gender' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(choices: ['H', 'M'])]),
+                'activity_level' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(choices: ['Baja', 'Media', 'Alta'])]),
+                'purpose' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(choices: ['Perder grasa', 'Mantenimiento', 'Ganar masa muscular'])]),
             ]);
             $constraints->allowExtraFields = true; // Permite campos extra de sistema sin dar error
 
