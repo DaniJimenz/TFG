@@ -43,12 +43,17 @@ class ImportExercisesSimpleCommand extends Command
         $progressBar->start();
 
         $imported = 0;
+        $updated = 0;
         foreach ($data as $item) {
             // Verificar si el ejercicio ya existe
             $existingExercise = $this->entityManager->getRepository(Exercise::class)
                 ->findOneBy(['name' => $item['name']]);
             
             if ($existingExercise) {
+                // Si el ejercicio existe, sobrescribimos la URL de la imagen con la del JSON original
+                $existingExercise->setUrlImage($item['url_image'] ?? '');
+                $existingExercise->setUrlVideo($item['url_video'] ?? '');
+                $updated++;
                 $progressBar->advance();
                 continue;
             }
@@ -75,7 +80,7 @@ class ImportExercisesSimpleCommand extends Command
         $progressBar->finish();
 
         $io->newLine();
-        $io->success("¡Se han importado $imported ejercicios correctamente!");
+        $io->success("¡Se han importado $imported ejercicios y actualizado $updated correctamente!");
 
         return Command::SUCCESS;
     }
