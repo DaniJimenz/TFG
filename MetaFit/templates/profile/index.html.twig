@@ -32,17 +32,6 @@
                     </div>
                 </a>
 
-                {# PREFERENCIAS #}
-                <a href="{{ path('profile_preferences') }}" class="group bg-[#0d1117] border border-slate-800 rounded-2xl p-6 hover:border-primary transition-all">
-                    <div class="flex items-start gap-4">
-                        <span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">tune</span>
-                        <div>
-                            <h3 class="text-xl font-black uppercase">Preferencias</h3>
-                            <p class="text-slate-400 text-sm mt-1">Hora de entrenamiento, intensidad, notificaciones</p>
-                        </div>
-                    </div>
-                </a>
-
                 {# CONTRASEÑA #}
                 <a href="{{ path('profile_change_password') }}" class="group bg-[#0d1117] border border-slate-800 rounded-2xl p-6 hover:border-primary transition-all">
                     <div class="flex items-start gap-4">
@@ -102,37 +91,6 @@
                             <p class="text-slate-400 text-sm">Objetivo</p>
                             <p class="font-bold">{{ user.getPurpose() ?? '—' }}</p>
                         </div>
-                    </div>
-                </div>
-
-                {# PREFERENCIAS RÁPIDAS #}
-                <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
-                    <h3 class="text-lg font-black uppercase mb-4">Preferencias</h3>
-                    <div class="space-y-3">
-                        {% if preferences %}
-                            <div class="flex justify-between">
-                                <span class="text-slate-400">Notificaciones</span>
-                                <span class="{% if preferences.isNotificationsEnabled() %}text-emerald-400{% else %}text-slate-500{% endif %} font-bold">
-                                    {% if preferences.isNotificationsEnabled() %}✓ Activadas{% else %}Desactivadas{% endif %}
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-400">Perfil público</span>
-                                <span class="{% if preferences.isProfilePublic() %}text-emerald-400{% else %}text-slate-500{% endif %} font-bold">
-                                    {% if preferences.isProfilePublic() %}✓ Sí{% else %}Privado{% endif %}
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-400">Unidad de medida</span>
-                                <span class="font-bold">{{ preferences.getMeasurementUnit() }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-400">Intensidad</span>
-                                <span class="font-bold capitalize">{{ preferences.getTrainingIntensity() ?? 'No configurada' }}</span>
-                            </div>
-                        {% else %}
-                            <p class="text-slate-400 italic">No hay preferencias configuradas</p>
-                        {% endif %}
                     </div>
                 </div>
 

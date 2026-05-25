@@ -30,11 +30,6 @@ class HomeController extends AbstractController
     #[Route('/home', name: 'app_home')]
     #[IsGranted('ROLE_USER')]
     public function index(
-        ExerciseRepository $exerciseRepository, 
-        DashboardStatsService $dashboardStatsService, 
-        MealRepository $mealRepository, 
-        RoutineRepository $routineRepository,
-        RecommendationService $recommendationService,
         RoutineService $routineService
     ): Response
     {
@@ -45,36 +40,34 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // Obtener objetivos diarios calculados en base a su perfil actual
-        $dailyGoals = $recommendationService->calculateDailyGoals($user);
-        
-        // Obtener la rutina persistida del usuario
-        $activeRoutines = $routineService->getUserActiveRoutines($user);
-        $rutina = !empty($activeRoutines) ? $activeRoutines[0]->getExercises()->toArray() : [];
-
-        // Obtener estadísticas del dashboard
-        $stats = $dashboardStatsService->getUserDashboardStats($user);
-        $recentTrainings = $dashboardStatsService->getRecentTrainings($user, 5);
-
-        // Obtener datos del último mes para el calendario
-        $startDate = new DateTimeImmutable('-30 days');
-        $endDate = new DateTimeImmutable();
-        $totalMealsCount = $mealRepository->count(['appUser' => $user]);
-        
         // Calcular el IMC en el controlador (Lógica de negocio)
         $imc = 0;
         if ($user->getHeight() > 0 && $user->getActualWeight() > 0) {
             $imc = $user->getActualWeight() / (($user->getHeight() / 100) ** 2);
         }
 
+        // Obtener la rutina persistida del usuario
+        $activeRoutines = $routineService->getUserActiveRoutines($user);
+        $activeRoutine = !empty($activeRoutines) ? $activeRoutines[0] : null;
+        
+        $rutinaEjercicios = $activeRoutine ? $activeRoutine->getExercises()->toArray() : [];
+        
+        // Dividir los ejercicios equitativamente según los días de la semana de la rutina
+        $rutinaPorDias = [];
+        if ($activeRoutine && count($rutinaEjercicios) > 0) {
+            $daysWeek = $activeRoutine->getDaysWeek() > 0 ? $activeRoutine->getDaysWeek() : 3;
+            $exercisesPerDay = ceil(count($rutinaEjercicios) / $daysWeek);
+            
+            $chunks = array_chunk($rutinaEjercicios, $exercisesPerDay);
+            foreach ($chunks as $index => $chunk) {
+                $rutinaPorDias['Día ' . ($index + 1)] = $chunk;
+            }
+        }
+
         return $this->render('home/index.html.twig', [
             'user' => $user,
-            'dailyGoals' => $dailyGoals,
-            'rutina' => $rutina,
-            'stats' => $stats,
-            'recentTrainings' => $recentTrainings,
-            'totalMealsCount' => $totalMealsCount,
             'imc' => $imc,
+            'rutinaPorDias' => $rutinaPorDias,
         ]);
     }
 
