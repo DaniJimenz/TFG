@@ -11,7 +11,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 class ApiController extends AbstractController
 {
-    #[Route('/api/food-macros', name: 'api_food_macros', methods: ['POST'])]
+    #[Route('/meals/food-macros', name: 'api_food_macros', methods: ['POST'])]
     public function calculateFoodMacros(Request $request): JsonResponse
     {
         try {

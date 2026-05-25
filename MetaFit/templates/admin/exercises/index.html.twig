@@ -25,17 +25,10 @@
     </div>
 
     {# ESTADÍSTICAS #}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
         <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total de Ejercicios</p>
             <p class="text-3xl font-black italic text-primary">{{ exercises|length }}</p>
-        </div>
-        <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
-            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Con Video</p>
-            <p class="text-3xl font-black italic text-accent-purple">
-                {% set with_video = exercises|filter(e => e.urlVideo)|length %}
-                {{ with_video }}
-            </p>
         </div>
         <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Con Imagen</p>
@@ -55,7 +48,7 @@
                         <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Ejercicio</th>
                         <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Grupo Muscular</th>
                         <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Dificultad</th>
-                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Recurso</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Imagen</th>
                         <th class="px-6 py-4 text-left text-sm font-bold uppercase tracking-widest text-slate-300">Acciones</th>
                     </tr>
                 </thead>
@@ -82,47 +75,29 @@
                             </span>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="text-xs font-bold">
-                                {% if exercise.difficulty == 'Alta' %}
-                                    <span class="text-red-500">{{ exercise.difficulty }}</span>
-                                {% elseif exercise.difficulty == 'Media' %}
-                                    <span class="text-yellow-500">{{ exercise.difficulty }}</span>
-                                {% else %}
-                                    <span class="text-green-500">{{ exercise.difficulty }}</span>
-                                {% endif %}
-                            </span>
+                            {% if exercise.difficulty == 'Alta' %}
+                                <span class="text-xs font-bold text-red-500">{{ exercise.difficulty }}</span>
+                            {% elseif exercise.difficulty == 'Media' %}
+                                <span class="text-xs font-bold text-yellow-500">{{ exercise.difficulty }}</span>
+                            {% else %}
+                                <span class="text-xs font-bold text-green-500">{{ exercise.difficulty }}</span>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                {% if exercise.urlImage %}
-                                    <span class="inline-flex items-center gap-1 text-green-400 text-xs font-bold">
-                                        <span class="material-symbols-outlined text-sm">image</span>
-                                    </span>
-                                {% else %}
-                                    <span class="inline-flex items-center gap-1 text-slate-600 text-xs font-bold">
-                                        <span class="material-symbols-outlined text-sm">image</span>
-                                    </span>
-                                {% endif %}
-                                {% if exercise.urlVideo %}
-                                    <span class="inline-flex items-center gap-1 text-accent-purple text-xs font-bold">
-                                        <span class="material-symbols-outlined text-sm">videocam</span>
-                                    </span>
-                                {% else %}
-                                    <span class="inline-flex items-center gap-1 text-slate-600 text-xs font-bold">
-                                        <span class="material-symbols-outlined text-sm">videocam</span>
-                                    </span>
-                                {% endif %}
-                            </div>
+                            {% if exercise.urlImage %}
+                                <span class="inline-flex items-center gap-1 text-green-400 text-xs font-bold">
+                                    <span class="material-symbols-outlined text-sm">check_circle</span> Sí
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 text-slate-600 text-xs font-bold">
+                                    <span class="material-symbols-outlined text-sm">cancel</span> No
+                                </span>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4">
-                            <div class="flex gap-2">
-                                <a href="{{ path('admin_exercises_quick_edit', {'id': exercise.id}) }}" class="p-2 bg-blue-900/20 text-blue-400 hover:bg-blue-900/40 rounded-lg transition-all" title="Editar">
-                                    <span class="material-symbols-outlined">edit</span>
-                                </a>
-                                <a href="{{ path('app_library_edit', {'id': exercise.id}) }}" class="p-2 bg-slate-800 text-slate-300 hover:bg-slate-700 rounded-lg transition-all" title="Ver en biblioteca">
-                                    <span class="material-symbols-outlined">open_in_new</span>
-                                </a>
-                            </div>
+                            <a href="{{ path('admin_exercises_quick_edit', {'id': exercise.id}) }}" class="p-2 bg-blue-900/20 text-blue-400 hover:bg-blue-900/40 rounded-lg transition-all inline-flex" title="Editar">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
                         </td>
                     </tr>
                     {% else %}

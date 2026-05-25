@@ -103,11 +103,12 @@ class RoutineService
     /**
      * Registrar entrenamiento
      */
-    public function recordTraining(User $user, Exercise $exercise, array $data, bool $flush = true): Training
+    public function recordTraining(User $user, Exercise $exercise, array $data, bool $flush = true, ?Routine $routine = null): Training
     {
         $training = new Training();
         $training->setAppUser($user);
         $training->setExercise($exercise);
+        $training->setRoutine($routine);
         $training->setDate(new \DateTimeImmutable());
         $training->setCompletedSeries($data['completed_series'] ?? 3);
         $training->setRepetitions($data['repetitions'] ?? 10);
@@ -194,7 +195,7 @@ class RoutineService
         foreach ($routine->getExercises() as $exercise) {
             if (isset($exerciseData[$exercise->getId()])) {
                 // Pasamos false para no hacer flush por cada ejercicio
-                $training = $this->recordTraining($user, $exercise, $exerciseData[$exercise->getId()], false);
+                $training = $this->recordTraining($user, $exercise, $exerciseData[$exercise->getId()], false, $routine);
                 $completedTrainings[] = $training;
             }
         }

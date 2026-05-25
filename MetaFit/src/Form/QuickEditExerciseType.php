@@ -9,6 +9,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Validator\Constraints\File;
 
 class QuickEditExerciseType extends AbstractType
@@ -43,35 +44,35 @@ class QuickEditExerciseType extends AbstractType
                 ],
                 'mapped' => true,
             ])
-            ->add('description', TextType::class, [
+            ->add('description', TextareaType::class, [
                 'label' => 'Descripción',
                 'required' => false,
                 'mapped' => true,
-                'attr' => ['placeholder' => 'Descripción del ejercicio...']
+                'attr' => ['placeholder' => 'Descripción del ejercicio...', 'rows' => 3]
+            ])
+            ->add('url_image', TextType::class, [
+                'label' => 'URL de Imagen',
+                'required' => false,
+                'mapped' => true,
+                'attr' => ['placeholder' => 'https://...']
             ])
             ->add('image_file', FileType::class, [
-                'label' => 'Imagen del Ejercicio',
+                'label' => 'Subir nueva imagen (opcional)',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
-                    new File([
-                        'maxSize' => '5M',
-                        'mimeTypes' => [
+                    new File(
+                        maxSize: '5M',
+                        mimeTypes: [
                             'image/jpeg',
                             'image/png',
                             'image/webp',
                             'image/gif',
                         ],
-                        'mimeTypesMessage' => 'Por favor, sube un archivo de imagen válido',
-                    ])
+                        mimeTypesMessage: 'Por favor, sube un archivo de imagen válido',
+                    )
                 ],
                 'attr' => ['accept' => 'image/*']
-            ])
-            ->add('url_video', TextType::class, [
-                'label' => 'URL Video (YouTube, Pexels, etc)',
-                'required' => false,
-                'mapped' => true,
-                'attr' => ['placeholder' => 'https://www.youtube.com/watch?v=... o https://videos.pexels.com/...']
             ])
         ;
     }

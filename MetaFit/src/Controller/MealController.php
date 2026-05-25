@@ -3,10 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Meal;
-use App\Entity\MealFood;
-use App\Entity\Food;
 use App\Repository\MealRepository;
-use App\Repository\FoodRepository;
 use App\Service\FoodAnalysisService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -91,7 +88,7 @@ class MealController extends AbstractController
             $data = $request->request->all();
 
             $constraints = new Assert\Collection([
-                'food_type' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(['desayuno', 'comida', 'merienda', 'cena'])]),
+                'food_type' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(choices: ['desayuno', 'comida', 'merienda', 'cena', 'snack'])]),
                 'calories_total' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
                 'proteines_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
                 'carbohidrats_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
@@ -187,10 +184,15 @@ class MealController extends AbstractController
             // Analizar imagen con Google Vision
             $analysisData = $analysisService->analyzeFoodImage($tempPath->getRealPath());
 
+            // Usar el tipo de comida enviado por el usuario, o el detectado por la IA
+            $userFoodType = $request->request->get('food_type');
+            $validTypes = ['desayuno', 'comida', 'merienda', 'cena', 'snack'];
+            $foodType = in_array($userFoodType, $validTypes) ? $userFoodType : $analysisData['food_type'];
+
             // Guardar la comida
             $meal = new Meal();
             $meal->setAppUser($user);
-            $meal->setFoodType($analysisData['food_type']);
+            $meal->setFoodType($foodType);
             $meal->setCaloriesTotal((float)$analysisData['calories_total']);
             $meal->setProteinesG((float)$analysisData['proteines_g']);
             $meal->setCarbohidratesG((float)$analysisData['carbohidrats_g']);
@@ -239,7 +241,7 @@ class MealController extends AbstractController
             $data = $request->request->all();
 
             $constraints = new Assert\Collection([
-                'food_type' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(['desayuno', 'comida', 'merienda', 'cena'])]),
+                'food_type' => new Assert\Required([new Assert\NotBlank(), new Assert\Choice(choices: ['desayuno', 'comida', 'merienda', 'cena', 'snack'])]),
                 'calories_total' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
                 'proteines_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),
                 'carbohidrats_g' => new Assert\Required([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\PositiveOrZero()]),

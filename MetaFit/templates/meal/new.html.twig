@@ -277,7 +277,7 @@
 
         try {
             console.log('Enviando solicitud para:', foodName, foodWeight);
-            const response = await fetch('/api/food-macros', {
+            const response = await fetch('/meals/food-macros', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -445,14 +445,15 @@
         const file = photoInput.files[0];
         const foodType = document.getElementById('food_type_photo').value;
 
-        if (!file || !foodType) {
-            errorText.textContent = 'Selecciona una foto y un tipo de comida';
+        if (!file) {
+            errorText.textContent = 'Selecciona una foto para analizar';
             errorMessage.classList.remove('hidden');
             return;
         }
 
         const formData = new FormData();
         formData.append('photo', file);
+        if (foodType) formData.append('food_type', foodType);
 
         loading.classList.remove('hidden');
         analysisResult.classList.add('hidden');
@@ -484,7 +485,7 @@
                 document.getElementById('result-proteines').textContent = Math.round(data.meal.proteines_g * 10) / 10 + 'g';
                 document.getElementById('result-carbs').textContent = Math.round(data.meal.carbohidrats_g * 10) / 10 + 'g';
                 document.getElementById('result-fats').textContent = Math.round(data.meal.fats_g * 10) / 10 + 'g';
-                document.getElementById('result-items').textContent = data.detected_items?.join(', ') || 'Alimentos detectados';
+                document.getElementById('result-items').textContent = data.meal.detected_items?.join(', ') || 'Alimentos detectados';
 
                 analysisResult.classList.remove('hidden');
                 btnSave.style.display = 'flex';

@@ -150,9 +150,14 @@
             .then(data => {
                 if (data.success) {
                     window.location.href = data.redirect || "{{ path('routine_index') }}";
+                } else {
+                    alert('Error al guardar el entrenamiento. Inténtalo de nuevo.');
                 }
             })
-            .catch(err => console.error('Error al completar entrenamiento:', err));
+            .catch(err => {
+                console.error('Error al completar entrenamiento:', err);
+                alert('Error al guardar el entrenamiento. Inténtalo de nuevo.');
+            });
         }
 
         updateCalculations();

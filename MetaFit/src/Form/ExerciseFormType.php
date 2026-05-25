@@ -51,16 +51,16 @@ class ExerciseFormType extends AbstractType
                 'required' => false,
                 'mapped' => false,
                 'constraints' => [
-                    new File([
-                        'maxSize' => '5M',
-                        'mimeTypes' => [
+                    new File(
+                        maxSize: '5M',
+                        mimeTypes: [
                             'image/jpeg',
                             'image/png',
                             'image/webp',
                             'image/gif',
                         ],
-                        'mimeTypesMessage' => 'Por favor sube una imagen válida (JPEG, PNG, WebP o GIF)',
-                    ])
+                        mimeTypesMessage: 'Por favor sube una imagen válida (JPEG, PNG, WebP o GIF)',
+                    )
                 ],
                 'attr' => ['accept' => 'image/*']
             ])

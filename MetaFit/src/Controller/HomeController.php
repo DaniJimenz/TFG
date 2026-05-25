@@ -2,11 +2,8 @@
 
 namespace App\Controller;
 
-use App\Repository\ExerciseRepository;
 use App\Repository\MealRepository;
-use App\Repository\RoutineRepository;
 use App\Repository\TrainingRepository;
-use App\Service\DashboardStatsService;
 use App\Service\RecommendationService;
 use App\Service\RoutineService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

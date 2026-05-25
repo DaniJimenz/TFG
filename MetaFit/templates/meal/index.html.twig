@@ -85,9 +85,6 @@
                             </div>
                             
                             <div class="flex gap-2">
-                                <a href="{{ path('meal_edit', {'id': meal.id}) }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase">
-                                    Editar
-                                </a>
                                 <form method="POST" action="{{ path('meal_delete', {'id': meal.id}) }}" style="display: inline;" onsubmit="return confirm('¿Estás seguro?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete_meal_' ~ meal.id) }}">
                                     <button type="submit" class="border border-red-700/50 hover:bg-red-500/10 text-red-500 px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase">
