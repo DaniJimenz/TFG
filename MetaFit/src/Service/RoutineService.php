@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\ExerciseTraining;
 use App\Entity\Routine;
 use App\Entity\Exercise;
 use App\Entity\Training;
@@ -49,6 +50,42 @@ class RoutineService
             $this->entityManager->persist($routine);
             $this->entityManager->flush();
         }
+    }
+
+    /**
+     * Agrega un ejercicio a la rutina con su programación semanal completa (ExerciseTraining)
+     */
+    public function addExerciseWithSchedule(
+        Routine $routine,
+        Exercise $exercise,
+        int $dayWeek,
+        int $order,
+        int $seriesObjective,
+        int $repsMin,
+        int $repsMax,
+        int $restSeconds
+    ): void {
+        if (!$routine->getExercises()->contains($exercise)) {
+            $routine->addExercise($exercise);
+            $this->entityManager->persist($routine);
+        }
+
+        $exerciseTraining = new ExerciseTraining();
+        $exerciseTraining->setDayWeek($dayWeek);
+        $exerciseTraining->setOrderRutine($order);
+        $exerciseTraining->setSeriesObjective($seriesObjective);
+        $exerciseTraining->setRepsMin($repsMin);
+        $exerciseTraining->setRepsMax($repsMax);
+        $exerciseTraining->setRestSeconds($restSeconds);
+        $exerciseTraining->setRoutine($routine);
+        $exerciseTraining->setExercise($exercise);
+
+        $this->entityManager->persist($exerciseTraining);
+    }
+
+    public function flush(): void
+    {
+        $this->entityManager->flush();
     }
 
     /**

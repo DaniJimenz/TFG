@@ -27,10 +27,36 @@ class ExerciseRepository extends ServiceEntityRepository
             ->setParameter('group', $group)
             ->setParameter('difficulty', $difficulty)
             ->setMaxResults($limit);
-        
-        // Usar PHP para aleatorizar en lugar de RAND() de base de datos
+
         $results = $qb->getQuery()->getResult();
         shuffle($results);
         return $results;
+    }
+
+    /**
+     * Busca ejercicios para un día de rutina, priorizando compuestos si se indica
+     */
+    public function findForRoutineDay(string $group, string $difficulty, int $limit, bool $prioritizeCompound = false): array
+    {
+        $results = $this->createQueryBuilder('e')
+            ->andWhere('e.muscular_group = :group')
+            ->andWhere('e.difficulty = :difficulty')
+            ->setParameter('group', $group)
+            ->setParameter('difficulty', $difficulty)
+            ->setMaxResults($limit * 3)
+            ->getQuery()
+            ->getResult();
+
+        if (empty($results)) {
+            return [];
+        }
+
+        if ($prioritizeCompound) {
+            usort($results, fn($a, $b) => ($b->isCompound() ? 1 : 0) - ($a->isCompound() ? 1 : 0));
+            return array_slice($results, 0, $limit);
+        }
+
+        shuffle($results);
+        return array_slice($results, 0, $limit);
     }
 }

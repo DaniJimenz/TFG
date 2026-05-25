@@ -206,6 +206,14 @@ class RoutineController extends AbstractController
 
         $this->addFlash('success', "¡Entrenamiento completado! +{$xpGained} XP");
 
+        if ($request->headers->get('Content-Type') === 'application/json' || $request->isXmlHttpRequest()) {
+            return $this->json([
+                'success' => true,
+                'message' => "¡Entrenamiento completado! +{$xpGained} XP",
+                'redirect' => $this->generateUrl('routine_index'),
+            ]);
+        }
+
         return $this->redirectToRoute('routine_index');
     }
 

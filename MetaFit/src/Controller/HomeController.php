@@ -30,7 +30,8 @@ class HomeController extends AbstractController
     #[Route('/home', name: 'app_home')]
     #[IsGranted('ROLE_USER')]
     public function index(
-        RoutineService $routineService
+        RoutineService $routineService,
+        RecommendationService $recommendationService
     ): Response
     {
         /** @var \App\Entity\User $user */
@@ -46,28 +47,57 @@ class HomeController extends AbstractController
             $imc = $user->getActualWeight() / (($user->getHeight() / 100) ** 2);
         }
 
-        // Obtener la rutina persistida del usuario
+        $dailyGoals = ($user->getHeight() > 0 && $user->getActualWeight() > 0)
+            ? $recommendationService->calculateDailyGoals($user)
+            : null;
+
         $activeRoutines = $routineService->getUserActiveRoutines($user);
         $activeRoutine = !empty($activeRoutines) ? $activeRoutines[0] : null;
-        
-        $rutinaEjercicios = $activeRoutine ? $activeRoutine->getExercises()->toArray() : [];
-        
-        // Dividir los ejercicios equitativamente según los días de la semana de la rutina
+
         $rutinaPorDias = [];
-        if ($activeRoutine && count($rutinaEjercicios) > 0) {
-            $daysWeek = $activeRoutine->getDaysWeek() > 0 ? $activeRoutine->getDaysWeek() : 3;
-            $exercisesPerDay = ceil(count($rutinaEjercicios) / $daysWeek);
-            
-            $chunks = array_chunk($rutinaEjercicios, $exercisesPerDay);
-            foreach ($chunks as $index => $chunk) {
-                $rutinaPorDias['Día ' . ($index + 1)] = $chunk;
+        $dayNames = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'];
+
+        if ($activeRoutine) {
+            $exerciseTrainings = $activeRoutine->getExerciseTrainings();
+
+            if ($exerciseTrainings->count() > 0) {
+                $byDayNumber = [];
+                foreach ($exerciseTrainings as $et) {
+                    $byDayNumber[$et->getDayWeek()][] = [
+                        'exercise' => $et->getExercise(),
+                        'series'   => $et->getSeriesObjective(),
+                        'reps_min' => $et->getRepsMin(),
+                        'reps_max' => $et->getRepsMax(),
+                        'rest'     => $et->getRestSeconds(),
+                        'order'    => $et->getOrderRutine(),
+                    ];
+                }
+                ksort($byDayNumber);
+                foreach ($byDayNumber as $dayNum => &$dayExercises) {
+                    usort($dayExercises, fn($a, $b) => $a['order'] - $b['order']);
+                    $rutinaPorDias[$dayNames[$dayNum] ?? "Día $dayNum"] = $dayExercises;
+                }
+            } else {
+                // Fallback para rutinas sin ExerciseTraining (formato antiguo)
+                $rutinaEjercicios = $activeRoutine->getExercises()->toArray();
+                if (!empty($rutinaEjercicios)) {
+                    $daysWeek = max(1, $activeRoutine->getDaysWeek());
+                    foreach (array_chunk($rutinaEjercicios, (int) ceil(count($rutinaEjercicios) / $daysWeek)) as $i => $chunk) {
+                        $rutinaPorDias['Día ' . ($i + 1)] = array_map(
+                            fn($ex) => ['exercise' => $ex, 'series' => 3, 'reps_min' => 10, 'reps_max' => 12, 'rest' => 60, 'order' => 0],
+                            $chunk
+                        );
+                    }
+                }
             }
         }
 
         return $this->render('home/index.html.twig', [
-            'user' => $user,
-            'imc' => $imc,
+            'user'          => $user,
+            'imc'           => $imc,
+            'activeRoutine' => $activeRoutine,
             'rutinaPorDias' => $rutinaPorDias,
+            'dailyGoals'    => $dailyGoals,
         ]);
     }
 

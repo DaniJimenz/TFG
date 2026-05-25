@@ -3,84 +3,224 @@
 {% block title %}Dashboard MetaFit AI{% endblock %}
 
 {% block body %}
-    <div class="bg-background-dark text-white min-h-screen">
-        <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8 pb-12 md:pb-16">
+<div class="bg-background-dark text-white min-h-screen">
+    <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8 pb-16">
 
-            {# HEADER CON BIENVENIDA Y BOTÓN #}
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-                <div class="flex-1">
-                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-white">
-                        ¡Hola, <span class="text-primary">{{ user.name|split(' ')[0] }}</span>!
-                    </h1>
-                    <p class="text-slate-400 text-sm md:text-base mt-3">
-                        Aquí tienes tu información personal y la rutina que hemos preparado para ti.
+        {# ── HEADER ─────────────────────────────────────────────────────── #}
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div>
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="h-1 w-12 bg-primary"></div>
+                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-xs">Dashboard</span>
+                </div>
+                <h1 class="text-5xl sm:text-6xl font-black italic uppercase tracking-tighter text-white">
+                    ¡Hola, <span class="text-primary">{{ user.name|split(' ')[0] }}</span>!
+                </h1>
+                <p class="text-slate-400 mt-2 text-sm">
+                    {% if user.purpose %}
+                        <span class="text-white font-bold">{{ user.purpose }}</span>
+                        {% if user.activityLevel %} · Actividad <span class="text-white font-bold">{{ user.activityLevel|lower }}</span>{% endif %}
+                    {% else %}
+                        Completa tu perfil para personalizar tu experiencia.
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if activeRoutine %}
+                <a href="{{ path('routine_start', {id: activeRoutine.id}) }}"
+                   class="inline-flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-xl font-black uppercase text-sm tracking-widest transition-all self-start md:self-auto">
+                    <span class="material-symbols-outlined text-xl">fitness_center</span>
+                    Entrenar Ahora
+                </a>
+            {% endif %}
+        </div>
+
+        {# ── STATS ───────────────────────────────────────────────────────── #}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="bg-[#0d1117] border border-slate-800 p-5 rounded-2xl text-center">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Peso</p>
+                <p class="text-3xl font-black italic text-white">
+                    {{ user.actualWeight ?? '--' }}<span class="text-primary text-xs ml-1">KG</span>
+                </p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-5 rounded-2xl text-center">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Altura</p>
+                <p class="text-3xl font-black italic text-white">
+                    {{ user.height ?? '--' }}<span class="text-primary text-xs ml-1">CM</span>
+                </p>
+            </div>
+            <div class="bg-[#0d1117] border border-slate-800 p-5 rounded-2xl text-center">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Edad</p>
+                <p class="text-3xl font-black italic text-white">
+                    {{ user.age ?? '--' }}<span class="text-primary text-xs ml-1">AÑOS</span>
+                </p>
+            </div>
+            <div class="bg-primary/10 border border-primary/30 p-5 rounded-2xl text-center">
+                <p class="text-primary text-[10px] font-bold uppercase tracking-widest mb-1">IMC</p>
+                <p class="text-3xl font-black italic text-primary">
+                    {{ imc > 0 ? imc|number_format(1) : '--' }}
+                </p>
+                {% if imc > 0 %}
+                    <p class="text-[10px] text-slate-400 mt-1">
+                        {% if imc < 18.5 %}Bajo peso
+                        {% elseif imc < 25 %}Peso normal
+                        {% elseif imc < 30 %}Sobrepeso
+                        {% else %}Obesidad{% endif %}
                     </p>
-                </div>
-            </div>
-
-            {# STATS PERSONALES #}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl text-center flex flex-col justify-center">
-                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Peso</p>
-                    <p class="text-4xl font-black italic text-white">{{ user.actualWeight|default('--') }}<span class="text-primary text-sm ml-1">KG</span></p>
-                </div>
-                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl text-center flex flex-col justify-center">
-                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Altura</p>
-                    <p class="text-4xl font-black italic text-white">{{ user.height|default('--') }}<span class="text-primary text-sm ml-1">CM</span></p>
-                </div>
-                <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl text-center flex flex-col justify-center">
-                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Edad</p>
-                    <p class="text-4xl font-black italic text-white">{{ user.age|default('--') }}<span class="text-primary text-sm ml-1">AÑOS</span></p>
-                </div>
-                <div class="bg-primary/10 border border-primary/30 p-6 rounded-2xl text-center flex flex-col justify-center">
-                    <p class="text-primary text-[10px] font-bold uppercase tracking-widest mb-2">Tu IMC</p>
-                    <p class="text-4xl font-black italic text-primary">{{ imc > 0 ? imc|number_format(1) : '--' }}</p>
-                </div>
-            </div>
-
-            {# RUTINA ORGANIZADA POR DÍAS #}
-            <div class="mb-12">
-                <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-8">Tu Rutina <span class="text-primary">Asignada</span></h2>
-                
-                {% if rutinaPorDias is empty %}
-                    <div class="col-span-full py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl">
-                        <p class="text-slate-500 italic">No tienes ninguna rutina generada en este momento.</p>
-                    </div>
-                {% else %}
-                    <div class="space-y-12">
-                        {% for dia, ejercicios in rutinaPorDias %}
-                            <div class="bg-[#0d1117]/50 p-6 md:p-8 rounded-3xl border border-slate-800/50">
-                                <h3 class="text-2xl font-black italic text-white mb-6 flex items-center gap-3">
-                                    <span class="bg-primary text-white text-sm px-4 py-1 rounded-full uppercase tracking-widest">{{ dia }}</span>
-                                </h3>
-                                
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {% for ejercicio in ejercicios %}
-                                        <div class="group bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden hover:border-primary/50 transition-all">
-                                            <div class="relative h-40 overflow-hidden">
-                                                <img src="{{ ejercicio.getUrlImage()|default('https://images.unsplash.com/photo-1534438327276-14e5300c3a48') }}" class="w-full h-full object-cover">
-                                                <div class="absolute top-3 left-3">
-                                                    <span class="bg-black/80 text-white text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest">
-                                                        {{ ejercicio.getMuscularGroup() }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="p-5">
-                                                <h4 class="text-lg font-black italic uppercase text-white mb-2 line-clamp-1">{{ ejercicio.getName() }}</h4>
-                                                <p class="text-slate-500 text-xs line-clamp-2 mb-4">{{ ejercicio.getDescription() }}</p>
-                                                <div class="pt-3 border-t border-slate-800 flex justify-between items-center text-[9px] font-black uppercase tracking-widest">
-                                                    <span class="text-slate-400">Esfuerzo</span>
-                                                    <span class="text-primary">{{ ejercicio.getDifficulty() }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
                 {% endif %}
             </div>
         </div>
+
+        {# ── OBJETIVOS DIARIOS ───────────────────────────────────────────── #}
+        {% if dailyGoals %}
+            <div class="mb-10 bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl">local_fire_department</span>
+                        <h3 class="text-sm font-black uppercase tracking-widest text-slate-300">Objetivo Calórico Diario</h3>
+                    </div>
+                    <span class="text-3xl font-black italic text-primary">
+                        {{ dailyGoals.calories }} <span class="text-xs text-slate-400 font-bold">kcal / día</span>
+                    </span>
+                </div>
+                <div class="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800">
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Proteínas</p>
+                        <p class="text-lg font-black text-white">{{ dailyGoals.proteins }}<span class="text-xs text-slate-400 ml-0.5">g</span></p>
+                    </div>
+                    <div class="text-center border-x border-slate-800">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Carbohidratos</p>
+                        <p class="text-lg font-black text-white">{{ dailyGoals.carbs }}<span class="text-xs text-slate-400 ml-0.5">g</span></p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Grasas</p>
+                        <p class="text-lg font-black text-white">{{ dailyGoals.fats }}<span class="text-xs text-slate-400 ml-0.5">g</span></p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {# ── RUTINA ──────────────────────────────────────────────────────── #}
+        <div>
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-3xl font-black italic uppercase tracking-tighter">
+                        Tu Rutina <span class="text-primary">Personalizada</span>
+                    </h2>
+                    {% if activeRoutine %}
+                        <p class="text-slate-400 text-sm mt-1 font-bold">{{ activeRoutine.getName() }}</p>
+                    {% endif %}
+                </div>
+
+                {% if activeRoutine %}
+                    <div class="flex gap-2 flex-wrap text-xs font-black uppercase">
+                        <span class="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">
+                            {{ activeRoutine.getDaysWeek() }} días/sem
+                        </span>
+                        <span class="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg">
+                            {{ activeRoutine.getExercises()|length }} ejercicios
+                        </span>
+                        <a href="{{ path('routine_edit', {id: activeRoutine.id}) }}"
+                           class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg transition-all">
+                            Editar
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if rutinaPorDias is empty %}
+                <div class="py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl">
+                    <span class="material-symbols-outlined text-5xl text-slate-600 mb-4 block">fitness_center</span>
+                    <p class="text-slate-500 italic mb-2">No tienes ninguna rutina generada.</p>
+                    <p class="text-slate-600 text-sm">Completa tu perfil para obtener una rutina personalizada.</p>
+                </div>
+            {% else %}
+                <div class="space-y-6">
+                    {% for dia, ejercicios in rutinaPorDias %}
+                        <div class="bg-[#0d1117] rounded-2xl border border-slate-800 overflow-hidden">
+
+                            {# DAY HEADER #}
+                            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-gradient-to-r from-primary/10 to-transparent">
+                                <div class="flex items-center gap-3 flex-wrap">
+                                    <span class="bg-primary text-white text-xs font-black px-4 py-1 rounded-full uppercase tracking-widest">
+                                        {{ dia }}
+                                    </span>
+                                    {# Grupos musculares únicos del día #}
+                                    {% set groups = [] %}
+                                    {% for ej in ejercicios %}
+                                        {% set grupo = ej.exercise.getMuscularGroup() %}
+                                        {% if grupo not in groups %}
+                                            {% set groups = groups|merge([grupo]) %}
+                                            <span class="hidden sm:inline text-[10px] font-bold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded uppercase tracking-wider">
+                                                {{ grupo }}
+                                            </span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="text-slate-500 text-xs font-bold shrink-0">{{ ejercicios|length }} ejercicios</span>
+                            </div>
+
+                            {# EXERCISES GRID #}
+                            <div class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {% for ej in ejercicios %}
+                                    {% set ex = ej.exercise %}
+                                    <div class="group bg-[#080c11] border border-slate-800/80 rounded-xl overflow-hidden hover:border-primary/40 transition-all duration-200">
+
+                                        {# IMAGE #}
+                                        <div class="relative h-36 overflow-hidden">
+                                            <img src="{{ ex.getUrlImage() ?? 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400' }}"
+                                                 alt="{{ ex.getName() }}"
+                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+
+                                            {# TOP BADGES #}
+                                            <div class="absolute top-2 left-2 flex gap-1 flex-wrap">
+                                                <span class="bg-black/80 text-[9px] font-black px-2 py-0.5 rounded text-slate-300 uppercase tracking-wider">
+                                                    {{ ex.getMuscularGroup() }}
+                                                </span>
+                                                {% if ex.isCompound() %}
+                                                    <span class="bg-primary/90 text-[9px] font-black px-2 py-0.5 rounded text-white uppercase tracking-wider">
+                                                        Compuesto
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+
+                                            {# BOTTOM: difficulty #}
+                                            <div class="absolute bottom-2 left-2">
+                                                <span class="text-[9px] font-bold uppercase text-slate-400 tracking-widest">
+                                                    {{ ex.getDifficulty() }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {# CONTENT #}
+                                        <div class="p-4">
+                                            <h4 class="text-sm font-black italic uppercase text-white mb-1 line-clamp-1">
+                                                {{ ex.getName() }}
+                                            </h4>
+                                            <p class="text-slate-500 text-xs line-clamp-2 mb-3 leading-relaxed">
+                                                {{ ex.getDescription() }}
+                                            </p>
+
+                                            {# SCHEDULE: series × reps + descanso #}
+                                            <div class="flex items-center gap-2 flex-wrap pt-3 border-t border-slate-800/60">
+                                                <span class="bg-primary/15 border border-primary/30 text-primary text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                                                    {{ ej.series }} × {{ ej.reps_min }}-{{ ej.reps_max }} reps
+                                                </span>
+                                                <span class="bg-slate-800 text-slate-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase">
+                                                    {{ ej.rest }}s desc.
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
     </div>
+</div>
 {% endblock %}

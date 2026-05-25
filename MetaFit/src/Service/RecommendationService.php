@@ -69,25 +69,162 @@ class RecommendationService
     }
 
     /**
-     * Genera la primera rutina y la persiste en base de datos
+     * Genera la rutina inicial personalizada según el objetivo y nivel del usuario.
+     * Crea un split semanal de 3 días con grupos musculares específicos,
+     * volumen adaptado al objetivo y programación en ExerciseTraining.
      */
     public function generateInitialRoutine(User $user): void
     {
-        // Crear la entidad Rutina para el usuario
+        $purpose = strtolower($user->getPurpose() ?? 'mantenimiento');
+        $difficulty = $user->getActivityLevel() ?? 'Baja';
+
+        [$routineName, $split, $volume] = $this->buildRoutineConfig($purpose);
+
         $routine = $this->routineService->createRoutine($user, [
-            'name' => 'Rutina Inicial',
+            'name' => $routineName,
             'objective' => $user->getPurpose() ?? 'General',
-            'days_week' => 3,
-            'dispo_material' => 'Gimnasio'
+            'days_week' => count($split),
+            'dispo_material' => 'Gimnasio',
         ]);
 
-        $dificultad = $user->getActivityLevel() ?? 'Baja';
-        
-        // Conseguir ejercicios aleatorios de la DB según nivel
-        $exercises = $this->exerciseRepository->findRandomByGroupAndDifficulty('Core', $dificultad, 4);
-
-        foreach ($exercises as $exercise) {
-            $this->routineService->addExerciseToRoutine($routine, $exercise, 3, 10);
+        foreach ($split as $dayConfig) {
+            $order = 1;
+            foreach ($dayConfig['muscle_groups'] as $groupConfig) {
+                $exercises = $this->exerciseRepository->findForRoutineDay(
+                    $groupConfig['group'],
+                    $difficulty,
+                    $groupConfig['count'],
+                    $groupConfig['prefer_compound'] ?? false
+                );
+                foreach ($exercises as $exercise) {
+                    $this->routineService->addExerciseWithSchedule(
+                        $routine,
+                        $exercise,
+                        $dayConfig['day'],
+                        $order++,
+                        $volume['series'],
+                        $volume['reps_min'],
+                        $volume['reps_max'],
+                        $volume['rest_seconds']
+                    );
+                }
+            }
         }
+
+        $this->routineService->flush();
+    }
+
+    /**
+     * Devuelve [nombre, split, volumen] según el objetivo del usuario.
+     *
+     * Ganar masa   → Push/Pull/Legs, 4×8-12, 90s descanso
+     * Perder grasa → Full Body x3,   3×12-15, 60s descanso
+     * Mantenimiento→ Upper/Lower,    3×10-12, 75s descanso
+     */
+    private function buildRoutineConfig(string $purpose): array
+    {
+        if (str_contains($purpose, 'ganar') || str_contains($purpose, 'masa')) {
+            return [
+                'Rutina de Hipertrofia — Push/Pull/Legs',
+                [
+                    [
+                        'day' => 1,
+                        'muscle_groups' => [
+                            ['group' => 'Pecho',    'count' => 2, 'prefer_compound' => true],
+                            ['group' => 'Hombros',  'count' => 2],
+                            ['group' => 'Tríceps',  'count' => 2],
+                        ],
+                    ],
+                    [
+                        'day' => 3,
+                        'muscle_groups' => [
+                            ['group' => 'Espalda',  'count' => 2, 'prefer_compound' => true],
+                            ['group' => 'Bíceps',   'count' => 2],
+                            ['group' => 'Core',     'count' => 1],
+                        ],
+                    ],
+                    [
+                        'day' => 5,
+                        'muscle_groups' => [
+                            ['group' => 'Piernas',  'count' => 2, 'prefer_compound' => true],
+                            ['group' => 'Glúteos',  'count' => 2],
+                            ['group' => 'Core',     'count' => 1],
+                        ],
+                    ],
+                ],
+                ['series' => 4, 'reps_min' => 8,  'reps_max' => 12, 'rest_seconds' => 90],
+            ];
+        }
+
+        if (str_contains($purpose, 'perder')) {
+            return [
+                'Rutina de Definición — Full Body',
+                [
+                    [
+                        'day' => 1,
+                        'muscle_groups' => [
+                            ['group' => 'Pecho',    'count' => 1, 'prefer_compound' => true],
+                            ['group' => 'Espalda',  'count' => 1, 'prefer_compound' => true],
+                            ['group' => 'Piernas',  'count' => 1, 'prefer_compound' => true],
+                            ['group' => 'Hombros',  'count' => 1],
+                            ['group' => 'Core',     'count' => 1],
+                        ],
+                    ],
+                    [
+                        'day' => 3,
+                        'muscle_groups' => [
+                            ['group' => 'Espalda',  'count' => 1, 'prefer_compound' => true],
+                            ['group' => 'Piernas',  'count' => 1, 'prefer_compound' => true],
+                            ['group' => 'Glúteos',  'count' => 1],
+                            ['group' => 'Bíceps',   'count' => 1],
+                            ['group' => 'Core',     'count' => 1],
+                        ],
+                    ],
+                    [
+                        'day' => 5,
+                        'muscle_groups' => [
+                            ['group' => 'Pecho',    'count' => 1, 'prefer_compound' => true],
+                            ['group' => 'Piernas',  'count' => 1, 'prefer_compound' => true],
+                            ['group' => 'Hombros',  'count' => 1],
+                            ['group' => 'Tríceps',  'count' => 1],
+                            ['group' => 'Core',     'count' => 1],
+                        ],
+                    ],
+                ],
+                ['series' => 3, 'reps_min' => 12, 'reps_max' => 15, 'rest_seconds' => 60],
+            ];
+        }
+
+        // Mantenimiento (default)
+        return [
+            'Rutina de Mantenimiento — Upper/Lower',
+            [
+                [
+                    'day' => 1,
+                    'muscle_groups' => [
+                        ['group' => 'Pecho',    'count' => 2, 'prefer_compound' => true],
+                        ['group' => 'Hombros',  'count' => 1],
+                        ['group' => 'Tríceps',  'count' => 2],
+                    ],
+                ],
+                [
+                    'day' => 3,
+                    'muscle_groups' => [
+                        ['group' => 'Piernas',  'count' => 2, 'prefer_compound' => true],
+                        ['group' => 'Glúteos',  'count' => 2],
+                        ['group' => 'Core',     'count' => 1],
+                    ],
+                ],
+                [
+                    'day' => 5,
+                    'muscle_groups' => [
+                        ['group' => 'Espalda',  'count' => 2, 'prefer_compound' => true],
+                        ['group' => 'Bíceps',   'count' => 2],
+                        ['group' => 'Core',     'count' => 1],
+                    ],
+                ],
+            ],
+            ['series' => 3, 'reps_min' => 10, 'reps_max' => 12, 'rest_seconds' => 75],
+        ];
     }
 }
