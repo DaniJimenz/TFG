@@ -52,4 +52,25 @@ class AdminExercisesController extends AbstractController
             'form' => $form,
         ]);
     }
+
+    #[Route('/{id}/delete', name: 'delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function delete(Exercise $exercise, Request $request, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
+    {
+        if (!$this->isCsrfTokenValid('delete_exercise_' . $exercise->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de seguridad inválido.');
+            return $this->redirectToRoute('admin_exercises_index');
+        }
+
+        if ($exercise->getTrainings()->count() > 0 || $exercise->getRoutines()->count() > 0) {
+            $this->addFlash('error', 'No se puede eliminar: este ejercicio está siendo usado en rutinas o historial de usuarios.');
+            return $this->redirectToRoute('admin_exercises_index');
+        }
+
+        $imageUploadService->deleteExerciseImage($exercise->getUrlImage());
+        $entityManager->remove($exercise);
+        $entityManager->flush();
+
+        $this->addFlash('success', '¡Ejercicio eliminado correctamente!');
+        return $this->redirectToRoute('admin_exercises_index');
+    }
 }

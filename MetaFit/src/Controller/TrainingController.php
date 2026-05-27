@@ -32,7 +32,7 @@ class TrainingController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        $trainings = $trainingRepository->findAllByUserWithRelations($user);
+        $trainings = $trainingRepository->findManualByUser($user);
 
         return $this->render('training/index.html.twig', [
             'trainings' => $trainings,

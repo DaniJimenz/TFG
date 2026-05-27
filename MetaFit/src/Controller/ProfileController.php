@@ -50,42 +50,31 @@ class ProfileController extends AbstractController
     #[Route('/edit-personal', name: 'edit_personal', methods: ['GET', 'POST'])]
     public function editPersonal(
         Request $request,
-        EntityManagerInterface $entityManager,
-        ValidatorInterface $validator
+        EntityManagerInterface $entityManager
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
 
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
-            
-            $constraints = new Assert\Collection([
-                'name' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('string')]),
-                'lastname' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('string')]),
-                'age' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 14, max: 100)]),
-                'height' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 100, max: 250)]),
-                'gender' => new Assert\Optional([new Assert\Choice(['H', 'M', 'Hombre', 'Mujer'])]),
-                'actual_weight' => new Assert\Optional([new Assert\NotBlank(), new Assert\Type('numeric'), new Assert\Range(min: 30, max: 300)]),
-                'purpose' => new Assert\Optional([new Assert\Type('string')]),
-                'activity_level' => new Assert\Optional([new Assert\Type('string')]),
-            ]);
-            $constraints->allowExtraFields = true;
-            $constraints->allowMissingFields = true;
 
-            $violations = $validator->validate($data, $constraints);
-            if (count($violations) > 0) {
-                $this->addFlash('error', 'Los datos introducidos no son válidos. Por favor, revisa tus medidas.');
+            if (empty(trim($data['name'] ?? ''))) {
+                $this->addFlash('error', 'El nombre no puede estar vacío.');
+                return $this->redirectToRoute('profile_edit_personal');
+            }
+            if (empty(trim($data['lastname'] ?? ''))) {
+                $this->addFlash('error', 'El apellido no puede estar vacío.');
                 return $this->redirectToRoute('profile_edit_personal');
             }
 
-            $user->setName($data['name']);
-            $user->setLastname($data['lastname']);
-            $user->setAge(isset($data['age']) && $data['age'] !== '' ? (int)$data['age'] : $user->getAge());
-            $user->setHeight(isset($data['height']) && $data['height'] !== '' ? (float)$data['height'] : $user->getHeight());
-            $user->setGender(!empty($data['gender']) ? $data['gender'] : $user->getGender());
-            $user->setActualWeight(isset($data['actual_weight']) && $data['actual_weight'] !== '' ? (float)$data['actual_weight'] : $user->getActualWeight());
-            $user->setPurpose($data['purpose'] ?? null);
-            $user->setActivityLevel($data['activity_level'] ?? null);
+            $user->setName(trim($data['name']));
+            $user->setLastname(trim($data['lastname']));
+            if (isset($data['age']) && $data['age'] !== '')                     $user->setAge((int)$data['age']);
+            if (isset($data['height']) && $data['height'] !== '')               $user->setHeight((float)$data['height']);
+            if (isset($data['actual_weight']) && $data['actual_weight'] !== '') $user->setActualWeight((float)$data['actual_weight']);
+            if (!empty($data['gender']))                                         $user->setGender($data['gender']);
+            if (isset($data['purpose']))                                         $user->setPurpose($data['purpose']);
+            if (isset($data['activity_level']))                                  $user->setActivityLevel($data['activity_level']);
             $user->setUpdatedAt(new \DateTimeImmutable());
 
             $entityManager->persist($user);

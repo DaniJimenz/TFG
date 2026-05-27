@@ -4,85 +4,71 @@
 
 {% block body %}
 <div class="bg-background-dark text-white">
-    <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8">
+    <div class="max-w-2xl mx-auto px-6 pt-6">
 
         {# HEADER #}
-        <div class="mb-12">
-            <div class="flex items-center gap-4 mb-4">
-                <div class="h-1 w-12 bg-primary"></div>
-                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Registrar Entrenamiento</span>
+        <div class="mb-6">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="h-1 w-10 bg-primary"></div>
+                <span class="text-primary font-bold tracking-[0.3em] uppercase text-xs">Registrar Entrenamiento</span>
             </div>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter">
+            <h1 class="text-3xl font-black italic uppercase tracking-tighter">
                 Nuevo <span class="text-primary">Entrenamiento</span>
             </h1>
         </div>
 
         {# FORM #}
-        {{ form_start(form, {'attr': {'class': 'space-y-8', 'novalidate': 'novalidate'}}) }}
+        {{ form_start(form, {'attr': {'class': 'space-y-4', 'novalidate': 'novalidate'}}) }}
 
             {# EXERCISE #}
             <div>
-                {{ form_label(form.exercise, 'Ejercicio', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
-                {{ form_widget(form.exercise, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
+                {{ form_label(form.exercise, 'Ejercicio', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5'}}) }}
+                {{ form_widget(form.exercise, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:border-primary focus:outline-none transition'}}) }}
                 {{ form_errors(form.exercise) }}
             </div>
 
-            {# ROUTINE (Optional) #}
+            {# ROUTINE #}
             <div>
-                {{ form_label(form.routine, 'Rutina (Opcional)', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
-                {{ form_widget(form.routine, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
+                {{ form_label(form.routine, 'Rutina (Opcional)', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5'}}) }}
+                {{ form_widget(form.routine, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:border-primary focus:outline-none transition'}}) }}
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {# COMPLETED SERIES #}
+            {# SERIES + REPS + PESO #}
+            <div class="grid grid-cols-3 gap-4">
                 <div>
-                    {{ form_label(form.completedSeries, 'Series Completadas', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
-                    {{ form_widget(form.completedSeries, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
+                    {{ form_label(form.completedSeries, 'Series', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5'}}) }}
+                    {{ form_widget(form.completedSeries, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:border-primary focus:outline-none transition'}}) }}
                 </div>
-
-                {# REPETITIONS #}
                 <div>
-                    {{ form_label(form.repetitions, 'Repeticiones', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
-                    {{ form_widget(form.repetitions, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
+                    {{ form_label(form.repetitions, 'Repeticiones', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5'}}) }}
+                    {{ form_widget(form.repetitions, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:border-primary focus:outline-none transition'}}) }}
                 </div>
-
-                {# WEIGHT #}
                 <div>
-                    {{ form_label(form.weight, 'Peso (kg)', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
-                    {{ form_widget(form.weight, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
-                </div>
-
-                {# DURATION #}
-                <div>
-                    {{ form_label(form.durationMinutes, 'Duración (minutos)', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
-                    {{ form_widget(form.durationMinutes, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
+                    {{ form_label(form.weight, 'Peso (kg)', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5'}}) }}
+                    {{ form_widget(form.weight, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:border-primary focus:outline-none transition'}}) }}
                 </div>
             </div>
 
-            {# 1RM ESTIMATED #}
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-                <p class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">1RM Estimado</p>
-                <div class="flex items-center gap-4">
-                    <input type="number" id="oneRmEstimated" step="0.1" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none transition" disabled>
-                    <span class="text-slate-600">kg</span>
+            {# 1RM ESTIMADO #}
+            <div class="bg-slate-900 border border-slate-800 px-5 py-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-400">1RM Estimado</p>
+                    <p class="text-xs text-slate-600 mt-0.5">Fórmula de Epley: peso × (1 + reps/30)</p>
                 </div>
-                <p class="text-xs text-slate-500 mt-3">Se calculará automáticamente usando la fórmula de Epley</p>
-            </div>
-
-            {# COMPLETED #}
-            <div class="flex items-center gap-4">
-                {{ form_widget(form.completed, {'attr': {'class': 'w-5 h-5 bg-slate-900 border border-slate-800 rounded cursor-pointer'}}) }}
-                {{ form_label(form.completed, 'Entrenamiento Completado', {'label_attr': {'class': 'text-sm font-bold uppercase tracking-wider text-slate-400 cursor-pointer'}}) }}
+                <div class="flex items-center gap-2">
+                    <span id="oneRmValue" class="text-2xl font-black text-primary">—</span>
+                    <span class="text-slate-500 text-sm font-bold">kg</span>
+                </div>
             </div>
 
             {# NOTES #}
             <div>
-                {{ form_label(form.notes, 'Notas', {'label_attr': {'class': 'block text-sm font-bold uppercase tracking-wider text-slate-400 mb-3'}}) }}
-                {{ form_widget(form.notes, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition', 'rows': '4'}}) }}
+                {{ form_label(form.notes, 'Notas', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5'}}) }}
+                {{ form_widget(form.notes, {'attr': {'class': 'w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:border-primary focus:outline-none transition', 'rows': '3'}}) }}
             </div>
 
             {# BUTTONS #}
-            <div class="flex gap-4 pt-6">
+            <div class="flex gap-4 pt-2">
                 <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl transition-all font-bold text-sm uppercase">
                     Registrar Entrenamiento
                 </button>
@@ -97,34 +83,25 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const completedSeriesInput = document.querySelector('input[name="training_form_type[completedSeries]"]');
-        const repetitionsInput = document.querySelector('input[name="training_form_type[repetitions]"]');
-        const weightInput = document.querySelector('input[name="training_form_type[weight]"]');
-        const oneRmInput = document.getElementById('oneRmEstimated');
+    document.addEventListener('DOMContentLoaded', function () {
+        const repsInput = document.getElementById('training_form_type_repetitions');
+        const weightInput = document.getElementById('training_form_type_weight');
+        const oneRmDisplay = document.getElementById('oneRmValue');
 
         function calculateOneRM() {
-            const series = parseInt(completedSeriesInput?.value || 0);
-            const reps = parseInt(repetitionsInput?.value || 0);
-            const weight = parseFloat(weightInput?.value || 0);
+            const reps = parseInt(repsInput?.value);
+            const weight = parseFloat(weightInput?.value);
 
-            if (weight > 0 && reps > 0) {
-                // Epley formula: weight × (1 + reps/30)
-                const oneRM = weight * (1 + (reps / 30));
-                oneRmInput.value = oneRM.toFixed(1);
+            if (reps > 0 && weight > 0) {
+                const oneRM = weight * (1 + reps / 30);
+                oneRmDisplay.textContent = oneRM.toFixed(1);
             } else {
-                oneRmInput.value = '';
+                oneRmDisplay.textContent = '—';
             }
         }
 
-        completedSeriesInput?.addEventListener('change', calculateOneRM);
-        repetitionsInput?.addEventListener('change', calculateOneRM);
-        repetitionsInput?.addEventListener('input', calculateOneRM);
-        weightInput?.addEventListener('change', calculateOneRM);
+        repsInput?.addEventListener('input', calculateOneRM);
         weightInput?.addEventListener('input', calculateOneRM);
-
-        // Initial calculation
-        calculateOneRM();
     });
 </script>
 {% endblock %}

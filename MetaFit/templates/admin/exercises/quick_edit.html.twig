@@ -3,115 +3,116 @@
 {% block title %}Editar {{ exercise.name }} - MetaFit AI{% endblock %}
 
 {% block body %}
-<div class="bg-background-dark text-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 md:pt-8 pb-12">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 md:pt-8 pb-8">
 
-        {# HEADER #}
-        <div class="mb-8">
-            <a href="{{ path('admin_exercises_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors font-bold">
+    {# HEADER #}
+    <div class="mb-8">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="h-1 w-12 bg-red-500"></div>
+            <span class="text-red-500 font-bold tracking-[0.3em] uppercase text-sm">Administración</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{{ path('admin_exercises_index') }}" class="inline-flex items-center gap-1 text-slate-400 hover:text-white transition-colors font-bold">
                 <span class="material-symbols-outlined">arrow_back</span>
-                Volver
             </a>
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter">
-                Editar: <span class="text-primary">{{ exercise.name }}</span>
+            <h1 class="text-5xl font-black italic uppercase tracking-tighter">
+                Editar: <span class="text-red-500">{{ exercise.name }}</span>
             </h1>
         </div>
+    </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            {# PREVISUALIZACIÓN ACTUAL #}
-            <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
-                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Imagen Actual</h2>
-                {% if exercise.urlImage %}
-                    <div class="aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
-                        <img id="current-image" src="{{ exercise.urlImage }}" alt="{{ exercise.name }}" class="w-full h-full object-cover">
-                    </div>
-                    <p class="text-xs text-slate-500 mt-2 break-all">{{ exercise.urlImage }}</p>
-                {% else %}
-                    <div id="current-image-placeholder" class="aspect-video rounded-xl border border-slate-700 bg-slate-900 flex items-center justify-center">
-                        <div class="text-center text-slate-600">
-                            <span class="material-symbols-outlined text-5xl block mb-2">image_not_supported</span>
-                            <p class="text-sm">Sin imagen</p>
-                        </div>
-                    </div>
-                {% endif %}
-
-                {# Previsualización de imagen nueva (al escribir URL o subir archivo) #}
-                <div id="new-image-preview" class="mt-4 hidden">
-                    <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-2">Nueva Imagen (previsualización)</h2>
-                    <div class="aspect-video rounded-xl overflow-hidden border border-primary/40 bg-slate-900">
-                        <img id="preview-img" src="" alt="Preview" class="w-full h-full object-cover">
+        {# PREVISUALIZACIÓN ACTUAL #}
+        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Imagen Actual</h2>
+            {% if exercise.urlImage %}
+                <div class="aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
+                    <img id="current-image" src="{{ exercise.urlImage }}" alt="{{ exercise.name }}" class="w-full h-full object-cover">
+                </div>
+                <p class="text-xs text-slate-500 mt-2 break-all">{{ exercise.urlImage }}</p>
+            {% else %}
+                <div id="current-image-placeholder" class="aspect-video rounded-xl border border-slate-700 bg-slate-900 flex items-center justify-center">
+                    <div class="text-center text-slate-600">
+                        <span class="material-symbols-outlined text-5xl block mb-2">image_not_supported</span>
+                        <p class="text-sm">Sin imagen</p>
                     </div>
                 </div>
-            </div>
+            {% endif %}
 
-            {# FORMULARIO #}
-            <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
-                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6">Editar Datos</h2>
-
-                {{ form_start(form, {'attr': {'class': 'space-y-5', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data', 'id': 'edit-form'}}) }}
-
-                    {# NOMBRE (deshabilitado) #}
-                    <div>
-                        {{ form_label(form.name, 'Nombre', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2'}}) }}
-                        {{ form_widget(form.name, {'attr': {'class': 'w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed'}}) }}
-                    </div>
-
-                    {# GRUPO MUSCULAR #}
-                    <div>
-                        {{ form_label(form.muscular_group, 'Grupo Muscular', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2'}}) }}
-                        {{ form_widget(form.muscular_group, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
-                    </div>
-
-                    {# DIFICULTAD #}
-                    <div>
-                        {{ form_label(form.difficulty, 'Dificultad', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2'}}) }}
-                        {{ form_widget(form.difficulty, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition'}}) }}
-                    </div>
-
-                    {# DESCRIPCIÓN #}
-                    <div>
-                        {{ form_label(form.description, 'Descripción', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2'}}) }}
-                        {{ form_widget(form.description, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition resize-none'}}) }}
-                    </div>
-
-                    {# URL DE IMAGEN #}
-                    <div>
-                        {{ form_label(form.url_image, 'URL de Imagen', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2'}}) }}
-                        {{ form_widget(form.url_image, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition font-mono text-sm', 'id': 'url_image_input'}}) }}
-                        <p class="text-xs text-slate-500 mt-1">Pega la URL de la imagen (iStock, Pexels, etc.)</p>
-                        {{ form_errors(form.url_image) }}
-                    </div>
-
-                    {# SUBIR IMAGEN (tiene prioridad sobre la URL) #}
-                    <div>
-                        {{ form_label(form.image_file, 'O subir archivo (tiene prioridad sobre la URL)', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2'}}) }}
-                        <div class="relative">
-                            {{ form_widget(form.image_file, {'attr': {'class': 'w-full hidden', 'id': 'image_file_input', 'accept': 'image/*'}}) }}
-                            <label for="image_file_input" class="w-full bg-[#1a1d26] border-2 border-dashed border-slate-700 rounded-lg px-6 py-5 text-center cursor-pointer hover:border-primary transition block">
-                                <span class="material-symbols-outlined text-slate-500 text-3xl mb-1 block">upload</span>
-                                <p class="text-sm font-bold text-white">Haz clic o arrastra una imagen</p>
-                                <p class="text-xs text-slate-500 mt-1">JPG, PNG, WebP o GIF · Máx. 5 MB</p>
-                            </label>
-                        </div>
-                        {{ form_errors(form.image_file) }}
-                    </div>
-
-                    {# BOTONES #}
-                    <div class="flex gap-3 pt-4 border-t border-slate-800">
-                        <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all font-bold text-sm uppercase">
-                            Guardar Cambios
-                        </button>
-                        <a href="{{ path('admin_exercises_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-lg transition-all font-bold text-sm uppercase text-center">
-                            Cancelar
-                        </a>
-                    </div>
-
-                {{ form_end(form) }}
+            <div id="new-image-preview" class="mt-4 hidden">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Nueva Imagen (previsualización)</h2>
+                <div class="aspect-video rounded-xl overflow-hidden border border-red-500/40 bg-slate-900">
+                    <img id="preview-img" src="" alt="Preview" class="w-full h-full object-cover">
+                </div>
             </div>
         </div>
 
+        {# FORMULARIO #}
+        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-6">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Editar Datos</h2>
+
+            {{ form_start(form, {'attr': {'class': 'space-y-4', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data', 'id': 'edit-form'}}) }}
+
+                {# NOMBRE #}
+                <div>
+                    {{ form_label(form.name, 'Nombre', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1'}}) }}
+                    {{ form_widget(form.name, {'attr': {'class': 'w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-slate-500 cursor-not-allowed text-sm'}}) }}
+                </div>
+
+                {# GRUPO MUSCULAR + DIFICULTAD en fila #}
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        {{ form_label(form.muscular_group, 'Grupo Muscular', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1'}}) }}
+                        {{ form_widget(form.muscular_group, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-red-500 focus:outline-none transition text-sm'}}) }}
+                    </div>
+                    <div>
+                        {{ form_label(form.difficulty, 'Dificultad', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1'}}) }}
+                        {{ form_widget(form.difficulty, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-red-500 focus:outline-none transition text-sm'}}) }}
+                    </div>
+                </div>
+
+                {# DESCRIPCIÓN #}
+                <div>
+                    {{ form_label(form.description, 'Descripción', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-red-500 focus:outline-none transition resize-none text-sm', 'rows': '3'}}) }}
+                </div>
+
+                {# URL DE IMAGEN #}
+                <div>
+                    {{ form_label(form.url_image, 'URL de Imagen', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1'}}) }}
+                    {{ form_widget(form.url_image, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-red-500 focus:outline-none transition font-mono text-sm', 'id': 'url_image_input'}}) }}
+                    {{ form_errors(form.url_image) }}
+                </div>
+
+                {# SUBIR IMAGEN #}
+                <div>
+                    {{ form_label(form.image_file, 'O subir archivo (prioridad sobre la URL)', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1'}}) }}
+                    <div class="relative">
+                        {{ form_widget(form.image_file, {'attr': {'class': 'w-full hidden', 'id': 'image_file_input', 'accept': 'image/*'}}) }}
+                        <label for="image_file_input" class="w-full bg-[#1a1d26] border-2 border-dashed border-slate-700 rounded-lg px-4 py-3 text-center cursor-pointer hover:border-red-500 transition block">
+                            <span class="material-symbols-outlined text-slate-500 text-2xl mb-1 block">upload</span>
+                            <p class="text-xs font-bold text-white">Haz clic o arrastra una imagen</p>
+                            <p class="text-xs text-slate-500 mt-0.5">JPG, PNG, WebP · Máx. 5 MB</p>
+                        </label>
+                    </div>
+                    {{ form_errors(form.image_file) }}
+                </div>
+
+                {# BOTONES #}
+                <div class="flex gap-3 pt-3 border-t border-slate-800">
+                    <button type="submit" class="flex-1 bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg transition-all font-bold text-sm uppercase">
+                        Guardar Cambios
+                    </button>
+                    <a href="{{ path('admin_exercises_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-2.5 rounded-lg transition-all font-bold text-sm uppercase text-center">
+                        Cancelar
+                    </a>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
     </div>
+
 </div>
 
 <script>
@@ -120,7 +121,6 @@
     const preview = document.getElementById('new-image-preview');
     const previewImg = document.getElementById('preview-img');
 
-    // Previsualizar al escribir una URL
     let urlTimer;
     urlInput.addEventListener('input', () => {
         clearTimeout(urlTimer);
@@ -136,7 +136,6 @@
         }, 500);
     });
 
-    // Previsualizar al subir un archivo
     fileInput.addEventListener('change', () => {
         const file = fileInput.files[0];
         if (file) {
@@ -149,13 +148,12 @@
         }
     });
 
-    // Drag & drop sobre la zona de subida
     const dropLabel = document.querySelector('label[for="image_file_input"]');
-    dropLabel.addEventListener('dragover', e => { e.preventDefault(); dropLabel.classList.add('border-primary'); });
-    dropLabel.addEventListener('dragleave', () => dropLabel.classList.remove('border-primary'));
+    dropLabel.addEventListener('dragover', e => { e.preventDefault(); dropLabel.classList.add('border-red-500'); });
+    dropLabel.addEventListener('dragleave', () => dropLabel.classList.remove('border-red-500'));
     dropLabel.addEventListener('drop', e => {
         e.preventDefault();
-        dropLabel.classList.remove('border-primary');
+        dropLabel.classList.remove('border-red-500');
         if (e.dataTransfer.files.length) {
             fileInput.files = e.dataTransfer.files;
             fileInput.dispatchEvent(new Event('change', { bubbles: true }));

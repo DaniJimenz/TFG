@@ -8,6 +8,7 @@ use App\Service\RoutineService;
 use App\Service\AchievementService;
 use App\Repository\RoutineRepository;
 use App\Repository\ExerciseRepository;
+use App\Repository\TrainingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -142,10 +143,23 @@ class RoutineController extends AbstractController
             }
         }
 
+        $availableExercises = array_values(array_filter(
+            $allExercises,
+            fn($e) => !in_array($e->getId(), $routineExerciseIds)
+        ));
+
+        $availableExercisesJson = array_map(fn($e) => [
+            'id'            => $e->getId(),
+            'name'          => $e->getName(),
+            'muscularGroup' => $e->getMuscularGroup(),
+            'difficulty'    => $e->getDifficulty() ?? '—',
+        ], $availableExercises);
+
         return $this->render('routine/edit.html.twig', [
-            'routine' => $routine,
-            'exercises' => $routine->getExercises(),
-            'availableExercises' => array_filter($allExercises, fn($e) => !in_array($e->getId(), $routineExerciseIds)),
+            'routine'               => $routine,
+            'exercises'             => $routine->getExercises(),
+            'availableExercises'    => $availableExercises,
+            'availableExercisesJson'=> $availableExercisesJson,
         ]);
     }
 
@@ -153,14 +167,32 @@ class RoutineController extends AbstractController
      * Iniciar sesión de entrenamiento
      */
     #[Route('/{id}/start', name: 'start', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function start(Routine $routine): Response
+    public function start(Routine $routine, TrainingRepository $trainingRepository): Response
     {
         if ($routine->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $lastSession = [];
+
+        foreach ($routine->getExercises() as $exercise) {
+            $last = $trainingRepository->findLastByUserAndExercise($user, $exercise);
+            if ($last) {
+                $lastSession[$exercise->getId()] = [
+                    'series'     => $last->getCompletedSeries(),
+                    'reps'       => $last->getRepetitions(),
+                    'weight'     => $last->getWeight(),
+                    'date'       => $last->getDate()->format('d/m/Y'),
+                    'seriesData' => $last->getSeriesData(),
+                ];
+            }
+        }
+
         return $this->render('routine/start.html.twig', [
-            'routine' => $routine,
+            'routine'     => $routine,
+            'lastSession' => $lastSession,
         ]);
     }
 
@@ -228,53 +260,57 @@ class RoutineController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        $trainings = $this->entityManager->createQuery(
-            'SELECT t FROM App\Entity\Training t 
-             WHERE t.appUser = :user AND t.exercise = :exercise 
-             AND t.date >= :date
+        // Historial completo ordenado del más reciente al más antiguo
+        $allTrainings = $this->entityManager->createQuery(
+            'SELECT t FROM App\Entity\Training t
+             WHERE t.appUser = :user AND t.exercise = :exercise
              ORDER BY t.date DESC'
         )
         ->setParameter('user', $user)
         ->setParameter('exercise', $exercise)
-        ->setParameter('date', new \DateTime('-30 days'))
         ->getResult();
 
-        // Calcular estadísticas
-        $totalTrainings = count($trainings);
-        $weights = array_map(fn($t) => $t->getWeight(), $trainings);
-        $maxWeight = !empty($weights) ? max($weights) : 0;
-        $avgWeight = !empty($weights) ? array_sum($weights) / count($weights) : 0;
-        $oneRMs = array_map(fn($t) => $t->getOneRmEstimated(), $trainings);
-        $maxOneRM = !empty($oneRMs) ? max($oneRMs) : 0;
-        $totalVolume = 0;
-        foreach ($trainings as $t) {
-            $totalVolume += $routineService->calculateVolume($t->getCompletedSeries(), $t->getRepetitions(), $t->getWeight());
-        }
+        $totalTrainings = count($allTrainings);
+        $lastTraining   = $allTrainings[0] ?? null;
 
-        // Preparar datos para gráfico
-        $chartData = [
-            'labels' => [],
-            'weights' => [],
-            'oneRMs' => [],
-        ];
-        foreach (array_reverse($trainings) as $t) {
-            $chartData['labels'][] = $t->getDate()->format('d/m');
+        // Stats significativas
+        $lastWeight  = $lastTraining ? $lastTraining->getWeight() : 0;
+        $lastSeries  = $lastTraining ? $lastTraining->getCompletedSeries() : 0;
+        $lastReps    = $lastTraining ? $lastTraining->getRepetitions() : 0;
+        $weights     = array_filter(array_map(fn($t) => $t->getWeight(), $allTrainings));
+        $prWeight    = !empty($weights) ? max($weights) : 0;
+        $oneRMs      = array_filter(array_map(fn($t) => $t->getOneRmEstimated(), $allTrainings));
+        $bestOneRM   = !empty($oneRMs) ? max($oneRMs) : 0;
+
+        // Progreso: diferencia de peso entre primera y última sesión
+        $firstWeight  = !empty($allTrainings) ? end($allTrainings)->getWeight() : 0;
+        $weightGain   = $lastWeight - $firstWeight;
+
+        // Últimas 20 sesiones en orden cronológico para el gráfico
+        $chartTrainings = array_reverse(array_slice($allTrainings, 0, 20));
+        $chartData = ['labels' => [], 'weights' => [], 'oneRMs' => []];
+        foreach ($chartTrainings as $t) {
+            $chartData['labels'][]  = $t->getDate()->format('d/m');
             $chartData['weights'][] = $t->getWeight();
-            $chartData['oneRMs'][] = $t->getOneRmEstimated();
+            $chartData['oneRMs'][]  = $t->getOneRmEstimated() ?? 0;
         }
 
-        $nextLoadRecommendation = $routineService->getNextLoadRecommendation($user, $exercise);
+        $nextLoad = $lastTraining ? $routineService->getNextLoadRecommendation($lastTraining) : 0;
 
         return $this->render('routine/exercise_progress.html.twig', [
-            'exercise' => $exercise,
-            'trainings' => $trainings,
-            'totalTrainings' => $totalTrainings,
-            'maxWeight' => $maxWeight,
-            'avgWeight' => $avgWeight,
-            'maxOneRM' => $maxOneRM,
-            'totalVolume' => $totalVolume,
-            'chartData' => $chartData,
-            'nextLoadRecommendation' => $nextLoadRecommendation,
+            'exercise'      => $exercise,
+            'trainings'     => array_slice($allTrainings, 0, 15),
+            'totalTrainings'=> $totalTrainings,
+            'lastTraining'  => $lastTraining,
+            'lastWeight'    => $lastWeight,
+            'lastSeries'    => $lastSeries,
+            'lastReps'      => $lastReps,
+            'prWeight'      => $prWeight,
+            'bestOneRM'     => $bestOneRM,
+            'weightGain'    => $weightGain,
+            'firstWeight'   => $firstWeight,
+            'chartData'     => $chartData,
+            'nextLoad'      => $nextLoad,
         ]);
     }
 
@@ -284,17 +320,24 @@ class RoutineController extends AbstractController
     #[Route('/api/exercise/{id}/next-load', name: 'api_next_load', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function apiNextLoad(
         Exercise $exercise,
-        RoutineService $routineService
+        RoutineService $routineService,
+        TrainingRepository $trainingRepository
     ): JsonResponse {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        $nextLoad = $routineService->getNextLoadRecommendation($user, $exercise);
+        $lastTraining = $trainingRepository->findLastByUserAndExercise($user, $exercise);
+
+        if (!$lastTraining) {
+            return $this->json(['exercise_id' => $exercise->getId(), 'next_load' => 0, 'suggestion' => 'Sin historial']);
+        }
+
+        $nextLoad = $routineService->getNextLoadRecommendation($lastTraining);
 
         return $this->json([
             'exercise_id' => $exercise->getId(),
-            'next_load' => $nextLoad,
-            'suggestion' => "{$nextLoad} kg",
+            'next_load'   => $nextLoad,
+            'suggestion'  => "{$nextLoad} kg",
         ]);
     }
 

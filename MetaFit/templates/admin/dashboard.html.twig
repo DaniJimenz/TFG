@@ -68,7 +68,7 @@
     </div>
 
     {# ACCIONES RÁPIDAS #}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {# Gestionar Usuarios #}
         <a href="{{ path('admin_users_index') }}" class="bg-[#0d1117] border border-slate-800 hover:border-red-500/50 p-8 rounded-2xl transition-all group">
             <div class="flex items-start justify-between mb-4">
@@ -95,6 +95,20 @@
                 <span class="material-symbols-outlined text-slate-600 group-hover:text-red-500 transition">arrow_forward</span>
             </div>
             <p class="text-slate-400 text-sm">Crea, edita y elimina ejercicios</p>
+        </a>
+
+        {# Gestionar Logros #}
+        <a href="{{ path('admin_achievements_index') }}" class="bg-[#0d1117] border border-slate-800 hover:border-red-500/50 p-8 rounded-2xl transition-all group">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <span class="inline-block p-3 bg-red-900/20 rounded-lg mb-4 group-hover:bg-red-900/30 transition-all">
+                        <span class="material-symbols-outlined text-red-500">emoji_events</span>
+                    </span>
+                    <h3 class="text-xl font-bold uppercase tracking-tighter mb-2">Logros</h3>
+                </div>
+                <span class="material-symbols-outlined text-slate-600 group-hover:text-red-500 transition">arrow_forward</span>
+            </div>
+            <p class="text-slate-400 text-sm">Crea, edita y elimina logros</p>
         </a>
 
         {# Estadísticas #}
@@ -145,47 +159,6 @@
                 <p>No hay datos disponibles</p>
             </div>
         {% endif %}
-    </div>
-
-    {# INFORMACIÓN RÁPIDA #}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        {# Últimas Acciones #}
-        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
-            <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6">Información del Sistema</h2>
-            <div class="space-y-3 text-sm">
-                <div class="flex justify-between items-center py-2 border-b border-slate-800/50">
-                    <span class="text-slate-400">Versión de MetaFit</span>
-                    <span class="text-red-500 font-bold">1.0.0</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-800/50">
-                    <span class="text-slate-400">Fecha Actual</span>
-                    <span class="text-white font-bold">{{ "now"|date("d/m/Y") }}</span>
-                </div>
-                <div class="flex justify-between items-center py-2">
-                    <span class="text-slate-400">Estado del Sistema</span>
-                    <span class="text-green-500 font-bold flex items-center gap-1">
-                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                        Operativo
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        {# Atajos de Administración #}
-        <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
-            <h2 class="text-xl font-black italic uppercase tracking-tighter mb-6">Atajos Útiles</h2>
-            <div class="space-y-2">
-                <a href="{{ path('admin_users_index') }}" class="block p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900 transition-all text-sm font-bold text-slate-300 hover:text-red-500">
-                    → Ir a Gestión de Usuarios
-                </a>
-                <a href="{{ path('admin_exercises_index') }}" class="block p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900 transition-all text-sm font-bold text-slate-300 hover:text-red-500">
-                    → Ir a Gestión de Ejercicios
-                </a>
-                <a href="{{ path('admin_stats_index') }}" class="block p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900 transition-all text-sm font-bold text-slate-300 hover:text-red-500">
-                    → Ver Estadísticas Detalladas
-                </a>
-            </div>
-        </div>
     </div>
 
 </div>

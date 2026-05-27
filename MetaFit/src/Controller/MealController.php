@@ -153,43 +153,51 @@ class MealController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        // Verificar que hay una imagen
-        if (!$request->files->has('photo')) {
+        $uploadedFile = $request->files->get('photo');
+
+        if (!$uploadedFile) {
             return new JsonResponse(
-                ['error' => 'Photo is required'],
+                ['error' => 'No se recibió ninguna imagen. Asegúrate de que el archivo no supere 2MB.'],
                 Response::HTTP_BAD_REQUEST
             );
         }
 
-        $uploadedFile = $request->files->get('photo');
+        if (!$uploadedFile->isValid()) {
+            $errorMessages = [
+                \UPLOAD_ERR_INI_SIZE   => 'La imagen supera el límite permitido por el servidor (2MB).',
+                \UPLOAD_ERR_FORM_SIZE  => 'La imagen supera el límite del formulario.',
+                \UPLOAD_ERR_PARTIAL    => 'La imagen se subió de forma incompleta. Inténtalo de nuevo.',
+                \UPLOAD_ERR_NO_TMP_DIR => 'Error de configuración del servidor.',
+                \UPLOAD_ERR_CANT_WRITE => 'No se pudo guardar la imagen en el servidor.',
+            ];
+            $msg = $errorMessages[$uploadedFile->getError()] ?? 'Error al subir la imagen.';
+            return new JsonResponse(['error' => $msg], Response::HTTP_BAD_REQUEST);
+        }
 
-        // Validar que es una imagen
-        if (!in_array($uploadedFile->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
+        $mimeType = $uploadedFile->getMimeType();
+        if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])) {
             return new JsonResponse(
-                ['error' => 'File must be an image (JPEG, PNG, WebP)'],
+                ['error' => 'El archivo debe ser una imagen (JPEG, PNG o WebP).'],
                 Response::HTTP_BAD_REQUEST
             );
         }
 
         try {
-            // Guardar la imagen temporalmente
             $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/meals';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
 
-            $fileName = uniqid('meal_') . '.' . $uploadedFile->guessExtension();
+            $ext = $uploadedFile->guessExtension() ?? 'jpg';
+            $fileName = uniqid('meal_') . '.' . $ext;
             $tempPath = $uploadedFile->move($uploadDir, $fileName);
 
-            // Analizar imagen con Google Vision
             $analysisData = $analysisService->analyzeFoodImage($tempPath->getRealPath());
 
-            // Usar el tipo de comida enviado por el usuario, o el detectado por la IA
             $userFoodType = $request->request->get('food_type');
             $validTypes = ['desayuno', 'comida', 'merienda', 'cena', 'snack'];
             $foodType = in_array($userFoodType, $validTypes) ? $userFoodType : $analysisData['food_type'];
 
-            // Guardar la comida
             $meal = new Meal();
             $meal->setAppUser($user);
             $meal->setFoodType($foodType);
@@ -201,6 +209,7 @@ class MealController extends AbstractController
             $meal->setRegisterMethod('photo_ai');
             $meal->setRegisterDate(new \DateTimeImmutable());
             $meal->setUrlImage('/uploads/meals/' . $fileName);
+            $meal->setNotes($request->request->get('notes'));
 
             $entityManager->persist($meal);
             $entityManager->flush();
@@ -218,9 +227,9 @@ class MealController extends AbstractController
                     'confidence' => $analysisData['confidence'],
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return new JsonResponse(
-                ['error' => 'Error analyzing image: ' . $e->getMessage()],
+                ['error' => 'Error al procesar la imagen: ' . $e->getMessage()],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }

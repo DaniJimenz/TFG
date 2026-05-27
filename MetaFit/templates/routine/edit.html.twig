@@ -64,9 +64,28 @@
                     <h2 class="text-2xl font-black italic uppercase mb-6">Ejercicios Disponibles</h2>
                     {% if availableExercises|length > 0 %}
                         <div class="mb-4">
-                            <input type="text" id="exerciseSearch" placeholder="Buscar ejercicio..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-primary focus:outline-none transition" />
+                            <input type="text" id="exerciseSearch" placeholder="Buscar ejercicio..."
+                                   class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-primary focus:outline-none transition" />
                         </div>
-                        <div class="space-y-3 max-h-96 overflow-y-scroll scrollbar-hide" id="exercisesContainer">
+                        <div class="space-y-3 max-h-96 overflow-y-auto" id="exercisesContainer">
+                            {% for exercise in availableExercises %}
+                                <form method="POST" action="{{ path('routine_edit', {id: routine.id}) }}"
+                                      class="exercise-item bg-[#0d1117] border border-slate-800 rounded-xl p-4 flex items-center justify-between group hover:border-primary/50 transition-all"
+                                      data-name="{{ exercise.getName()|lower }}"
+                                      data-group="{{ exercise.getMuscularGroup()|lower }}">
+                                    <input type="hidden" name="action" value="add_exercise">
+                                    <input type="hidden" name="exercise_id" value="{{ exercise.id }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('edit_routine_' ~ routine.id) }}">
+                                    <div class="flex-1">
+                                        <p class="font-black italic text-white">{{ exercise.getName() }}</p>
+                                        <p class="text-slate-500 text-xs">{{ exercise.getMuscularGroup() }} · {{ exercise.getDifficulty()|default('—') }}</p>
+                                    </div>
+                                    <button type="submit" class="text-primary hover:text-primary/80 ml-4 flex-shrink-0">
+                                        <span class="material-symbols-outlined">add_circle</span>
+                                    </button>
+                                </form>
+                            {% endfor %}
+                            <p id="noResults" class="hidden text-center text-slate-500 italic py-4">No se encontraron ejercicios</p>
                         </div>
                     {% else %}
                         <div class="bg-slate-900/50 border border-dashed border-slate-700 rounded-xl p-8 text-center">
@@ -97,61 +116,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('exerciseSearch');
-            const exercisesContainer = document.getElementById('exercisesContainer');
-            
-            // Si no existen los elementos, es porque no hay ejercicios disponibles
-            if (!searchInput || !exercisesContainer) {
-                return;
-            }
-            
-            const exerciseData = [
-                {% for exercise in availableExercises %}
-                    {
-                        id: {{ exercise.id }},
-                        name: '{{ exercise.getName() }}',
-                        muscularGroup: '{{ exercise.getMuscularGroup() }}',
-                        difficulty: '{{ exercise.getDifficulty() }}'
-                    }{{ not loop.last ? ',' : '' }}
-                {% endfor %}
-            ];
+            if (!searchInput) return;
 
-            const csrfToken = '{{ csrf_token("edit_routine_" ~ routine.id) }}';
-            const routineId = {{ routine.id }};
-
-            function renderExercises(filteredData) {
-                if (filteredData.length === 0) {
-                    exercisesContainer.innerHTML = '<div class="bg-slate-900/50 border border-dashed border-slate-700 rounded-xl p-8 text-center"><p class="text-slate-500 italic">No se encontraron ejercicios</p></div>';
-                    return;
-                }
-
-                exercisesContainer.innerHTML = filteredData.map(exercise => `
-                    <form method="POST" action="{{ path('routine_edit', {id: routine.id}) }}" class="bg-[#0d1117] border border-slate-800 rounded-xl p-4 flex items-center justify-between group hover:border-primary/50 transition-all">
-                        <input type="hidden" name="action" value="add_exercise">
-                        <input type="hidden" name="exercise_id" value="${exercise.id}">
-                        <input type="hidden" name="_token" value="${csrfToken}">
-                        <div class="flex-1">
-                            <p class="font-black italic text-white">${exercise.name}</p>
-                            <p class="text-slate-500 text-xs">${exercise.muscularGroup} • ${exercise.difficulty}</p>
-                        </div>
-                        <button type="submit" class="text-primary hover:text-primary/80 ml-4">
-                            <span class="material-symbols-outlined">add_circle</span>
-                        </button>
-                    </form>
-                `).join('');
-            }
-
-            // Inicial render
-            renderExercises(exerciseData);
-
-            // Search listener
             searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                const filtered = exerciseData.filter(exercise =>
-                    exercise.name.toLowerCase().includes(searchTerm) ||
-                    exercise.muscularGroup.toLowerCase().includes(searchTerm) ||
-                    exercise.difficulty.toLowerCase().includes(searchTerm)
-                );
-                renderExercises(filtered);
+                const term = this.value.toLowerCase().trim();
+                let visible = 0;
+                document.querySelectorAll('.exercise-item').forEach(function(item) {
+                    const match = !term || item.dataset.name.includes(term) || item.dataset.group.includes(term);
+                    item.style.display = match ? '' : 'none';
+                    if (match) visible++;
+                });
+                const noResults = document.getElementById('noResults');
+                if (noResults) noResults.classList.toggle('hidden', visible > 0);
             });
         });
     </script>

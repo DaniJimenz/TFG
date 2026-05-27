@@ -121,58 +121,52 @@ class DownloadExerciseImagesCommand extends Command
 
     private function downloadImage(string $url, string $uploadDir): string|false
     {
-        try {
-            $imageContent = @file_get_contents($url);
+        $urlHash = hash('sha256', $url);
+        $urlPath = parse_url($url, PHP_URL_PATH);
+        $extension = strtolower(pathinfo($urlPath, PATHINFO_EXTENSION)) ?: 'jpg';
+        // Strip query string from extension (e.g. "jpeg?foo=bar" → "jpeg")
+        $extension = preg_replace('/[^a-z0-9].*/', '', $extension);
+        $filename = 'exercise-' . substr($urlHash, 0, 12) . '.' . $extension;
+        $filepath = $uploadDir . '/' . $filename;
 
-            if ($imageContent === false) {
-                return false;
-            }
-
-            // Generar nombre único basado en la URL
-            $urlHash = hash('sha256', $url);
-            $extension = $this->getExtensionFromUrl($url);
-            $filename = 'exercise-' . substr($urlHash, 0, 12) . '.' . $extension;
-
-            $filepath = $uploadDir . '/' . $filename;
-
-            // No descargar si ya existe
-            if (file_exists($filepath)) {
-                return $filename;
-            }
-
-            // Guardar archivo
-            if (file_put_contents($filepath, $imageContent) === false) {
-                return false;
-            }
-
+        if (file_exists($filepath)) {
             return $filename;
-        } catch (\Exception $e) {
+        }
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (compatible; MetaFit/1.0)',
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $imageContent = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        curl_close($ch);
+
+        if ($imageContent === false || $httpCode !== 200) {
             return false;
         }
-    }
 
-    private function getExtensionFromUrl(string $url): string
-    {
-        // Obtener la extensión de la URL
-        $urlPath = parse_url($url, PHP_URL_PATH);
-        $extension = pathinfo($urlPath, PATHINFO_EXTENSION);
-
-        // Si no hay extensión, inferir del content-type
-        if (empty($extension)) {
-            $headers = @get_headers($url, 1);
-            if ($headers && isset($headers['Content-Type'])) {
-                $contentType = $headers['Content-Type'];
-                if (str_contains($contentType, 'image/jpeg') || str_contains($contentType, 'image/jpg')) {
-                    return 'jpg';
-                } elseif (str_contains($contentType, 'image/png')) {
-                    return 'png';
-                } elseif (str_contains($contentType, 'image/webp')) {
-                    return 'webp';
-                }
+        // Corregir extensión si la URL no la tenía
+        if (empty(pathinfo($urlPath, PATHINFO_EXTENSION))) {
+            if (str_contains($contentType, 'png')) {
+                $extension = 'png';
+            } elseif (str_contains($contentType, 'webp')) {
+                $extension = 'webp';
+            } else {
+                $extension = 'jpg';
             }
-            return 'jpg'; // Default
+            $filename = 'exercise-' . substr($urlHash, 0, 12) . '.' . $extension;
+            $filepath = $uploadDir . '/' . $filename;
         }
 
-        return strtolower($extension);
+        if (file_put_contents($filepath, $imageContent) === false) {
+            return false;
+        }
+
+        return $filename;
     }
 }

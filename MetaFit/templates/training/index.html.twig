@@ -4,7 +4,7 @@
 
 {% block body %}
 <div class="bg-background-dark text-white">
-    <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8">
+    <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8 pb-12">
 
         {# HEADER #}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 mb-6 md:mb-8">
@@ -85,7 +85,7 @@
                                     </div>
                                     <div class="bg-slate-900 p-3 rounded-lg">
                                         <p class="text-slate-500 text-xs uppercase tracking-wider">Duración</p>
-                                        <p class="text-xl font-bold">{{ training.durationMinutes }}m</p>
+                                        <p class="text-xl font-bold">{{ training.durationMinutes ? training.durationMinutes ~ 'm' : '—' }}</p>
                                     </div>
                                     <div class="bg-slate-900 p-3 rounded-lg">
                                         <p class="text-slate-500 text-xs uppercase tracking-wider">1RM Est.</p>
@@ -97,18 +97,13 @@
                                     <p class="text-slate-400 text-sm mt-3 italic">{{ training.notes }}</p>
                                 {% endif %}
                             </div>
-                            
-                            <div class="flex gap-2 flex-wrap md:flex-col">
-                                <a href="{{ path('training_edit', {'id': training.id}) }}" class="border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase">
-                                    Editar
-                                </a>
-                                <form method="POST" action="{{ path('training_delete', {'id': training.id}) }}" style="display: inline;" onsubmit="return confirm('¿Estás seguro?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_training_' ~ training.id) }}">
-                                    <button type="submit" class="w-full border border-red-700/50 hover:bg-red-500/10 text-red-500 px-4 py-2 rounded-lg transition-all font-bold text-xs uppercase">
-                                        Eliminar
-                                    </button>
-                                </form>
-                            </div>
+
+                            <form method="POST" action="{{ path('training_delete', {'id': training.id}) }}" onsubmit="return confirm('¿Eliminar este entrenamiento?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_training_' ~ training.id) }}">
+                                <button type="submit" class="text-red-500 hover:text-red-400 border border-red-700/40 hover:border-red-500 p-2 rounded-lg transition-all" title="Eliminar">
+                                    <span class="material-symbols-outlined text-xl">delete</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 {% endfor %}

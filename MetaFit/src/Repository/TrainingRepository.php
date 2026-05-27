@@ -49,6 +49,20 @@ class TrainingRepository extends ServiceEntityRepository
         ;
     }
 
+    public function findManualByUser($user): array
+    {
+        return $this->createQueryBuilder('t')
+            ->select('t', 'e')
+            ->leftJoin('t.exercise', 'e')
+            ->andWhere('t.appUser = :user')
+            ->andWhere('t.routine IS NULL')
+            ->setParameter('user', $user)
+            ->orderBy('t.date', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     /**
      * Find trainings after a specific date for a user
      * @return Training[]
@@ -83,6 +97,20 @@ class TrainingRepository extends ServiceEntityRepository
             ->orderBy('t.date', 'DESC')
             ->getQuery()
             ->getResult()
+        ;
+    }
+
+    public function findLastByUserAndExercise($user, $exercise): ?Training
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.appUser = :user')
+            ->andWhere('t.exercise = :exercise')
+            ->setParameter('user', $user)
+            ->setParameter('exercise', $exercise)
+            ->orderBy('t.date', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult()
         ;
     }
 

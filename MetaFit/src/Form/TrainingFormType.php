@@ -12,7 +12,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
@@ -58,18 +57,6 @@ class TrainingFormType extends AbstractType
                     new NotBlank(message: 'El peso es obligatorio (usa 0 si es con peso corporal)'),
                     new PositiveOrZero(message: 'El peso no puede ser negativo')
                 ],
-            ])
-            ->add('durationMinutes', IntegerType::class, [
-                'label' => 'Duración (minutos)',
-                'attr' => ['min' => 1],
-                'constraints' => [
-                    new NotBlank(message: 'La duración es obligatoria'),
-                    new Positive(message: 'La duración debe ser de al menos 1 minuto')
-                ],
-            ])
-            ->add('completed', CheckboxType::class, [
-                'label' => 'Entrenamiento Completado',
-                'required' => false,
             ])
             ->add('notes', TextareaType::class, [
                 'label' => 'Notas',

@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ isNew ? 'Nuevo Logro' : 'Editar ' ~ achievement.name }} - MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 pt-6 md:pt-8 pb-12">
+
+    {# HEADER #}
+    <div class="mb-8">
+        <a href="{{ path('admin_achievements_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors font-bold">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Volver a Logros
+        </a>
+        <h1 class="text-4xl font-black italic uppercase tracking-tighter">
+            {% if isNew %}
+                <span class="text-red-500">Nuevo</span> Logro
+            {% else %}
+                Editar: <span class="text-red-500">{{ achievement.name }}</span>
+            {% endif %}
+        </h1>
+    </div>
+
+    <div class="bg-[#0d1117] border border-slate-800 rounded-2xl p-8">
+
+        {{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                {# NOMBRE #}
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Nombre</label>
+                    {{ form_widget(form.name, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none transition', 'placeholder': 'Ej: Primer Entrenamiento'}}) }}
+                    {{ form_errors(form.name) }}
+                </div>
+
+                {# TIPO #}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Tipo</label>
+                    {{ form_widget(form.type, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none transition', 'placeholder': 'Ej: entrenamiento'}}) }}
+                    {{ form_errors(form.type) }}
+                </div>
+
+                {# IDENTIFICADOR #}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Identificador <span class="text-slate-600 font-normal normal-case tracking-normal">(judgment)</span></label>
+                    {{ form_widget(form.judgment, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none transition font-mono text-sm', 'placeholder': 'Ej: completed_1_training'}}) }}
+                    <p class="text-xs text-slate-600 mt-1">Clave única usada en el código para desbloquear este logro.</p>
+                    {{ form_errors(form.judgment) }}
+                </div>
+
+                {# XP #}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">XP Otorgado</label>
+                    {{ form_widget(form.otorgated_xp, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none transition', 'placeholder': '100'}}) }}
+                    {{ form_errors(form.otorgated_xp) }}
+                </div>
+
+                {# ORDEN #}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Orden</label>
+                    {{ form_widget(form.sort_order, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none transition'}}) }}
+                    {{ form_errors(form.sort_order) }}
+                </div>
+
+                {# ICONO #}
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Icono <span class="text-slate-600 font-normal normal-case tracking-normal">(nombre de Material Symbol)</span></label>
+                    {{ form_widget(form.url_icon, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none transition font-mono text-sm', 'placeholder': 'Ej: emoji_events, fitness_center, star...', 'id': 'url_icon_input'}}) }}
+                    <div class="flex items-center gap-3 mt-2">
+                        <span id="icon-preview" class="material-symbols-outlined text-red-500 text-3xl">emoji_events</span>
+                        <p class="text-xs text-slate-600">Vista previa del icono. Usa nombres de <a href="https://fonts.google.com/icons" target="_blank" class="text-red-500 hover:underline">Material Symbols</a>.</p>
+                    </div>
+                    {{ form_errors(form.url_icon) }}
+                </div>
+
+                {# DESCRIPCIÓN #}
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Descripción</label>
+                    {{ form_widget(form.description, {'attr': {'class': 'w-full bg-[#1a1d26] border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-red-500 focus:outline-none transition resize-none', 'placeholder': 'Descripción que verá el usuario al desbloquear el logro...'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+            </div>
+
+            {# BOTONES #}
+            <div class="flex gap-3 pt-4 border-t border-slate-800">
+                <button type="submit" class="flex-1 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-bold text-sm uppercase">
+                    {{ isNew ? 'Crear Logro' : 'Guardar Cambios' }}
+                </button>
+                <a href="{{ path('admin_achievements_index') }}" class="flex-1 border border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-white px-6 py-3 rounded-lg transition-all font-bold text-sm uppercase text-center">
+                    Cancelar
+                </a>
+            </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+    const iconInput = document.getElementById('url_icon_input');
+    const iconPreview = document.getElementById('icon-preview');
+    iconInput.addEventListener('input', () => {
+        const val = iconInput.value.trim();
+        iconPreview.textContent = val || 'emoji_events';
+    });
+    iconPreview.textContent = iconInput.value.trim() || 'emoji_events';
+</script>
+{% endblock %}

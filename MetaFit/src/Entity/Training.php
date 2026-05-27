@@ -26,17 +26,20 @@ class Training
     #[ORM\Column]
     private ?float $weight = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $duration_minutes = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
 
     #[ORM\Column]
-    private ?bool $completed = null;
+    private bool $completed = true;
 
     #[ORM\Column(nullable: true)]
     private ?float $one_rm_estimated = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $series_data = null;
 
     #[ORM\ManyToOne(inversedBy: 'trainings')]
     #[ORM\JoinColumn(nullable: false)]
@@ -47,7 +50,7 @@ class Training
     private ?Exercise $exercise = null;
 
     #[ORM\ManyToOne(inversedBy: 'trainings')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Routine $routine = null;
 
     public function getId(): ?int
@@ -108,7 +111,7 @@ class Training
         return $this->duration_minutes;
     }
 
-    public function setDurationMinutes(int $duration_minutes): static
+    public function setDurationMinutes(?int $duration_minutes): static
     {
         $this->duration_minutes = $duration_minutes;
 
@@ -183,6 +186,18 @@ class Training
     public function setRoutine(?Routine $routine): static
     {
         $this->routine = $routine;
+
+        return $this;
+    }
+
+    public function getSeriesData(): ?array
+    {
+        return $this->series_data;
+    }
+
+    public function setSeriesData(?array $series_data): static
+    {
+        $this->series_data = $series_data;
 
         return $this;
     }

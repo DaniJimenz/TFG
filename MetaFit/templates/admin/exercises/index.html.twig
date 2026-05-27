@@ -28,7 +28,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
         <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Total de Ejercicios</p>
-            <p class="text-3xl font-black italic text-primary">{{ exercises|length }}</p>
+            <p class="text-3xl font-black italic text-red-500">{{ exercises|length }}</p>
         </div>
         <div class="bg-[#0d1117] border border-slate-800 p-6 rounded-2xl">
             <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Con Imagen</p>
@@ -70,7 +70,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase border border-primary/20">
+                            <span class="inline-flex items-center gap-1 bg-red-500/10 text-red-400 px-3 py-1 rounded-full text-xs font-bold uppercase border border-red-500/20">
                                 {{ exercise.muscularGroup }}
                             </span>
                         </td>
@@ -95,9 +95,17 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ path('admin_exercises_quick_edit', {'id': exercise.id}) }}" class="p-2 bg-blue-900/20 text-blue-400 hover:bg-blue-900/40 rounded-lg transition-all inline-flex" title="Editar">
-                                <span class="material-symbols-outlined">edit</span>
-                            </a>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ path('admin_exercises_quick_edit', {'id': exercise.id}) }}" class="p-2 bg-red-900/20 text-red-400 hover:bg-red-900/40 rounded-lg transition-all inline-flex" title="Editar">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </a>
+                                <form method="post" action="{{ path('admin_exercises_delete', {'id': exercise.id}) }}" onsubmit="return confirm('¿Seguro que quieres eliminar «{{ exercise.name }}»? Esta acción no se puede deshacer.')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_exercise_' ~ exercise.id) }}">
+                                    <button type="submit" class="p-2 bg-slate-800 text-slate-500 hover:bg-red-900/40 hover:text-red-400 rounded-lg transition-all inline-flex" title="Eliminar">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
@@ -106,7 +114,7 @@
                             <div class="flex flex-col items-center justify-center text-slate-500">
                                 <span class="material-symbols-outlined text-5xl mb-2">inventory_2</span>
                                 <p>No hay ejercicios en la base de datos</p>
-                                <a href="{{ path('app_library_new') }}" class="mt-4 bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg text-sm font-bold uppercase inline-flex items-center gap-2">
+                                <a href="{{ path('app_library_new') }}" class="mt-4 bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-bold uppercase inline-flex items-center gap-2">
                                     <span class="material-symbols-outlined">add</span>
                                     Crear Primer Ejercicio
                                 </a>

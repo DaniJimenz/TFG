@@ -3,19 +3,20 @@
 {% block title %}Editar Perfil - MetaFit AI{% endblock %}
 
 {% block body %}
+{% set isAdmin = is_granted('ROLE_ADMIN') %}
     <div class="bg-background-dark text-white">
-        <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8">
+        <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8 pb-12">
 
             {# HEADER #}
-            <a href="{{ path('profile_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
+            <a href="{{ isAdmin ? path('profile_index') : path('profile_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
                 <span class="material-symbols-outlined text-xl">arrow_back</span>
-                Volver al Perfil
+                {{ isAdmin ? 'Volver a Configuración Admin' : 'Volver al Perfil' }}
             </a>
 
             <div class="mb-12">
                 <div class="flex items-center gap-4 mb-4">
-                    <div class="h-1 w-12 bg-primary"></div>
-                    <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Mi Cuenta</span>
+                    <div class="h-1 w-12 {{ isAdmin ? 'bg-red-500' : 'bg-primary' }}"></div>
+                    <span class="{{ isAdmin ? 'text-red-500' : 'text-primary' }} font-bold tracking-[0.3em] uppercase text-sm">{{ isAdmin ? 'Admin' : 'Mi Cuenta' }}</span>
                 </div>
                 <h1 class="text-5xl font-black italic uppercase tracking-tighter">
                     Información Personal
@@ -29,11 +30,11 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Nombre</label>
-                        <input type="text" name="name" value="{{ user.getName() }}" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                        <input type="text" name="name" value="{{ user.getName() }}" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none {{ isAdmin ? 'focus:border-red-500' : 'focus:border-primary' }} transition-all">
                     </div>
                     <div>
                         <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Apellido</label>
-                        <input type="text" name="lastname" value="{{ user.getLastname() }}" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                        <input type="text" name="lastname" value="{{ user.getLastname() }}" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none {{ isAdmin ? 'focus:border-red-500' : 'focus:border-primary' }} transition-all">
                     </div>
                 </div>
 
@@ -43,15 +44,15 @@
                     <div class="grid md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Edad (años)</label>
-                            <input type="number" name="age" value="{{ user.getAge() ?? '' }}" min="13" max="120" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                            <input type="number" name="age" value="{{ user.getAge() ?? '' }}" min="13" max="120" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none {{ isAdmin ? 'focus:border-red-500' : 'focus:border-primary' }} transition-all">
                         </div>
                         <div>
                             <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Altura (cm)</label>
-                            <input type="number" name="height" value="{{ user.getHeight() ?? '' }}" step="0.1" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                            <input type="number" name="height" value="{{ user.getHeight() ?? '' }}" step="0.1" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none {{ isAdmin ? 'focus:border-red-500' : 'focus:border-primary' }} transition-all">
                         </div>
                         <div>
                             <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Peso Actual (kg)</label>
-                            <input type="number" name="actual_weight" value="{{ user.getActualWeight() ?? '' }}" step="0.5" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                            <input type="number" name="actual_weight" value="{{ user.getActualWeight() ?? '' }}" step="0.5" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none {{ isAdmin ? 'focus:border-red-500' : 'focus:border-primary' }} transition-all">
                         </div>
                     </div>
                 </div>
@@ -59,7 +60,7 @@
                 {# GÉNERO #}
                 <div>
                     <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Género</label>
-                    <select name="gender" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all">
+                    <select name="gender" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none {{ isAdmin ? 'focus:border-red-500' : 'focus:border-primary' }} transition-all">
                         <option value="">Seleccionar...</option>
                         <option value="M" {% if user.getGender() == 'M' %}selected{% endif %}>Masculino</option>
                         <option value="F" {% if user.getGender() == 'F' %}selected{% endif %}>Femenino</option>
@@ -67,6 +68,7 @@
                     </select>
                 </div>
 
+                {% if not isAdmin %}
                 {# OBJETIVO #}
                 <div>
                     <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Objetivo Principal</label>
@@ -93,13 +95,14 @@
                         <option value="Muy Intenso" {% if user.getActivityLevel() == 'Muy Intenso' %}selected{% endif %}>Muy Intenso (atletismo/profesional)</option>
                     </select>
                 </div>
+                {% endif %}
 
                 {# BOTONES #}
                 <div class="flex gap-4 pt-6">
-                    <a href="{{ path('profile_index') }}" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase text-center">
+                    <a href="{{ isAdmin ? path('profile_index') : path('profile_index') }}" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase text-center">
                         Cancelar
                     </a>
-                    <button type="submit" class="flex-1 bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-xl transition-all font-bold uppercase">
+                    <button type="submit" class="flex-1 {{ isAdmin ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary/80' }} text-white px-6 py-3 rounded-xl transition-all font-bold uppercase">
                         ✓ Guardar Cambios
                     </button>
                 </div>

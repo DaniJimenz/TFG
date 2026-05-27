@@ -8,7 +8,6 @@ use App\Entity\Exercise;
 use App\Entity\Training;
 use App\Entity\User;
 use App\Repository\RoutineRepository;
-use App\Repository\ExerciseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class RoutineService
@@ -16,7 +15,6 @@ class RoutineService
     public function __construct(
         private EntityManagerInterface $entityManager,
         private RoutineRepository $routineRepository,
-        private ExerciseRepository $exerciseRepository,
     ) {}
 
     /**
@@ -43,7 +41,7 @@ class RoutineService
     /**
      * Agregar ejercicio a rutina
      */
-    public function addExerciseToRoutine(Routine $routine, Exercise $exercise, int $series = 3, int $reps = 10): void
+    public function addExerciseToRoutine(Routine $routine, Exercise $exercise): void
     {
         if (!$routine->getExercises()->contains($exercise)) {
             $routine->addExercise($exercise);
@@ -110,17 +108,33 @@ class RoutineService
         $training->setExercise($exercise);
         $training->setRoutine($routine);
         $training->setDate(new \DateTimeImmutable());
-        $training->setCompletedSeries($data['completed_series'] ?? 3);
-        $training->setRepetitions($data['repetitions'] ?? 10);
-        $training->setWeight($data['weight'] ?? 0);
-        $training->setDurationMinutes($data['duration_minutes'] ?? 0);
+        $training->setDurationMinutes($data['duration_minutes'] ?? null);
         $training->setNotes($data['notes'] ?? null);
         $training->setCompleted($data['completed'] ?? true);
 
-        // Calcular 1RM estimado (Brzycki Formula)
-        if (isset($data['weight']) && isset($data['repetitions']) && $data['weight'] > 0 && $data['repetitions'] > 0) {
-            $oneRm = $this->calculateOneRM($data['weight'], $data['repetitions']);
-            $training->setOneRmEstimated($oneRm);
+        $seriesData = $data['series'] ?? null;
+        if (!empty($seriesData) && is_array($seriesData)) {
+            $training->setSeriesData($seriesData);
+            $training->setCompletedSeries(count($seriesData));
+
+            $weights    = array_column($seriesData, 'weight');
+            $bestWeight = !empty($weights) ? (float)max($weights) : 0.0;
+            $lastReps   = (int)(end($seriesData)['reps'] ?? 10);
+
+            $training->setWeight($bestWeight);
+            $training->setRepetitions($lastReps);
+
+            if ($bestWeight > 0 && $lastReps > 0) {
+                $training->setOneRmEstimated($this->calculateOneRM($bestWeight, $lastReps));
+            }
+        } else {
+            $training->setCompletedSeries($data['completed_series'] ?? 3);
+            $training->setRepetitions($data['repetitions'] ?? 10);
+            $training->setWeight($data['weight'] ?? 0);
+
+            if (!empty($data['weight']) && !empty($data['repetitions'])) {
+                $training->setOneRmEstimated($this->calculateOneRM($data['weight'], $data['repetitions']));
+            }
         }
 
         $this->entityManager->persist($training);
@@ -220,26 +234,17 @@ class RoutineService
     /**
      * Obtener recomendaciones de carga siguiente
      */
-    public function getNextLoadRecommendation(User $user, Exercise $exercise): float
+    public function getNextLoadRecommendation(Training $lastTraining): float
     {
-        $trainings = $this->entityManager->createQuery(
-            'SELECT t FROM App\Entity\Training t 
-             WHERE t.appUser = :user AND t.exercise = :exercise 
-             AND t.completed = true
-             ORDER BY t.date DESC LIMIT 5'
-        )
-        ->setParameter('user', $user)
-        ->setParameter('exercise', $exercise)
-        ->getResult();
+        $lastWeight = $lastTraining->getWeight();
 
-        if (empty($trainings)) {
-            return $exercise->getDifficulty() === 'Alta' ? 50 : ($exercise->getDifficulty() === 'Media' ? 30 : 20);
+        if ($lastWeight <= 0) {
+            return 0;
         }
 
-        // Promediar último peso y sugerir +2.5kg o +5%
-        $avgWeight = array_reduce($trainings, fn($sum, $t) => $sum + $t->getWeight(), 0) / count($trainings);
-        $increase = max(2.5, $avgWeight * 0.05); // El mayor entre 2.5kg o 5%
+        // +2.5 kg o +5% sobre el peso de la última sesión, lo que sea mayor
+        $increase = max(2.5, $lastWeight * 0.05);
 
-        return round($avgWeight + $increase, 1);
+        return round($lastWeight + $increase, 1);
     }
 }

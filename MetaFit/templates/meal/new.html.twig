@@ -163,7 +163,7 @@
                     <div class="text-slate-400">
                         <span class="material-symbols-outlined text-4xl mb-2 block">image</span>
                         <p class="font-bold text-white mb-1 text-sm">Haz clic o arrastra</p>
-                        <p class="text-xs">JPG, PNG o WebP • Máx. 10MB</p>
+                        <p class="text-xs">JPG, PNG o WebP • Se comprime automáticamente</p>
                     </div>
                 </label>
                 <div id="photo-preview" class="mt-3 hidden">
@@ -395,24 +395,62 @@
     const errorMessage = document.getElementById('error-message');
     const errorText = document.getElementById('error-text');
 
-    // Permitir arrastrar y soltar
-    const photoLabel = document.querySelector('label[for="photo_input"]');
-    photoLabel.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        photoLabel.classList.add('border-primary', 'bg-slate-900/30');
-    });
-    photoLabel.addEventListener('dragleave', () => {
-        photoLabel.classList.remove('border-primary', 'bg-slate-900/30');
-    });
-    photoLabel.addEventListener('drop', (e) => {
-        e.preventDefault();
-        photoLabel.classList.remove('border-primary', 'bg-slate-900/30');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            photoInput.files = files;
-            handlePhotoSelect();
-        }
-    });
+    // Comprimir imagen para que no supere 1.8MB (límite PHP es 2MB)
+    function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const maxDim = 1600;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                        else       { w = Math.round(w * maxDim / h); h = maxDim; }
+                    }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+                    const tryCompress = (q) => {
+                        canvas.toBlob((blob) => {
+                            if (blob.size > 1.8 * 1024 * 1024 && q > 0.2) {
+                                tryCompress(q - 0.1);
+                            } else {
+                                resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+                            }
+                        }, 'image/jpeg', q);
+                    };
+                    tryCompress(0.85);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Arrastrar y soltar
+    const photoDropLabel = document.querySelectorAll('label[for="photo_input"]')[1];
+    if (photoDropLabel) {
+        photoDropLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            photoDropLabel.classList.add('border-primary', 'bg-slate-900/30');
+        });
+        photoDropLabel.addEventListener('dragleave', () => {
+            photoDropLabel.classList.remove('border-primary', 'bg-slate-900/30');
+        });
+        photoDropLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            photoDropLabel.classList.remove('border-primary', 'bg-slate-900/30');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                photoInput.files = dt.files;
+                handlePhotoSelect();
+            }
+        });
+    }
 
     photoInput.addEventListener('change', handlePhotoSelect);
 
@@ -430,79 +468,71 @@
     }
 
     btnUpload.addEventListener('click', uploadPhoto);
-
-    btnSave.addEventListener('click', saveMeal);
-
-    async function saveMeal() {
-        const mealId = btnSave.dataset.mealId;
-        if (mealId) {
-            // La comida ya fue guardada por el servidor
+    btnSave.addEventListener('click', () => {
+        if (btnSave.dataset.mealId) {
             window.location.href = '{{ path("meal_index") }}';
         }
-    }
+    });
 
     async function uploadPhoto() {
         const file = photoInput.files[0];
-        const foodType = document.getElementById('food_type_photo').value;
-
         if (!file) {
-            errorText.textContent = 'Selecciona una foto para analizar';
+            errorText.textContent = 'Selecciona una foto primero.';
             errorMessage.classList.remove('hidden');
             return;
         }
-
-        const formData = new FormData();
-        formData.append('photo', file);
-        if (foodType) formData.append('food_type', foodType);
 
         loading.classList.remove('hidden');
         analysisResult.classList.add('hidden');
         errorMessage.classList.add('hidden');
         btnUpload.disabled = true;
+        document.querySelector('#loading p').textContent = 'Comprimiendo imagen...';
 
         try {
+            const compressed = await compressImage(file);
+
+            document.querySelector('#loading p').textContent = 'Analizando imagen...';
+
+            const formData = new FormData();
+            formData.append('photo', compressed);
+            const foodType = document.getElementById('food_type_photo').value;
+            if (foodType) formData.append('food_type', foodType);
+            const notes = document.getElementById('notes_photo').value;
+            if (notes) formData.append('notes', notes);
+
             const response = await fetch('/meals/photo', {
                 method: 'POST',
                 body: formData
             });
 
-            const contentType = response.headers.get('content-type');
-            let data;
-            
-            if (contentType && contentType.includes('application/json')) {
-                data = await response.json();
-            } else {
-                const text = await response.text();
-                console.error('Server returned non-JSON response:', text.substring(0, 500));
-                throw new Error('Servidor devolvió HTML en lugar de JSON');
-            }
-
             loading.classList.add('hidden');
 
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                throw new Error('Respuesta inesperada del servidor. Inténtalo de nuevo.');
+            }
+
+            const data = await response.json();
+
             if (response.ok && data.success) {
-                // Mostrar resultados
                 document.getElementById('result-calories').textContent = Math.round(data.meal.calories_total) + ' kcal';
                 document.getElementById('result-proteines').textContent = Math.round(data.meal.proteines_g * 10) / 10 + 'g';
                 document.getElementById('result-carbs').textContent = Math.round(data.meal.carbohidrats_g * 10) / 10 + 'g';
                 document.getElementById('result-fats').textContent = Math.round(data.meal.fats_g * 10) / 10 + 'g';
                 document.getElementById('result-items').textContent = data.meal.detected_items?.join(', ') || 'Alimentos detectados';
-
                 analysisResult.classList.remove('hidden');
                 btnSave.style.display = 'flex';
-
-                // Guardar los datos para enviar después
                 btnSave.dataset.mealId = data.meal.id;
             } else {
-                errorText.textContent = data.error || 'Error al analizar la foto: ' + (response.status === 500 ? 'Error del servidor' : response.statusText);
+                errorText.textContent = data.error || 'Error al analizar la foto.';
                 errorMessage.classList.remove('hidden');
                 btnUpload.disabled = false;
             }
-        } catch (error) {
+        } catch (err) {
             loading.classList.add('hidden');
-            errorText.textContent = 'Error: ' + error.message;
+            errorText.textContent = err.message || 'Error de conexión. Inténtalo de nuevo.';
             errorMessage.classList.remove('hidden');
             btnUpload.disabled = false;
-            console.error('Upload error:', error);
         }
     }
 

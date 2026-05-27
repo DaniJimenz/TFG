@@ -4,7 +4,7 @@
 
 {% block body %}
     <div class="bg-background-dark text-white">
-        <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8">
+        <div class="max-w-full mx-auto px-4 sm:px-6 pt-6 md:pt-8 pb-16">
 
             {# HEADER #}
             <a href="{{ path('routine_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
@@ -26,7 +26,10 @@
             {# EJERCICIOS #}
             <div class="space-y-6 mb-12" id="exerciseContainer">
                 {% for exercise in routine.getExercises() %}
+                    {% set last = lastSession[exercise.id] ?? null %}
+                    {% set defaultSeries = last ? last.seriesData ?? null : null %}
                     <div class="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden" data-exercise-id="{{ exercise.id }}">
+
                         {# ENCABEZADO #}
                         <div class="bg-gradient-to-r from-primary/20 to-transparent p-6 border-b border-slate-700">
                             <div class="flex items-start justify-between">
@@ -34,52 +37,79 @@
                                     <h3 class="text-2xl font-black italic uppercase text-white mb-2">{{ exercise.getName() }}</h3>
                                     <p class="text-slate-400">{{ exercise.getDescription()|slice(0, 100) }}{{ exercise.getDescription()|length > 100 ? '…' : '' }}</p>
                                 </div>
-                                <div class="text-right">
-                                    <span class="inline-block bg-primary/30 text-primary text-xs font-black px-3 py-1 rounded-lg mb-2">
+                                <div class="text-right flex flex-col items-end gap-2">
+                                    <span class="inline-block bg-primary/30 text-primary text-xs font-black px-3 py-1 rounded-lg">
                                         {{ exercise.getMuscularGroup() }}
                                     </span>
-                                    <p class="text-slate-500 text-xs">Dificultad: {{ exercise.getDifficulty() }}</p>
+                                    <a href="{{ path('routine_exercise_progress', {id: exercise.id}) }}"
+                                       class="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-primary transition-all font-bold uppercase tracking-wider">
+                                        <span class="material-symbols-outlined text-sm">trending_up</span>
+                                        Ver progreso
+                                    </a>
                                 </div>
                             </div>
                         </div>
 
-                        {# CONTROLES #}
-                        <div class="p-6 space-y-4">
-                            <div class="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Series</label>
-                                    <input type="number" min="1" value="3" class="exercise-series w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all" data-exercise-id="{{ exercise.id }}">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Repeticiones</label>
-                                    <input type="number" min="1" value="10" class="exercise-reps w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all" data-exercise-id="{{ exercise.id }}">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Peso (kg)</label>
-                                    <input type="number" step="0.5" min="0" value="20" class="exercise-weight w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all" data-exercise-id="{{ exercise.id }}">
-                                </div>
+                        {# ÚLTIMA SESIÓN #}
+                        {% if last %}
+                            <div class="px-6 py-3 bg-slate-900/60 border-b border-slate-800 flex items-center gap-6 text-xs text-slate-400 flex-wrap">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm text-slate-500">history</span>
+                                    Última vez ({{ last.date }}):
+                                </span>
+                                <span class="font-bold text-slate-300">{{ last.series }} series</span>
+                                <span class="font-bold text-primary">· mejor peso {{ last.weight }} kg</span>
+                            </div>
+                        {% endif %}
+
+                        {# TABLA DE SERIES #}
+                        <div class="p-6">
+                            <div class="mb-3 grid grid-cols-[2rem_1fr_1fr_2rem] gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 px-1">
+                                <span>#</span>
+                                <span>Peso (kg)</span>
+                                <span>Reps</span>
+                                <span></span>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Duración (min)</label>
-                                    <input type="number" min="0" value="5" class="exercise-duration w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-all" data-exercise-id="{{ exercise.id }}">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-bold uppercase tracking-widest text-slate-300 mb-2">Notas</label>
-                                    <input type="text" placeholder="Ej: Buen desempeño..." class="exercise-notes w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-primary transition-all" data-exercise-id="{{ exercise.id }}">
-                                </div>
+                            {% if defaultSeries %}
+                                {% set initSeries = defaultSeries|json_encode %}
+                            {% elseif last %}
+                                {% set initArr = [] %}
+                                {% for i in 1..last.series %}
+                                    {% set initArr = initArr|merge([{weight: last.weight, reps: last.reps}]) %}
+                                {% endfor %}
+                                {% set initSeries = initArr|json_encode %}
+                            {% else %}
+                                {% set initSeries = '[{"weight":0,"reps":10}]' %}
+                            {% endif %}
+                            <div class="series-list space-y-2"
+                                 data-exercise-id="{{ exercise.id }}"
+                                 data-default-series="{{ initSeries }}">
                             </div>
 
-                            {# CÁLCULOS #}
-                            <div class="bg-slate-900/50 border border-slate-700 rounded-lg p-4 space-y-2">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-slate-400">Volumen Total:</span>
-                                    <span class="font-bold text-primary volume-{{ exercise.id }}">0 kg</span>
+                            <button type="button"
+                                    onclick="addSeries({{ exercise.id }})"
+                                    class="mt-3 w-full border border-dashed border-slate-700 hover:border-primary text-slate-500 hover:text-primary text-xs font-bold uppercase py-2 rounded-lg transition-all flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-sm">add</span>
+                                Añadir serie
+                            </button>
+
+                            {# NOTAS #}
+                            <div class="mt-4">
+                                <input type="text" placeholder="Notas (opcional)..."
+                                       class="exercise-notes w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary transition-all"
+                                       data-exercise-id="{{ exercise.id }}">
+                            </div>
+
+                            {# RESUMEN #}
+                            <div class="mt-4 bg-slate-900/50 border border-slate-700 rounded-lg p-4 grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-slate-400">Volumen total:</span>
+                                    <span class="font-bold text-primary ml-1 volume-{{ exercise.id }}">0 kg</span>
                                 </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-slate-400">1RM Estimado:</span>
-                                    <span class="font-bold oneRM-{{ exercise.id }}">-- kg</span>
+                                <div>
+                                    <span class="text-slate-400">Mejor 1RM est.:</span>
+                                    <span class="font-bold ml-1 oneRM-{{ exercise.id }}">— kg</span>
                                 </div>
                             </div>
                         </div>
@@ -100,43 +130,107 @@
     </div>
 
     <script>
-        // Solo los inputs (no los divs contenedores) actualizan los cálculos
-        document.querySelectorAll('.exercise-series, .exercise-reps, .exercise-weight').forEach(input => {
-            input.addEventListener('input', updateCalculations);
-        });
+        // Renders a single series row
+        function createSeriesRow(exerciseId, index, weight, reps) {
+            const row = document.createElement('div');
+            row.className = 'series-row grid grid-cols-[2rem_1fr_1fr_2rem] gap-2 items-center';
+            row.dataset.exerciseId = exerciseId;
+            row.innerHTML = `
+                <span class="text-slate-500 font-bold text-sm text-center">${index}</span>
+                <input type="number" step="0.5" min="0" value="${weight}"
+                       class="series-weight bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                       oninput="updateCalculations(${exerciseId})" placeholder="kg">
+                <input type="number" min="1" value="${reps}"
+                       class="series-reps bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                       oninput="updateCalculations(${exerciseId})" placeholder="reps">
+                <button type="button" onclick="removeSeries(this, ${exerciseId})"
+                        class="text-slate-600 hover:text-red-500 transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            `;
+            return row;
+        }
 
-        function updateCalculations() {
-            // Iterar solo los divs raíz de cada ejercicio (los que tienen data-exercise-id en #exerciseContainer)
-            document.querySelectorAll('#exerciseContainer > [data-exercise-id]').forEach(container => {
-                const exerciseId = container.getAttribute('data-exercise-id');
-
-                const series = parseInt(container.querySelector('.exercise-series').value) || 0;
-                const reps = parseInt(container.querySelector('.exercise-reps').value) || 0;
-                const weight = parseFloat(container.querySelector('.exercise-weight').value) || 0;
-
-                const volume = series * reps * weight;
-                container.querySelector(`.volume-${exerciseId}`).textContent = `${volume.toFixed(0)} kg`;
-
-                const oneRMEl = container.querySelector(`.oneRM-${exerciseId}`);
-                if (reps > 0 && reps < 37 && weight > 0) {
-                    oneRMEl.textContent = `${(weight * (36 / (37 - reps))).toFixed(1)} kg`;
-                } else {
-                    oneRMEl.textContent = '-- kg';
-                }
+        function renumberSeries(list) {
+            list.querySelectorAll('.series-row').forEach((row, i) => {
+                row.querySelector('span').textContent = i + 1;
             });
         }
+
+        function addSeries(exerciseId) {
+            const list = document.querySelector(`.series-list[data-exercise-id="${exerciseId}"]`);
+            const rows = list.querySelectorAll('.series-row');
+            // Copy last row's values as default
+            let weight = 0, reps = 10;
+            if (rows.length > 0) {
+                const lastRow = rows[rows.length - 1];
+                weight = parseFloat(lastRow.querySelector('.series-weight').value) || 0;
+                reps   = parseInt(lastRow.querySelector('.series-reps').value) || 10;
+            }
+            list.appendChild(createSeriesRow(exerciseId, rows.length + 1, weight, reps));
+            updateCalculations(exerciseId);
+        }
+
+        function removeSeries(btn, exerciseId) {
+            const list = document.querySelector(`.series-list[data-exercise-id="${exerciseId}"]`);
+            if (list.querySelectorAll('.series-row').length <= 1) return; // keep at least 1
+            btn.closest('.series-row').remove();
+            renumberSeries(list);
+            updateCalculations(exerciseId);
+        }
+
+        function updateCalculations(exerciseId) {
+            const list = document.querySelector(`.series-list[data-exercise-id="${exerciseId}"]`);
+            let volume = 0, bestOneRM = 0;
+
+            list.querySelectorAll('.series-row').forEach(row => {
+                const w = parseFloat(row.querySelector('.series-weight').value) || 0;
+                const r = parseInt(row.querySelector('.series-reps').value) || 0;
+                volume += w * r;
+                if (r > 0 && r < 37 && w > 0) {
+                    const oneRM = w * (36 / (37 - r));
+                    if (oneRM > bestOneRM) bestOneRM = oneRM;
+                }
+            });
+
+            document.querySelector(`.volume-${exerciseId}`).textContent = `${volume.toFixed(0)} kg`;
+            document.querySelector(`.oneRM-${exerciseId}`).textContent  = bestOneRM > 0 ? `${bestOneRM.toFixed(1)} kg` : '— kg';
+        }
+
+        // Initialize all exercises
+        document.querySelectorAll('.series-list').forEach(list => {
+            const exerciseId = parseInt(list.dataset.exerciseId);
+            let seriesData;
+            try {
+                seriesData = JSON.parse(list.dataset.defaultSeries);
+                if (!Array.isArray(seriesData) || seriesData.length === 0) throw new Error();
+            } catch (e) {
+                seriesData = [{ weight: 0, reps: 10 }];
+            }
+            seriesData.forEach((s, i) => {
+                list.appendChild(createSeriesRow(exerciseId, i + 1, s.weight ?? 0, s.reps ?? 10));
+            });
+            updateCalculations(exerciseId);
+        });
 
         function completeTraining(routineId) {
             const exercises = {};
 
             document.querySelectorAll('#exerciseContainer > [data-exercise-id]').forEach(container => {
                 const exerciseId = container.getAttribute('data-exercise-id');
+                const list = container.querySelector('.series-list');
+                const series = [];
+
+                list.querySelectorAll('.series-row').forEach(row => {
+                    series.push({
+                        weight: parseFloat(row.querySelector('.series-weight').value) || 0,
+                        reps:   parseInt(row.querySelector('.series-reps').value) || 0,
+                    });
+                });
+
                 exercises[exerciseId] = {
-                    completed_series: parseInt(container.querySelector('.exercise-series').value) || 0,
-                    repetitions: parseInt(container.querySelector('.exercise-reps').value) || 0,
-                    weight: parseFloat(container.querySelector('.exercise-weight').value) || 0,
-                    duration_minutes: parseInt(container.querySelector('.exercise-duration').value) || 0,
-                    notes: container.querySelector('.exercise-notes').value,
+                    series,
+                    notes:     container.querySelector('.exercise-notes').value,
                     completed: true,
                 };
             });
@@ -154,12 +248,7 @@
                     alert('Error al guardar el entrenamiento. Inténtalo de nuevo.');
                 }
             })
-            .catch(err => {
-                console.error('Error al completar entrenamiento:', err);
-                alert('Error al guardar el entrenamiento. Inténtalo de nuevo.');
-            });
+            .catch(() => alert('Error al guardar el entrenamiento. Inténtalo de nuevo.'));
         }
-
-        updateCalculations();
     </script>
 {% endblock %}
