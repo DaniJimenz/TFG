@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Elegir día — {{ routine.getName() }} — MetaFit AI{% endblock %}
+
+{% block body %}
+<div class="bg-background-dark text-white min-h-screen">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 pt-6 pb-16">
+
+        {# BACK #}
+        <a href="{{ path('routine_index') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-all">
+            <span class="material-symbols-outlined text-xl">arrow_back</span>
+            Volver a Rutinas
+        </a>
+
+        {# HEADER #}
+        <div class="mb-10">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="h-1 w-12 bg-primary"></div>
+                <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm">Sesión de Entrenamiento</span>
+            </div>
+            <h1 class="text-5xl font-black italic uppercase tracking-tighter mb-2">
+                {{ routine.getName() }}
+            </h1>
+            <p class="text-slate-400 text-lg">¿Qué día entrenas hoy?</p>
+        </div>
+
+        {# DAY CARDS #}
+        <div class="space-y-3">
+            {% for day in availableDays %}
+                {% set isToday = (day == todayDow) %}
+                {% set count = dayCounts[day] %}
+                <a href="{{ path('routine_start', {id: routine.id, day: day}) }}"
+                   class="group flex items-center justify-between rounded-2xl border p-5 transition-all
+                          {{ isToday
+                              ? 'bg-primary/10 border-primary/50 hover:bg-primary/20'
+                              : 'bg-[#0d1117] border-slate-800 hover:border-primary/40 hover:bg-slate-900' }}">
+
+                    <div class="flex items-center gap-4">
+                        {# Day number bubble #}
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg
+                                    {{ isToday ? 'bg-primary text-black' : 'bg-slate-800 text-slate-300 group-hover:bg-primary/20 group-hover:text-primary transition-all' }}">
+                            {{ day }}
+                        </div>
+                        <div>
+                            <p class="font-black text-xl uppercase tracking-wide {{ isToday ? 'text-primary' : 'text-white' }}">
+                                {{ dayNames[day] }}
+                            </p>
+                            <p class="text-sm text-slate-500 font-bold">
+                                {{ count }} ejercicio{{ count != 1 ? 's' : '' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        {% if isToday %}
+                            <span class="text-xs bg-primary text-black font-black px-3 py-1 rounded-full uppercase tracking-wider">Hoy</span>
+                        {% endif %}
+                        <span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-all text-2xl">chevron_right</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+
+        {# INFO #}
+        <p class="text-center text-slate-600 text-xs mt-8 font-bold uppercase tracking-wider">
+            Selecciona el día que corresponde a tu sesión de hoy
+        </p>
+
+    </div>
+</div>
+{% endblock %}

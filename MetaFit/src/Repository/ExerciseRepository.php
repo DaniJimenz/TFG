@@ -47,6 +47,16 @@ class ExerciseRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
 
+        // Fallback: any difficulty for this group
+        if (empty($results)) {
+            $results = $this->createQueryBuilder('e')
+                ->andWhere('e.muscular_group = :group')
+                ->setParameter('group', $group)
+                ->setMaxResults($limit * 3)
+                ->getQuery()
+                ->getResult();
+        }
+
         if (empty($results)) {
             return [];
         }

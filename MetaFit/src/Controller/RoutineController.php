@@ -166,18 +166,91 @@ class RoutineController extends AbstractController
     /**
      * Iniciar sesión de entrenamiento
      */
+    private const DAY_NAMES = [
+        1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles',
+        4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo',
+    ];
+
     #[Route('/{id}/start', name: 'start', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function start(Routine $routine, TrainingRepository $trainingRepository): Response
-    {
+    public function start(
+        Routine $routine,
+        TrainingRepository $trainingRepository,
+        Request $request
+    ): Response {
         if ($routine->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $lastSession = [];
+        $exerciseTrainings = $routine->getExerciseTrainings();
 
-        foreach ($routine->getExercises() as $exercise) {
+        // Rutina sin programación por días → mostrar todos los ejercicios
+        if ($exerciseTrainings->isEmpty()) {
+            $exercises = $routine->getExercises()->toArray();
+            return $this->render('routine/start.html.twig', [
+                'routine'     => $routine,
+                'exercises'   => $exercises,
+                'lastSession' => $this->buildLastSession($exercises, $user, $trainingRepository),
+                'selectedDay' => null,
+                'objectives'  => [],
+            ]);
+        }
+
+        // Agrupar días disponibles y contar ejercicios por día
+        $availableDays = [];
+        foreach ($exerciseTrainings as $et) {
+            $d = $et->getDayWeek();
+            $availableDays[$d] = ($availableDays[$d] ?? 0) + 1;
+        }
+        ksort($availableDays);
+
+        $day = $request->query->getInt('day', 0);
+
+        // Sin día seleccionado o día inválido → mostrar selector
+        if (!$day || !isset($availableDays[$day])) {
+            return $this->render('routine/start_day_picker.html.twig', [
+                'routine'       => $routine,
+                'availableDays' => array_keys($availableDays),
+                'dayCounts'     => $availableDays,
+                'dayNames'      => self::DAY_NAMES,
+                'todayDow'      => (int) date('N'),
+            ]);
+        }
+
+        // Filtrar y ordenar ejercicios del día seleccionado
+        $dayETs = array_values(array_filter(
+            $exerciseTrainings->toArray(),
+            fn($et) => $et->getDayWeek() === $day
+        ));
+        usort($dayETs, fn($a, $b) => $a->getOrderRutine() - $b->getOrderRutine());
+
+        $exercises = array_map(fn($et) => $et->getExercise(), $dayETs);
+
+        $objectives = [];
+        foreach ($dayETs as $et) {
+            $objectives[$et->getExercise()->getId()] = [
+                'series'  => $et->getSeriesObjective(),
+                'repsMin' => $et->getRepsMin(),
+                'repsMax' => $et->getRepsMax(),
+                'rest'    => $et->getRestSeconds(),
+            ];
+        }
+
+        return $this->render('routine/start.html.twig', [
+            'routine'     => $routine,
+            'exercises'   => $exercises,
+            'lastSession' => $this->buildLastSession($exercises, $user, $trainingRepository),
+            'selectedDay' => $day,
+            'dayName'     => self::DAY_NAMES[$day] ?? "Día $day",
+            'objectives'  => $objectives,
+        ]);
+    }
+
+    private function buildLastSession(array $exercises, $user, TrainingRepository $trainingRepository): array
+    {
+        $lastSession = [];
+        foreach ($exercises as $exercise) {
             $last = $trainingRepository->findLastByUserAndExercise($user, $exercise);
             if ($last) {
                 $lastSession[$exercise->getId()] = [
@@ -189,11 +262,7 @@ class RoutineController extends AbstractController
                 ];
             }
         }
-
-        return $this->render('routine/start.html.twig', [
-            'routine'     => $routine,
-            'lastSession' => $lastSession,
-        ]);
+        return $lastSession;
     }
 
     /**
